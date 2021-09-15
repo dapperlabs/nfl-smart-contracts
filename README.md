@@ -9,7 +9,7 @@ TBC
 
 ### Series
 Series encompass periods of time and will be named using strings like: `Summer 2021` or `Series 3`. 
-More that one series can be open at any given time, and in order for en Edition to be created, it must have a SeriesID.
+More that one series can be open at any given time, and in order for an Edition to be created, it must have a SeriesID.
 
 **Fields**
 - FlowID
@@ -17,10 +17,10 @@ More that one series can be open at any given time, and in order for en Edition 
 
 **Transactions**
 - MintSeries: Mints a new series onto Flow
-- CloseSeries: Stops any new Editions from using this series
+- CloseSeries: Stops any new Editions from using the specified series
 
 ### Sets
-Sets are categories of plays `Greatest Touchdowns` or similar. Sets have a name and description.
+Sets are categories of plays: `Greatest Touchdowns` or similar. Sets have a name and description.
 There can be many sets but only one may be used on an Edition. An Edition must have a SetID to be created.
 
 **Fields**
@@ -63,3 +63,14 @@ Moments are minted out of editions, given and EditionID and a number to mint.
 **Transactions**
 - MintEdition: Mints a new Edition on Flow. It should check that no edition exists with the specific SetID/PlayID combination
 - SetMaxEditionSizeFromCurrentSize: Should set the max edition size to whatever the current edition size is to avoid minting any more moments
+
+
+### Moment NFT
+Moments are minted out of editions and can be minted. These are the NFTs that will be sold in packs
+
+**Fields**
+- FlowID
+- EditionID
+
+**Transactions**
+- MintMoments: Mints moments out of the EditionID. Can only mint up to the MaxEditionSize

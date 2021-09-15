@@ -1,1 +1,3 @@
-# nfl-smart-contracts
+# NFL Smart Contracts
+
+

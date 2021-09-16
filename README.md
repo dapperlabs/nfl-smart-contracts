@@ -1,6 +1,5 @@
 # NFL Smart Contracts
 
-
 ## NFL Contract Addresses
 TBC
 
@@ -22,6 +21,7 @@ More that one series can be open at any given time, and in order for an Edition 
 ### Sets
 Sets are categories of plays: `Greatest Touchdowns` or similar. Sets have a name and description.
 There can be many sets but only one may be used on an Edition. An Edition must have a SetID to be created.
+Sets do not close and cannot be retired.
 
 **Fields**
 - FlowID
@@ -30,12 +30,13 @@ There can be many sets but only one may be used on an Edition. An Edition must h
 
 **Transactions**
 - MintSet: Mints a new set onto Flow
-- CloseSet: Stops any new Editions from using this set (?)
 ### Plays
-Plays contain the actual play metadata, including stats from Sport Radar. This will contain Player, Team, and Game metadata
+Plays contain the actual play metadata, including stats from Sport Radar. 
+This will contain Player, Team, and Game metadata some of which may be blank depending on the type of moment.
 
 **Fields**
 - FlowID
+- Classification (Name TBC: example, PLAYER, TEAM, PLAYER_MELT, TEAM_MELT)
 - Metadata
 
 **Transactions**
@@ -48,8 +49,8 @@ They also have a Max and Current Edition size so we can specify how many moments
 the edition. 
 
 The MaxEditionSize should be able to be added at any point and if empty allows for perpetual minting(for example, for editions we want to mint an unlimited number of). 
-Once it exists it is locked and can't be changed. 
-Moments are minted out of editions, given and EditionID and a number to mint.
+Once it exists it is locked and cannot be changed. 
+Moments are minted out of editions, given an EditionID and a number to mint.
 
 **Fields**
 - FlowID
@@ -58,7 +59,7 @@ Moments are minted out of editions, given and EditionID and a number to mint.
 - PlayID
 - MaxEditionSize
 - CurrentEditionSize
-- Rarity
+- Tier
 
 **Transactions**
 - MintEdition: Mints a new Edition on Flow. It should check that no edition exists with the specific SetID/PlayID combination
@@ -66,7 +67,7 @@ Moments are minted out of editions, given and EditionID and a number to mint.
 
 
 ### Moment NFT
-Moments are minted out of editions and can be minted. These are the NFTs that will be sold in packs
+Moments are minted out of editions. These are the NFTs that will be sold in packs
 
 **Fields**
 - FlowID

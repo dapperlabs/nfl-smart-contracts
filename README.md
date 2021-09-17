@@ -44,7 +44,7 @@ This will contain Player, Team, and Game metadata some of which may be blank dep
 
 
 ### Editions
-Editions are the combination of a SeriesID, PlayID, and FlowID and are what moments are minted out of.
+Editions are the combination of a SeriesID, SetID, and PlayID and are what moments are minted out of.
 They also have a Max and Current Edition size so we can specify how many moments can ever be minted from 
 the edition. 
 

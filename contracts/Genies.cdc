@@ -1,31 +1,29 @@
 import NonFungibleToken from "./NonFungibleToken.cdc"
 
 /*
-    Genies is structured similarly to TopShot.
+    Showdown is structured similarly to Showdown and TopShot.
     Unlike TopShot, we use resources for all entities and manage access to their data
     by copying it to structs (this simplifies access control, in particular write access).
     We also encapsulate resource creation for the admin in member functions on the parent type.
     
-    There are 4 levels of entity:
-    1. Series.
-    2. Genies Collection (not to be confused with an NFT Collection).
-    3. Edition.
-    4. Genies NFT (an NFT).
-    Each exists conceptually within the thing above it.
-    And each must be created or closed by the thing above it.
+    There are 5 levels of entity:
+    1. Series
+    2. Sets
+    3. Plays
+    4. Editions
+    4. Moment NFT (an NFT)
+    
+    An Edition is created with a combination of a Series, Set, and Play
+    Moment NFTs are minted out of Editions.
 
     Note that we cache some information (Series names/ids, counts of deactivated entities) rather
     than calculate it each time.
     This is enabled by encapsulation and saves gas for entity lifecycle operations.
-
-    Note that the behaviours of Series.closeAllCollections(), Series.deactivate(), and Series.init()
-    are kept separate to allow ending one series in various ways without starting another.
-    They are called in the correct order in Admin.advanceSeries().
  */
 
-// The Genies NFTs and metadata contract
+// The Showdown NFTs and metadata contract
 //
-pub contract Genies: NonFungibleToken {
+pub contract Showdown: NonFungibleToken {
     //------------------------------------------------------------
     // Events
     //------------------------------------------------------------
@@ -34,26 +32,43 @@ pub contract Genies: NonFungibleToken {
     //
     pub event ContractInitialized()
 
-    // NFT Collection (not Genies Collection!) Events
+    // NFT Collection Events
     //
     pub event Withdraw(id: UInt64, from: Address?)
     pub event Deposit(id: UInt64, to: Address?)
 
     // Series Events
     //
-    // Emitted when a new series has been triggered by an admin
-    pub event NewSeriesStarted(newCurrentSeries: UInt32, name: String, metadata: {String: String})
-    pub event SeriesDeactivated(id: UInt32)
+    // Emitted when a new series has been created by an admin
+    pub event SeriesCreated(id: UInt32, name: String, metadata: {String: String})
+    // Emitted when a series is closed by an admin
+    pub event SeriesClosed(id: UInt32)
 
-    // Collection Events
+    // Set Events
     //
-    pub event CollectionCreated(id: UInt32, seriesID: UInt32, name: String, metadata: {String: String})
-    pub event CollectionClosed(id: UInt32)
+    // Emitted when a new set has been created by an admin
+    pub event SetCreated(id: UInt32, name: String, metadata: {String: String})
+
+    // Play Events
+    //
+    // Emitted when a new play has been created by an admin
+    pub event PlayCreated(id: UInt32, classification: String, metadata: {String: String})
 
     // Edition Events
     //
-    pub event EditionCreated(id: UInt32, collectionID: UInt32, name: String, metadata: {String: String})
-    pub event EditionRetired(id: UInt32)
+    // Emitted when a new edition has been created by an admin
+    pub event EditionCreated(
+        id: UInt32, 
+        seriesID: UInt32, 
+        setID: UInt32, 
+        playID: UInt32, 
+        maxMintSize: UInt32, 
+        numMinted: UInt32, 
+        tier: String, 
+        metadata: {String: String},
+    )
+    // Emitted when an edition is either closed by an admin, or the max amount of moments have been minted
+    pub event EditionClosed(id: UInt32)
 
     // NFT Events
     //
@@ -72,15 +87,16 @@ pub contract Genies: NonFungibleToken {
     pub let MinterPrivatePath:      PrivatePath
 
     //------------------------------------------------------------
-    // Publcly readable contract state
+    // Publicly readable contract state
     //------------------------------------------------------------
 
     // Entity Counts
     //
     pub var totalSupply:        UInt64
     pub var currentSeriesID:    UInt32
-    pub var nextCollectionID:   UInt32
-    pub var nextEditionID:    UInt32
+    pub var nextSetID:          UInt32
+    pub var nextPlayID:          UInt32
+    pub var nextEditionID:      UInt32
 
     //------------------------------------------------------------
     // Internal contract state
@@ -92,8 +108,9 @@ pub contract Genies: NonFungibleToken {
     access(self) let seriesIDByName:    {String: UInt32}
     // This avoids storing Series in an array where the index is off by one
     access(self) let seriesByID:        @{UInt32: Series}
-    access(self) let collectionByID:    @{UInt32: GeniesCollection}
-    access(self) let editionByID:     @{UInt32: Edition}
+    access(self) let setByID:           @{UInt32: Set}
+    access(self) let playByID:          @{UInt32: Play}
+    access(self) let editionByID:       @{UInt32: Edition}
 
     //------------------------------------------------------------
     // Series
@@ -106,19 +123,15 @@ pub contract Genies: NonFungibleToken {
         pub let name: String
         pub let metadata: {String: String}
         pub let active: Bool
-        pub let collectionIDs: [UInt32]
-        pub let collectionsOpen: UInt32
 
         // initializer
         //
         init (id: UInt32) {
-            let series = &Genies.seriesByID[id] as! &Genies.Series
+            let series = &Showdown.seriesByID[id] as! &Showdown.Series
             self.id = series.id
             self.name = series.name
             self.metadata = series.metadata
             self.active = series.active
-            self.collectionIDs = series.collectionIDs
-            self.collectionsOpen = series.collectionsOpen
         }
     }
 
@@ -132,8 +145,6 @@ pub contract Genies: NonFungibleToken {
         pub let metadata: {String: String}
         // We manage this list, but need to access it to fill out the struct,
         // so it is access(contract)
-        access(contract) let collectionIDs: [UInt32]
-        pub var collectionsOpen: UInt32
         pub var active: Bool
 
         // Deactivate this series
@@ -141,82 +152,29 @@ pub contract Genies: NonFungibleToken {
         pub fun deactivate() {
             pre {
                 self.active == true: "not active"
-                self.collectionsOpen == 0: "must closeAllCollections before deactivating"
             }
 
             self.active = false
 
-            emit SeriesDeactivated(id: self.id)
-        }
-
-        // Create and add a collection to the series.
-        // You can only do so via this function, which updates the relevant fields.
-        //
-        pub fun addCollection(
-            collectionName: String,
-            collectionMetadata: {String: String}
-        ): UInt32 {
-            pre {
-                self.active == true: "Cannot add collection to previous series"
-            }
-
-            let collection <- create Genies.GeniesCollection(
-                seriesID: self.id,
-                name: collectionName,
-                metadata: collectionMetadata
-            )
-            let collectionID = collection.id
-            Genies.collectionByID[collectionID] <-! collection
-            self.collectionIDs.append(collectionID)
-            self.collectionsOpen = self.collectionsOpen + 1 as UInt32
-
-            return collectionID
-        }
-
-        // Close a collection, and update the relevant fields
-        //
-        pub fun closeGeniesCollection(collectionID: UInt32) {
-            pre {
-                Genies.collectionByID[collectionID] != nil: "no such collectionID"
-            }
-
-            let collection = &Genies.collectionByID[collectionID] as &Genies.GeniesCollection
-            collection.close()
-            self.collectionsOpen = self.collectionsOpen - 1 as UInt32
-        }
-
-        // Recursively ensure that all of the collections are closed,
-        // and all the editions in each are retired,
-        // allowing advanceSeries to proceed
-        // 
-        pub fun closeAllGeniesCollections() {
-            for collectionID in self.collectionIDs {
-                let collection = &Genies.collectionByID[collectionID] as &Genies.GeniesCollection
-                if collection.open {
-                    collection.retireAllEditions()
-                    self.closeGeniesCollection(collectionID: collectionID)
-                }
-            }
+            emit SeriesClosed(id: self.id)
         }
 
         // initializer
-        // We pass in ID as the lofic for it is more complex than it should be,
+        // We pass in ID as the logic for it is more complex than it should be,
         // and we don't want to spread it out.
         //
         init (id: UInt32, name: String, metadata: {String: String}) {
             pre {
-                !Genies.seriesIDByName.containsKey(name): "A Series with that name already exists"
+                !Showdown.seriesIDByName.containsKey(name): "A Series with that name already exists"
             }
 
             self.id = id
             self.name = name
             self.metadata = metadata
-            self.collectionIDs = []
-            self.collectionsOpen = 0 as UInt32  
             self.active = true   
 
-            emit NewSeriesStarted(
-                newCurrentSeries: self.id,
+            emit SeriesCreated(
+                id: self.id,
                 name: self.name,
                 metadata: self.metadata
             )
@@ -225,171 +183,146 @@ pub contract Genies: NonFungibleToken {
 
     // Get the publicly available data for a Series by id
     //
-    pub fun getSeriesData(id: UInt32): Genies.SeriesData {
+    pub fun getSeriesData(id: UInt32): Showdown.SeriesData {
         pre {
-            Genies.seriesByID[id] != nil: "Cannot borrow series, no such id"
+            Showdown.seriesByID[id] != nil: "Cannot borrow series, no such id"
         }
 
-        return Genies.SeriesData(id: id)
+        return Showdown.SeriesData(id: id)
     }
 
     // Get the publicly available data for a Series by name
     //
-    pub fun getSeriesDataByName(name: String): Genies.SeriesData {
+    pub fun getSeriesDataByName(name: String): Showdown.SeriesData {
         pre {
-            Genies.seriesIDByName[name] != nil: "Cannot borrow series, no such name"
+            Showdown.seriesIDByName[name] != nil: "Cannot borrow series, no such name"
         }
 
-        let id = Genies.seriesIDByName[name]!
+        let id = Showdown.seriesIDByName[name]!
 
-        return Genies.SeriesData(id: id)
+        return Showdown.SeriesData(id: id)
     }
 
     // Get all series names (this will be *long*)
     //
     pub fun getAllSeriesNames(): [String] {
-        return Genies.seriesIDByName.keys
+        return Showdown.seriesIDByName.keys
     }
 
     // Get series id for name
     //
     pub fun getSeriesIDByName(name: String): UInt32? {
-        return Genies.seriesIDByName[name]
+        return Showdown.seriesIDByName[name]
     }
 
     //------------------------------------------------------------
-    // GeniesCollection
+    // Set
     //------------------------------------------------------------
 
-    // A public struct to access GeniesCollection data
+    // A public struct to access Set data
     //
-    pub struct GeniesCollectionData {
+    pub struct SetData {
         pub let id: UInt32
-        pub let seriesID: UInt32
         pub let name: String
         pub let metadata: {String: String}
-        pub let open: Bool
-        pub let editionIDs: [UInt32]
-        pub let editionsActive: UInt32
 
         // initializer
         //
         init (id: UInt32) {
-            let collection = &Genies.collectionByID[id] as! &Genies.GeniesCollection
+            let set = &Showdown.setByID[id] as! &Showdown.Set
             self.id = id
-            self.seriesID = collection.seriesID
-            self.name = collection.name
-            self.metadata = collection.metadata
-            self.open = collection.open
-            self.editionIDs = collection.editionIDs
-            self.editionsActive = collection.editionsActive
+            self.name = set.name
+            self.metadata = set.metadata
         }
     }
 
-    // A Genies collection (not to be confused with a NonFungibleToken.Collection) within a series
+    // A top level Set with a unique ID and a name
     //
-    pub resource GeniesCollection {
+    pub resource Set {
         pub let id: UInt32
-        pub let seriesID: UInt32
         pub let name: String
         // Contents writable if borrowed!
         // This is deliberate, as it allows admins to update the data.
         pub let metadata: {String: String}
-        pub var open: Bool
-        // We manage this list, but need to access it to fill out the struct,
-        // so it is access(contract)
-        access(contract) let editionIDs: [UInt32]
-        pub var editionsActive: UInt32
-
-        // Create and add an Edition to the series.
-        // You can only do so via this function, which updates the relevant fields.
-        //
-        pub fun addEdition(
-            editionName: String,
-            editionMetadata: {String: String}
-        ): UInt32 {
-            pre {
-                self.open == true: "Cannot add edition to closed collection"
-            }
-            let edition <- create Genies.Edition(
-                collectionID: self.id,
-                name: editionName,
-                metadata: editionMetadata
-            )
-
-            let editionID = edition.id
-            Genies.editionByID[editionID] <-! edition
-            self.editionIDs.append(editionID)
-            self.editionsActive = self.editionsActive + 1 as UInt32
-
-            return editionID
-        }
-
-        // Close an Edition, and update the relevant fields
-        //
-        pub fun retireEdition(editionID: UInt32) {
-            pre {
-                Genies.editionByID[editionID] != nil: "editionID doesn't exist"
-            }
-
-            let edition = &Genies.editionByID[editionID] as &Edition
-            edition.retire()
-            self.editionsActive = self.editionsActive - 1 as UInt32
-        }
-
-        // Retire all of the Editions, allowing this collection to be closed
-        // 
-        pub fun retireAllEditions() {
-            for editionID in self.editionIDs {
-                self.retireEdition(editionID: editionID)
-            }
-        }
-
-        // Close the collection
-        // access(contract) to enforce calling through its parent series
-        //
-        access(contract) fun close() {
-            pre{
-                self.editionsActive == 0:
-                    "All editions in this collection must be closed before closing it"
-            }
-
-            self.open = false
-
-            emit CollectionClosed(id: self.id)
-        }
 
         // initializer
         //
-        init (seriesID: UInt32, name: String, metadata: {String: String}) {
-            pre {
-                Genies.seriesByID.containsKey(seriesID) != nil: "seriesID does not exist"
-            }
-
-            self.id = Genies.nextCollectionID
-            self.seriesID = seriesID
+        init (name: String, metadata: {String: String}) {
+            self.id = Showdown.nextSetID
             self.name = name
             self.metadata = metadata
-            self.editionIDs = []
-            self.editionsActive = 0 as UInt32
-            self.open = true
 
-            Genies.nextCollectionID = Genies.nextCollectionID + 1 as UInt32
+            Showdown.nextSetID = Showdown.nextSetID + 1 as UInt32
 
-            emit CollectionCreated(id: self.id, seriesID: self.seriesID, name: self.name, metadata: self.metadata)
+            emit SetCreated(id: self.id, name: self.name, metadata: self.metadata)
         }
     }
 
-    // Get the publicly available data for a GeniesCollection
-    // Not an NFT Collection!
+    // Get the publicly available data for a Set
     //
-    pub fun getGeniesCollectionData(id: UInt32): Genies.GeniesCollectionData {
+    pub fun getSetData(id: UInt32): Showdown.SetData {
         pre {
-            Genies.collectionByID[id] != nil: "Cannot borrow Genies collection, no such id"
+            Showdown.setByID[id] != nil: "Cannot borrow set, no such id"
         }
 
-        return GeniesCollectionData(id: id)
+        return SetData(id: id)
     }
+
+
+    //------------------------------------------------------------
+    // Play
+    //------------------------------------------------------------
+
+    // A public struct to access Play data
+    //
+    pub struct PlayData {
+        pub let id: UInt32
+        pub let classification: String
+        pub let metadata: {String: String}
+
+        // initializer
+        //
+        init (id: UInt32) {
+            let play = &Showdown.playByID[id] as! &Showdown.Play
+            self.id = id
+            self.classification = play.classification
+            self.metadata = play.metadata
+        }
+    }
+
+    // A top level Play with a unique ID and a classification
+    //
+    pub resource Play {
+        pub let id: UInt32
+        pub let classification: String
+        // Contents writable if borrowed!
+        // This is deliberate, as it allows admins to update the data.
+        pub let metadata: {String: String}
+
+        // initializer
+        //
+        init (classification: String, metadata: {String: String}) {
+            self.id = Showdown.nextSetID
+            self.classification = classification
+            self.metadata = metadata
+
+            Showdown.nextPlayID = Showdown.nextPlayID + 1 as UInt32
+
+            emit PlayCreated(id: self.id, classification: self.classification, metadata: self.metadata)
+        }
+    }
+
+    // Get the publicly available data for a Play
+    //
+    pub fun getPlayData(id: UInt32): Showdown.PlayData {
+        pre {
+            Showdown.playByID[id] != nil: "Cannot borrow play, no such id"
+        }
+
+        return PlayData(id: id)
+    }
+
+
 
     //------------------------------------------------------------
     // Edition
@@ -399,95 +332,112 @@ pub contract Genies: NonFungibleToken {
     //
     pub struct EditionData {
         pub let id: UInt32
-        pub let collectionID: UInt32
-        pub let name: String
-        pub let metadata: {String: String}
-        pub let open: Bool
+        pub let seriesID: UInt32
+        pub let setID: UInt32
+        pub let playID: UInt32
+        // null means there is no max size, minting is unlimited
+        pub let maxMintSize: UInt32
         pub let numMinted: UInt32
+        pub let tier: String
+        pub let metadata: {String: String}
 
         // initializer
         //
         init (id: UInt32) {
-            let edition = &Genies.editionByID[id] as! &Genies.Edition
+            let edition = &Showdown.editionByID[id] as! &Showdown.Edition
             self.id = id
-            self.collectionID = edition.collectionID
-            self.name = edition.name
-            self.metadata = edition.metadata
-            self.open = edition.open
+            self.seriesID = edition.seriesID
+            self.playID = edition.playID
+            self.setID = edition.setID
+            self.maxMintSize = edition.maxMintSize
             self.numMinted = edition.numMinted
+            self.tier = edition.tier
+            self.metadata = edition.metadata
         }
     }
 
-    // An Edition (NFT type) within a Genies collection
+    // A top level Edition that contains a Series, Set, and Play
     //
     pub resource Edition {
         pub let id: UInt32
-        pub let collectionID: UInt32
-        pub let name: String
+        pub let seriesID: UInt32
+        pub let setID: UInt32
+        pub let playID: UInt32
+        pub var maxMintSize: UInt32
+        pub var numMinted: UInt32
+        pub var tier: String
         // Contents writable if borrowed!
         // This is deliberate, as it allows admins to update the data.
         pub let metadata: {String: String}
-        pub var numMinted: UInt32
-        pub var open: Bool
 
-        // Retire this edition so that no more Genies NFTs can be minted in it
-        // access(contract) to enforce calling through its parent GeniesCollection
+        // Retire this edition so that no more Moment NFTs can be minted in it
         //
         access(contract) fun retire() {
             pre {
-                self.open == true: "already retired"
+                self.numMinted == self.maxMintSize: "max number of minted moments has already been reached"
             }
 
-            self.open = false
+            self.maxMintSize = self.numMinted
 
-            emit EditionRetired(id: self.id)
+            emit EditionClosed(id: self.id)
         }
 
-        // Mint a Genies NFT in this edition, with the given minting mintingDate.
-        // Note that this will panic if this edition is retired.
+        // Mint a Moment NFT in this edition, with the given minting mintingDate.
+        // Note that this will panic if the max mint size has already been reached.
         //
-        pub fun mint(): @Genies.NFT {
+        pub fun mint(): @Showdown.NFT {
             pre {
-                self.open: "edition closed, cannot mint"
+                self.numMinted == self.maxMintSize: "max number of minted moments has been reached"
             }
 
-            // Create the Genies NFT, filled out with our information
-            let geniesNFT <- create NFT(
-                id: Genies.totalSupply,
+            // Create the Moment NFT, filled out with our information
+            let momentNFT <- create NFT(
+                id: Showdown.totalSupply,
                 editionID: self.id,
                 serialNumber: self.numMinted
             )
-            Genies.totalSupply = Genies.totalSupply + 1
+            Showdown.totalSupply = Showdown.totalSupply + 1
             // Keep a running total (you'll notice we used this as the serial number)
             self.numMinted = self.numMinted + 1 as UInt32
 
-            return <- geniesNFT
+            return <- momentNFT
         }
 
         // initializer
         //
         init (
-            collectionID: UInt32,
-            name: String,
+            seriesID: UInt32,
+            setID: UInt32,
+            playID: UInt32,
+            maxSize: UInt32,
+            tier: String,
             metadata: {String: String}
         ) {
             pre {
-                Genies.collectionByID.containsKey(collectionID): "collectionID does not exist"
+                Showdown.seriesByID.containsKey(seriesID): "seriesID does not exist"
+                Showdown.setByID.containsKey(setID): "setID does not exist"
+                Showdown.playByID.containsKey(playID): "playID does not exist"
             }
 
-            self.id = Genies.nextEditionID
-            self.collectionID = collectionID
-            self.name = name
-            self.metadata = metadata
+            self.id = Showdown.nextEditionID
+            self.seriesID = seriesID
+            self.setID = setID
+            self.playID = playID
+            self.maxMintSize = maxSize
             self.numMinted = 0 as UInt32
-            self.open = true
+            self.tier = tier
+            self.metadata = metadata
 
-            Genies.nextEditionID = Genies.nextEditionID + 1 as UInt32
+            Showdown.nextEditionID = Showdown.nextEditionID + 1 as UInt32
 
             emit EditionCreated(
                 id: self.id,
-                collectionID: self.collectionID,
-                name: self.name,
+                seriesID: self.seriesID,
+                setID: self.setID,
+                playID: self.playID,
+                maxMintSize: self.maxMintSize,
+                numMinted: self.numMinted,
+                tier: self.tier,
                 metadata: self.metadata
             )
         }
@@ -497,10 +447,10 @@ pub contract Genies: NonFungibleToken {
     //
     pub fun getEditionData(id: UInt32): EditionData {
         pre {
-            Genies.editionByID[id] != nil: "Cannot borrow edition, no such id"
+            Showdown.editionByID[id] != nil: "Cannot borrow edition, no such id"
         }
 
-        let edition = &Genies.editionByID[id] as &Genies.Edition
+        let edition = &Showdown.editionByID[id] as &Showdown.Edition
 
         return EditionData(id: id)
     }
@@ -509,7 +459,7 @@ pub contract Genies: NonFungibleToken {
     // NFT
     //------------------------------------------------------------
 
-    // A Genies NFT
+    // A Moment NFT
     //
     pub resource NFT: NonFungibleToken.INFT {
         pub let id: UInt64
@@ -531,9 +481,9 @@ pub contract Genies: NonFungibleToken {
             serialNumber: UInt32
         ) {
             pre {
-                Genies.editionByID[editionID] != nil: "no such editionID"
-                (&Genies.editionByID[editionID] as &Edition).open:
-                    "editionID is retired"
+                Showdown.editionByID[editionID] != nil: "no such editionID"
+                (&Showdown.editionByID[editionID] as &Edition).numMinted == (&Showdown.editionByID[editionID] as &Edition).maxMintSize:
+                    "edition has reached the max mint size"
             }
 
             self.id = id
@@ -549,30 +499,30 @@ pub contract Genies: NonFungibleToken {
     // Collection
     //------------------------------------------------------------
 
-    // A public collection interface that allows Genies NFTs to be borrowed
+    // A public collection interface that allows Moment NFTs to be borrowed
     //
-    pub resource interface GeniesNFTCollectionPublic {
+    pub resource interface MomentNFTCollectionPublic {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowGeniesNFT(id: UInt64): &Genies.NFT? {
+        pub fun borrowMomentNFT(id: UInt64): &Showdown.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
                 (result == nil) || (result?.id == id): 
-                    "Cannot borrow Genies NFT reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow Moment NFT reference: The ID of the returned reference is incorrect"
             }
         }
     }
 
-    // An NFT Collection (not to be confused with a GeniesCollection)
+    // An NFT Collection
     //
     pub resource Collection:
         NonFungibleToken.Provider,
         NonFungibleToken.Receiver,
         NonFungibleToken.CollectionPublic,
-        GeniesNFTCollectionPublic
+        MomentNFTCollectionPublic
     {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an UInt64 ID field
@@ -593,7 +543,7 @@ pub contract Genies: NonFungibleToken {
         // and adds the ID to the id array
         //
         pub fun deposit(token: @NonFungibleToken.NFT) {
-            let token <- token as! @Genies.NFT
+            let token <- token as! @Showdown.NFT
             let id: UInt64 = token.id
 
             // add the new token to the dictionary which removes the old one
@@ -632,12 +582,12 @@ pub contract Genies: NonFungibleToken {
             return &self.ownedNFTs[id] as &NonFungibleToken.NFT
         }
 
-        // borrowGeniesNFT gets a reference to an NFT in the collection
+        // borrowMomentNFT gets a reference to an NFT in the collection
         //
-        pub fun borrowGeniesNFT(id: UInt64): &Genies.NFT? {
+        pub fun borrowMomentNFT(id: UInt64): &Showdown.NFT? {
             if self.ownedNFTs[id] != nil {
                 let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &Genies.NFT
+                return ref as! &Showdown.NFT
             } else {
                 return nil
             }
@@ -672,93 +622,59 @@ pub contract Genies: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt32): @Genies.NFT
+        pub fun mintNFT(editionID: UInt32): @Showdown.NFT
     }
 
     // A resource that allows managing metadata and minting NFTs
     //
     pub resource Admin: NFTMinter {
-        // Create a new series and set it to be the current one, deactivating the previous one if needed.
-        // You probably want to call closeAllCollections() on the current series before this.
-        //
-        pub fun advanceSeries(
-            nextSeriesName: String,
-            nextSeriesMetadata: {String: String}
-        ): UInt32 {
-            pre {
-                Genies.seriesByID[Genies.currentSeriesID] == nil
-                    || (&Genies.seriesByID[Genies.currentSeriesID] as &Genies.Series).collectionsOpen == 0:
-                    "All collections must be closed before advancing the series"
-            }
-
-            // The contract starts with currentSeriesID 0 but no entry for series zero.
-            // We have to call advanceSeries to create series 0, so we have to handle that special case.
-            // This test handles that case.
-            // Its body will be called every time after the initial advance, which is what we want.
-            if Genies.seriesByID[Genies.currentSeriesID] != nil {
-                let currentSeries = &Genies.seriesByID[Genies.currentSeriesID] as &Genies.Series
-                if currentSeries.active {
-                    // Make sure everything in the series is closed
-                    currentSeries.closeAllGeniesCollections()
-                    // Deactivate the current series
-                    currentSeries.deactivate()
-                    // Advance the currentSeriesID
-                    Genies.currentSeriesID = Genies.currentSeriesID + 1 as UInt32
-                }
-            }
-
-            // Create and store the new series
-            let series <- create Genies.Series(
-                id: Genies.currentSeriesID,
-                name: nextSeriesName,
-                metadata: nextSeriesMetadata
-            )
-            Genies.seriesByID[Genies.currentSeriesID] <-! series
-
-            // Cache the new series's name => ID
-            Genies.seriesIDByName[nextSeriesName] = Genies.currentSeriesID
-
-            // Return the new ID for convenience
-            return Genies.currentSeriesID
-        }
-
         // Borrow a Series
         //
-        pub fun borrowSeries(id: UInt32): &Genies.Series {
+        pub fun borrowSeries(id: UInt32): &Showdown.Series {
             pre {
-                Genies.seriesByID[id] != nil: "Cannot borrow series, no such id"
+                Showdown.seriesByID[id] != nil: "Cannot borrow series, no such id"
             }
 
-            return &Genies.seriesByID[id] as &Genies.Series
+            return &Showdown.seriesByID[id] as &Showdown.Series
         }
 
-        // Borrow a Genies Collection. Not an NFT Collection!
+        // Borrow a Set
         //
-        pub fun borrowGeniesCollection(id: UInt32): &Genies.GeniesCollection {
+        pub fun borrowSet(id: UInt32): &Showdown.Set {
             pre {
-                Genies.collectionByID[id] != nil: "Cannot borrow Genies collection, no such id"
+                Showdown.setByID[id] != nil: "Cannot borrow Set, no such id"
             }
 
-            return &Genies.collectionByID[id] as &Genies.GeniesCollection
+            return &Showdown.setByID[id] as &Showdown.Set
+        }
+
+        // Borrow a Play
+        //
+        pub fun borrowPlay(id: UInt32): &Showdown.Play {
+            pre {
+                Showdown.playByID[id] != nil: "Cannot borrow Play, no such id"
+            }
+
+            return &Showdown.playByID[id] as &Showdown.Play
         }
 
         // Borrow an Edition
         //
-        pub fun borrowEdition(id: UInt32): &Genies.Edition {
+        pub fun borrowEdition(id: UInt32): &Showdown.Edition {
             pre {
-                Genies.editionByID[id] != nil: "Cannot borrow edition, no such id"
+                Showdown.editionByID[id] != nil: "Cannot borrow edition, no such id"
             }
 
-            return &Genies.editionByID[id] as &Genies.Edition
+            return &Showdown.editionByID[id] as &Showdown.Edition
         }
 
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt32): @Genies.NFT {
+        pub fun mintNFT(editionID: UInt32): @Showdown.NFT {
             pre {
                 // Make sure the edition we are creating this NFT in exists
-                Genies.editionByID.containsKey(editionID): "No such EditionID"
+                Showdown.editionByID.containsKey(editionID): "No such EditionID"
             }
 
             return <- self.borrowEdition(id: editionID).mint()
@@ -769,25 +685,27 @@ pub contract Genies: NonFungibleToken {
     // Contract lifecycle
     //------------------------------------------------------------
 
-    // Genies contract initializer
+    // Showdown contract initializer
     //
     init() {
         // Set the named paths
-        self.CollectionStoragePath = /storage/GeniesNFTCollection
-        self.CollectionPublicPath = /public/GeniesNFTCollection
-        self.AdminStoragePath = /storage/GeniesAdmin
-        self.MinterPrivatePath = /private/GeniesMinter
+        self.CollectionStoragePath = /storage/ShowdownNFTCollection
+        self.CollectionPublicPath = /public/ShowdownNFTCollection
+        self.AdminStoragePath = /storage/ShowdownAdmin
+        self.MinterPrivatePath = /private/ShowdownMinter
 
         // Initialize the entity counts
         self.totalSupply = 0
         self.currentSeriesID = 0
-        self.nextCollectionID = 0
+        self.nextSetID = 0
+        self.nextPlayID = 0
         self.nextEditionID = 0
 
         // Initialize the metadata lookup dictionaries
         self.seriesByID <- {}
         self.seriesIDByName = {}
-        self.collectionByID <- {}
+        self.setByID <- {}
+        self.playByID <- {}
         self.editionByID <- {}
 
         // Create an Admin resource and save it to storage
@@ -795,7 +713,7 @@ pub contract Genies: NonFungibleToken {
         self.account.save(<-admin, to: self.AdminStoragePath)
         // Link capabilites to the admin constrained to the Minter
         // and Metadata interfaces
-        self.account.link<&Genies.Admin{Genies.NFTMinter}>(
+        self.account.link<&Showdown.Admin{Showdown.NFTMinter}>(
             self.MinterPrivatePath,
             target: self.AdminStoragePath
         )

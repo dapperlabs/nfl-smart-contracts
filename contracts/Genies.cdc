@@ -93,9 +93,9 @@ pub contract Showdown: NonFungibleToken {
     // Entity Counts
     //
     pub var totalSupply:        UInt64
-    pub var currentSeriesID:    UInt32
+    pub var nextSeriesID:       UInt32
     pub var nextSetID:          UInt32
-    pub var nextPlayID:          UInt32
+    pub var nextPlayID:         UInt32
     pub var nextEditionID:      UInt32
 
     //------------------------------------------------------------
@@ -167,11 +167,12 @@ pub contract Showdown: NonFungibleToken {
             pre {
                 !Showdown.seriesIDByName.containsKey(name): "A Series with that name already exists"
             }
-
-            self.id = id
+            self.id = Showdown.nextSeriesID
             self.name = name
             self.metadata = metadata
             self.active = true   
+
+            Showdown.nextSeriesID = Showdown.nextSeriesID + 1 as UInt32
 
             emit SeriesCreated(
                 id: self.id,
@@ -696,7 +697,7 @@ pub contract Showdown: NonFungibleToken {
 
         // Initialize the entity counts
         self.totalSupply = 0
-        self.currentSeriesID = 0
+        self.nextSeriesID = 0
         self.nextSetID = 0
         self.nextPlayID = 0
         self.nextEditionID = 0

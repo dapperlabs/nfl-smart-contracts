@@ -341,6 +341,14 @@ pub contract Showdown: NonFungibleToken {
         pub let tier: String
         pub let metadata: {String: String}
 
+       // member function to check if max edition size has been reached
+       pub fun maxEditionMintSizeReached(): Bool {
+            if self.numMinted == self.maxMintSize {
+                return true
+            }
+            return false
+        }
+
         // initializer
         //
         init (id: UInt32) {
@@ -482,8 +490,7 @@ pub contract Showdown: NonFungibleToken {
         ) {
             pre {
                 Showdown.editionByID[editionID] != nil: "no such editionID"
-                (&Showdown.editionByID[editionID] as &Edition).numMinted == (&Showdown.editionByID[editionID] as &Edition).maxMintSize:
-                    "edition has reached the max mint size"
+                EditionData(id: editionID).maxEditionMintSizeReached() == true: "max edition size already reached"
             }
 
             self.id = id

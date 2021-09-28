@@ -106,7 +106,6 @@ pub contract Showdown: NonFungibleToken {
     //
     // This is so we can find Series by their names (via seriesByID)
     access(self) let seriesIDByName:    {String: UInt32}
-    // This avoids storing Series in an array where the index is off by one
     access(self) let seriesByID:        @{UInt32: Series}
     access(self) let setByID:           @{UInt32: Set}
     access(self) let playByID:          @{UInt32: Play}

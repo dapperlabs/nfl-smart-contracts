@@ -62,8 +62,7 @@ pub contract Showdown: NonFungibleToken {
         seriesID: UInt32, 
         setID: UInt32, 
         playID: UInt32, 
-        maxMintSize: UInt32, 
-        numMinted: UInt32, 
+        maxMintSize: UInt32,
         tier: String, 
         metadata: {String: String},
     )
@@ -444,7 +443,6 @@ pub contract Showdown: NonFungibleToken {
                 setID: self.setID,
                 playID: self.playID,
                 maxMintSize: self.maxMintSize,
-                numMinted: self.numMinted,
                 tier: self.tier,
                 metadata: self.metadata
             )

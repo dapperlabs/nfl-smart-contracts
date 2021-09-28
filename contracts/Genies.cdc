@@ -16,7 +16,7 @@ import NonFungibleToken from "./NonFungibleToken.cdc"
     An Edition is created with a combination of a Series, Set, and Play
     Moment NFTs are minted out of Editions.
 
-    Note that we cache some information (Series names/ids, counts of deactivated entities) rather
+    Note that we cache some information (Series names/ids, counts of closed entities) rather
     than calculate it each time.
     This is enabled by encapsulation and saves gas for entity lifecycle operations.
  */
@@ -62,7 +62,7 @@ pub contract Showdown: NonFungibleToken {
         seriesID: UInt32, 
         setID: UInt32, 
         playID: UInt32, 
-        maxMintSize: UInt32,
+        maxMintSize: UInt32?,
         tier: String, 
         metadata: {String: String},
     )
@@ -145,9 +145,9 @@ pub contract Showdown: NonFungibleToken {
         // so it is access(contract)
         pub var active: Bool
 
-        // Deactivate this series
+        // Close this series
         //
-        pub fun deactivate() {
+        pub fun close() {
             pre {
                 self.active == true: "not active"
             }
@@ -335,7 +335,7 @@ pub contract Showdown: NonFungibleToken {
         pub let setID: UInt32
         pub let playID: UInt32
         // null means there is no max size, minting is unlimited
-        pub let maxMintSize: UInt32
+        pub let maxMintSize: UInt32?
         pub let numMinted: UInt32
         pub let tier: String
         pub let metadata: {String: String}
@@ -370,7 +370,7 @@ pub contract Showdown: NonFungibleToken {
         pub let seriesID: UInt32
         pub let setID: UInt32
         pub let playID: UInt32
-        pub var maxMintSize: UInt32
+        pub var maxMintSize: UInt32?
         pub var numMinted: UInt32
         pub var tier: String
         // Contents writable if borrowed!
@@ -416,7 +416,7 @@ pub contract Showdown: NonFungibleToken {
             seriesID: UInt32,
             setID: UInt32,
             playID: UInt32,
-            maxSize: UInt32,
+            maxSize: UInt32?,
             tier: String,
             metadata: {String: String}
         ) {
@@ -430,7 +430,14 @@ pub contract Showdown: NonFungibleToken {
             self.seriesID = seriesID
             self.setID = setID
             self.playID = playID
-            self.maxMintSize = maxSize
+
+            // If an edition size is not set, it has unlimited minting potential
+            if maxSize == 0 {
+                self.maxMintSize = nil
+            } else {
+                self.maxMintSize = maxSize
+            }
+
             self.numMinted = 0 as UInt32
             self.tier = tier
             self.metadata = metadata

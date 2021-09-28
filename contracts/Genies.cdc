@@ -1,7 +1,7 @@
 import NonFungibleToken from "./NonFungibleToken.cdc"
 
 /*
-    Showdown is structured similarly to Showdown and TopShot.
+    Showdown is structured similarly to Genies and TopShot.
     Unlike TopShot, we use resources for all entities and manage access to their data
     by copying it to structs (this simplifies access control, in particular write access).
     We also encapsulate resource creation for the admin in member functions on the parent type.

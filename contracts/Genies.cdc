@@ -464,8 +464,6 @@ pub contract Showdown: NonFungibleToken {
             Showdown.editionByID[id] != nil: "Cannot borrow edition, no such id"
         }
 
-        let edition = &Showdown.editionByID[id] as &Showdown.Edition
-
         return EditionData(id: id)
     }
 

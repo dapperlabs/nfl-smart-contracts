@@ -342,10 +342,7 @@ pub contract Showdown: NonFungibleToken {
 
        // member function to check if max edition size has been reached
        pub fun maxEditionMintSizeReached(): Bool {
-            if self.numMinted == self.maxMintSize {
-                return true
-            }
-            return false
+            return self.numMinted == self.maxMintSize 
         }
 
         // initializer

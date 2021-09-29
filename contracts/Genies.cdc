@@ -496,7 +496,7 @@ pub contract Showdown: NonFungibleToken {
         ) {
             pre {
                 Showdown.editionByID[editionID] != nil: "no such editionID"
-                EditionData(id: editionID).maxEditionMintSizeReached() == true: "max edition size already reached"
+                EditionData(id: editionID).maxEditionMintSizeReached() != true: "max edition size already reached"
             }
 
             self.id = id

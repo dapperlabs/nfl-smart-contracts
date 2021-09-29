@@ -438,7 +438,6 @@ pub contract Showdown: NonFungibleToken {
                 Showdown.seriesByID.containsKey(seriesID): "seriesID does not exist"
                 Showdown.setByID.containsKey(setID): "setID does not exist"
                 Showdown.playByID.containsKey(playID): "playID does not exist"
-                Showdown.setByID.containsKey(setID): "setID does not exist"
                 SetData(id: setID).setPlayExistsInEdition(playID: playID) != true: "set play combination already exists in an edition"
             }
 

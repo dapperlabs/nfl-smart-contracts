@@ -224,6 +224,17 @@ pub contract Showdown: NonFungibleToken {
         pub let id: UInt32
         pub let name: String
         pub let metadata: {String: String}
+        pub var setPlaysInEditions: {UInt32: Bool}
+
+        // member function to check the setPlaysInEditions to see if this Set/Play combination already exists
+       pub fun setPlayExistsInEdition(playID: UInt32): Bool {
+           return self.setPlaysInEditions.containsKey(playID)
+        }
+
+        // member function to insert a new Play to the setPlaysInEditions dictionary
+       pub fun insertNewPlay(playID: UInt32) {
+            self.setPlaysInEditions.insert(key: playID, true)
+        }
 
         // initializer
         //
@@ -232,6 +243,7 @@ pub contract Showdown: NonFungibleToken {
             self.id = id
             self.name = set.name
             self.metadata = set.metadata
+            self.setPlaysInEditions = {}
         }
     }
 
@@ -244,12 +256,17 @@ pub contract Showdown: NonFungibleToken {
         // This is deliberate, as it allows admins to update the data.
         pub let metadata: {String: String}
 
+        // Store a dictionary of all the Plays which are paired with the Set inside Editions
+        // This enforces only one Set/Play unique pair can be used for an Edition
+        pub var setPlaysInEditions: {String: String}
+
         // initializer
         //
         init (name: String, metadata: {String: String}) {
             self.id = Showdown.nextSetID
             self.name = name
             self.metadata = metadata
+            self.setPlaysInEditions = {}
 
             Showdown.nextSetID = Showdown.nextSetID + 1 as UInt32
 
@@ -421,7 +438,8 @@ pub contract Showdown: NonFungibleToken {
                 Showdown.seriesByID.containsKey(seriesID): "seriesID does not exist"
                 Showdown.setByID.containsKey(setID): "setID does not exist"
                 Showdown.playByID.containsKey(playID): "playID does not exist"
-                SetData(id: setID).setPlayExistsInEdition() != true: "set play combination already exists in an edition"
+                Showdown.setByID.containsKey(setID): "setID does not exist"
+                SetData(id: setID).setPlayExistsInEdition(playID: playID) != true: "set play combination already exists in an edition"
             }
 
             self.id = Showdown.nextEditionID
@@ -441,6 +459,8 @@ pub contract Showdown: NonFungibleToken {
             self.metadata = metadata
 
             Showdown.nextEditionID = Showdown.nextEditionID + 1 as UInt32
+
+            SetData(id: setID).insertNewPlay(playID: playID)
 
             emit EditionCreated(
                 id: self.id,

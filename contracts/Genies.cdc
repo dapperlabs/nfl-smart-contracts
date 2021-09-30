@@ -435,6 +435,7 @@ pub contract Showdown: NonFungibleToken {
             metadata: {String: String}
         ) {
             pre {
+                maxSize == 0: "max mint size is zero, must either be null or greater than 0"
                 Showdown.seriesByID.containsKey(seriesID): "seriesID does not exist"
                 Showdown.setByID.containsKey(setID): "setID does not exist"
                 Showdown.playByID.containsKey(playID): "playID does not exist"

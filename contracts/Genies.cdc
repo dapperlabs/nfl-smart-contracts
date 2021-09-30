@@ -430,12 +430,12 @@ pub contract Showdown: NonFungibleToken {
             seriesID: UInt32,
             setID: UInt32,
             playID: UInt32,
-            maxSize: UInt32?,
+            maxMintSize: UInt32?,
             tier: String,
             metadata: {String: String}
         ) {
             pre {
-                maxSize == 0: "max mint size is zero, must either be null or greater than 0"
+                maxMintSize == 0: "max mint size is zero, must either be null or greater than 0"
                 Showdown.seriesByID.containsKey(seriesID): "seriesID does not exist"
                 Showdown.setByID.containsKey(setID): "setID does not exist"
                 Showdown.playByID.containsKey(playID): "playID does not exist"
@@ -448,10 +448,10 @@ pub contract Showdown: NonFungibleToken {
             self.playID = playID
 
             // If an edition size is not set, it has unlimited minting potential
-            if maxSize == 0 {
+            if maxMintSize == 0 {
                 self.maxMintSize = nil
             } else {
-                self.maxMintSize = maxSize
+                self.maxMintSize = maxMintSize
             }
 
             self.numMinted = 0 as UInt32

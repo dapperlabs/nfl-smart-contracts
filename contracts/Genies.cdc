@@ -40,14 +40,14 @@ pub contract Showdown: NonFungibleToken {
     // Series Events
     //
     // Emitted when a new series has been created by an admin
-    pub event SeriesCreated(id: UInt32, name: String, metadata: {String: String})
+    pub event SeriesCreated(id: UInt32, name: String)
     // Emitted when a series is closed by an admin
     pub event SeriesClosed(id: UInt32)
 
     // Set Events
     //
     // Emitted when a new set has been created by an admin
-    pub event SetCreated(id: UInt32, name: String, metadata: {String: String})
+    pub event SetCreated(id: UInt32, name: String)
 
     // Play Events
     //
@@ -63,8 +63,7 @@ pub contract Showdown: NonFungibleToken {
         setID: UInt32, 
         playID: UInt32, 
         maxMintSize: UInt32?,
-        tier: String, 
-        metadata: {String: String},
+        tier: String,
     )
     // Emitted when an edition is either closed by an admin, or the max amount of moments have been minted
     pub event EditionClosed(id: UInt32)
@@ -119,7 +118,6 @@ pub contract Showdown: NonFungibleToken {
     pub struct SeriesData {
         pub let id: UInt32
         pub let name: String
-        pub let metadata: {String: String}
         pub let active: Bool
 
         // initializer
@@ -128,7 +126,6 @@ pub contract Showdown: NonFungibleToken {
             let series = &Showdown.seriesByID[id] as! &Showdown.Series
             self.id = series.id
             self.name = series.name
-            self.metadata = series.metadata
             self.active = series.active
         }
     }
@@ -138,11 +135,6 @@ pub contract Showdown: NonFungibleToken {
     pub resource Series {
         pub let id: UInt32
         pub let name: String
-        // Contents writable if borrowed!
-        // This is deliberate, as it allows admins to update the data.
-        pub let metadata: {String: String}
-        // We manage this list, but need to access it to fill out the struct,
-        // so it is access(contract)
         pub var active: Bool
 
         // Close this series
@@ -158,16 +150,13 @@ pub contract Showdown: NonFungibleToken {
         }
 
         // initializer
-        // We pass in ID as the logic for it is more complex than it should be,
-        // and we don't want to spread it out.
         //
-        init (id: UInt32, name: String, metadata: {String: String}) {
+        init (name: String) {
             pre {
                 !Showdown.seriesIDByName.containsKey(name): "A Series with that name already exists"
             }
             self.id = Showdown.nextSeriesID
             self.name = name
-            self.metadata = metadata
             self.active = true   
 
             Showdown.nextSeriesID = Showdown.nextSeriesID + 1 as UInt32
@@ -175,7 +164,6 @@ pub contract Showdown: NonFungibleToken {
             emit SeriesCreated(
                 id: self.id,
                 name: self.name,
-                metadata: self.metadata
             )
         }
     }
@@ -223,7 +211,6 @@ pub contract Showdown: NonFungibleToken {
     pub struct SetData {
         pub let id: UInt32
         pub let name: String
-        pub let metadata: {String: String}
         pub var setPlaysInEditions: {UInt32: Bool}
 
         // member function to check the setPlaysInEditions to see if this Set/Play combination already exists
@@ -242,7 +229,6 @@ pub contract Showdown: NonFungibleToken {
             let set = &Showdown.setByID[id] as! &Showdown.Set
             self.id = id
             self.name = set.name
-            self.metadata = set.metadata
             self.setPlaysInEditions = {}
         }
     }
@@ -252,25 +238,20 @@ pub contract Showdown: NonFungibleToken {
     pub resource Set {
         pub let id: UInt32
         pub let name: String
-        // Contents writable if borrowed!
-        // This is deliberate, as it allows admins to update the data.
-        pub let metadata: {String: String}
-
         // Store a dictionary of all the Plays which are paired with the Set inside Editions
         // This enforces only one Set/Play unique pair can be used for an Edition
         pub var setPlaysInEditions: {String: String}
 
         // initializer
         //
-        init (name: String, metadata: {String: String}) {
+        init (name: String) {
             self.id = Showdown.nextSetID
             self.name = name
-            self.metadata = metadata
             self.setPlaysInEditions = {}
 
             Showdown.nextSetID = Showdown.nextSetID + 1 as UInt32
 
-            emit SetCreated(id: self.id, name: self.name, metadata: self.metadata)
+            emit SetCreated(id: self.id, name: self.name)
         }
     }
 
@@ -318,7 +299,7 @@ pub contract Showdown: NonFungibleToken {
         // initializer
         //
         init (classification: String, metadata: {String: String}) {
-            self.id = Showdown.nextSetID
+            self.id = Showdown.nextPlayID
             self.classification = classification
             self.metadata = metadata
 
@@ -351,11 +332,9 @@ pub contract Showdown: NonFungibleToken {
         pub let seriesID: UInt32
         pub let setID: UInt32
         pub let playID: UInt32
-        // null means there is no max size, minting is unlimited
-        pub let maxMintSize: UInt32?
-        pub let numMinted: UInt32
         pub let tier: String
-        pub let metadata: {String: String}
+        pub var maxMintSize: UInt32?
+        pub var numMinted: UInt32
 
        // member function to check if max edition size has been reached
        pub fun maxEditionMintSizeReached(): Bool {
@@ -373,7 +352,6 @@ pub contract Showdown: NonFungibleToken {
             self.maxMintSize = edition.maxMintSize
             self.numMinted = edition.numMinted
             self.tier = edition.tier
-            self.metadata = edition.metadata
         }
     }
 
@@ -384,16 +362,15 @@ pub contract Showdown: NonFungibleToken {
         pub let seriesID: UInt32
         pub let setID: UInt32
         pub let playID: UInt32
+        pub let tier: String
+        // Null value indicates that there is unlimited minting potential for the Edition
         pub var maxMintSize: UInt32?
+        // Updates each time we mint a new moment for the Edition to keep a running total
         pub var numMinted: UInt32
-        pub var tier: String
-        // Contents writable if borrowed!
-        // This is deliberate, as it allows admins to update the data.
-        pub let metadata: {String: String}
 
-        // Retire this edition so that no more Moment NFTs can be minted in it
+        // Close this edition so that no more Moment NFTs can be minted in it
         //
-        access(contract) fun retire() {
+        access(contract) fun close() {
             pre {
                 self.numMinted == self.maxMintSize: "max number of minted moments has already been reached"
             }
@@ -432,7 +409,6 @@ pub contract Showdown: NonFungibleToken {
             playID: UInt32,
             maxMintSize: UInt32?,
             tier: String,
-            metadata: {String: String}
         ) {
             pre {
                 maxMintSize == 0: "max mint size is zero, must either be null or greater than 0"
@@ -456,7 +432,6 @@ pub contract Showdown: NonFungibleToken {
 
             self.numMinted = 0 as UInt32
             self.tier = tier
-            self.metadata = metadata
 
             Showdown.nextEditionID = Showdown.nextEditionID + 1 as UInt32
 
@@ -469,7 +444,6 @@ pub contract Showdown: NonFungibleToken {
                 playID: self.playID,
                 maxMintSize: self.maxMintSize,
                 tier: self.tier,
-                metadata: self.metadata
             )
         }
     }

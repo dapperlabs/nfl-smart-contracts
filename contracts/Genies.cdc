@@ -670,6 +670,49 @@ pub contract Showdown: NonFungibleToken {
             return &Showdown.editionByID[id] as &Showdown.Edition
         }
 
+        // Create a Series
+        //
+        pub fun createSeries(name: String): @Showdown.Series {
+            return <- create Series(
+                name: name,
+            )
+        }
+
+        // Create a Set
+        //
+        pub fun createSet(name: String): @Showdown.Set {
+            return <- create Set(
+                name: name,
+            )
+        }
+
+        // Create a Play
+        //
+        pub fun createPlay(classification: String, metadata: {String: String}): @Showdown.Play {
+            return <- create Play(
+                classification: classification,
+                metadata: metadata,
+            )
+        }
+
+        // Create an Edition
+        //
+        pub fun createEdition(            
+            seriesID: UInt32,
+            setID: UInt32,
+            playID: UInt32,
+            maxMintSize: UInt32?,
+            tier: String
+            ): @Showdown.Edition {
+            return <- create Edition(
+                seriesID: seriesID,
+                setID: setID,
+                playID: playID,
+                maxMintSize: maxMintSize,
+                tier: tier,
+            )
+        }
+
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //

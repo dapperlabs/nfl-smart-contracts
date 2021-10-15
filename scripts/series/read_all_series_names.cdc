@@ -1,8 +1,8 @@
-import Genies from "../../contracts/Genies.cdc"
+import Showdown from "../../contracts/Showdown.cdc"
 
 // This script returns all the names for Series.
-// These can be related to Series structs via Genies.getSeriesByName() .
+// These can be related to Series structs via Showdown.getSeriesByName() .
 
 pub fun main(): [String] {
-    return Genies.getAllSeriesNames()
+    return Showdown.getAllSeriesNames()
 }

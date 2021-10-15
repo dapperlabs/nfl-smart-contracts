@@ -1,8 +1,8 @@
-import Genies from "../../contracts/Genies.cdc"
+import Showdown from "../../contracts/Showdown.cdc"
 
 // This script returns a Series struct for the given id,
 // if it exists
 
-pub fun main(id: UInt32): Genies.SeriesData {
-    return Genies.getSeriesData(id: id)
+pub fun main(id: UInt32): Showdown.SeriesData {
+    return Showdown.getSeriesData(id: id)
 }

@@ -1,15 +1,15 @@
-import Genies from "../../contracts/Genies.cdc"
+import Showdown from "../../contracts/Showdown.cdc"
 
 // This script returns all the Series structs.
 // This will eventually be *long*.
 
-pub fun main(): [Genies.SeriesData] {
-    let geniesNFTs: [Genies.SeriesData] = []
-    var id: UInt32 = 0
-    // Note <= , as currentSeriesID is inclusive
-    while id <= Genies.currentSeriesID {
-        geniesNFTs.append(Genies.getSeriesData(id: id))
+pub fun main(): [Showdown.SeriesData] {
+    let series: [Showdown.SeriesData] = []
+    var id: UInt32 = 1
+    // Note < , as nextSeriesID has not yet been used
+    while id < Showdown.nextSeriesID {
+        series.append(Showdown.getSeriesData(id: id))
         id = id + 1
     }
-    return geniesNFTs
+    return series
 }

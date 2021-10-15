@@ -1,6 +1,6 @@
-module github.com/dapperlabs/genies-contracts/lib/go/test
+module github.com/dapperlabs/nfl-smart-contracts/lib/go/test
 
-go 1.14
+go 1.16
 
 require (
 	github.com/onflow/cadence v0.18.0
@@ -11,4 +11,5 @@ require (
 	github.com/onflow/flow-nft/lib/go/contracts v0.0.0-20210603230546-76c44712d829
 	github.com/onflow/flow-nft/lib/go/templates v0.0.0-20210603230546-76c44712d829
 	github.com/stretchr/testify v1.7.0
+	gotest.tools v2.2.0+incompatible // indirect
 )

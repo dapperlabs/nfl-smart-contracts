@@ -9,61 +9,80 @@ import (
 // Handle relative paths by making these regular expressions
 
 const (
-	nftAddressPlaceholder                     = "\"[^\"]*NonFungibleToken.cdc\""
-	geniesAddressPlaceholder                  = "\"[^\"]*Genies.cdc\""
-	geniesShardedCollectionAddressPlaceholder = "\"[^\"]*GeniesShardedCollection.cdc\""
+	nftAddressPlaceholder                       = "\"[^\"]*NonFungibleToken.cdc\""
+	showdownAddressPlaceholder                  = "\"[^\"]*Showdown.cdc\""
+	showdownShardedCollectionAddressPlaceholder = "\"[^\"]*ShowdownShardedCollection.cdc\""
 )
 
 const (
-	geniesPath                  = "../../../contracts/Genies.cdc"
-	geniesShardedCollectionPath = "../../../contracts/GeniesShardedCollection.cdc"
-	geniesTransactionsRootPath  = "../../../transactions"
-	geniesScriptsRootPath       = "../../../scripts"
+	showdownPath                 = "../../../contracts/Showdown.cdc"
+	showdownTransactionsRootPath = "../../../transactions"
+	showdownScriptsRootPath      = "../../../scripts"
 
-	geniesAddEditionPath                                   = geniesTransactionsRootPath + "/admin/edition/add_edition.cdc"
-	geniesRetireEditionPath                                = geniesTransactionsRootPath + "/admin/edition/retire_edition.cdc"
-	geniesAddGeniesCollectionPath                          = geniesTransactionsRootPath + "/admin/geniesCollection/add_genies_collection.cdc"
-	geniesCloseGeniesCollectionPath                        = geniesTransactionsRootPath + "/admin/geniesCollection/close_genies_collection.cdc"
-	geniesMintGeniesNFTMultiPath                           = geniesTransactionsRootPath + "/admin/nfts/mint_genies_nft_multi.cdc"
-	geniesMintGeniesNFTPath                                = geniesTransactionsRootPath + "/admin/nfts/mint_genies_nft.cdc"
-	geniesAdvanceSeriesPath                                = geniesTransactionsRootPath + "/admin/series/advance_series.cdc"
-	geniesSetupAccountPath                                 = geniesTransactionsRootPath + "/user/setup_genies_account.cdc"
-	geniesTransferNFTPath                                  = geniesTransactionsRootPath + "/user/transfer_genies_nft.cdc"
-	geniesSetupShardedCollectionPath                       = geniesTransactionsRootPath + "/admin/sharded_collection/setup_sharded_collection.cdc"
-	geniesTransferGeniesNFTFromShardedCollectionPath       = geniesTransactionsRootPath + "/admin/sharded_collection/transfer_genies_nft_from_sharded_collection.cdc"
-	geniesBatchTransferGeniesNFTsFromShardedCollectionPath = geniesTransactionsRootPath + "/admin/sharded_collection/batch_transfer_genies_nfts_from_sharded_collection.cdc"
+	// Accounts
+	showdownSetupAccountPath   = showdownTransactionsRootPath + "/user/setup_showdown_account.cdc"
+	showdownAccountIsSetupPath = showdownScriptsRootPath + "/user/account_is_setup.cdc"
 
-	geniesReadAllEditionsPath          = geniesScriptsRootPath + "/edition/read_all_editions.cdc"
-	geniesReadEditionPath              = geniesScriptsRootPath + "/edition/read_edition.cdc"
-	geniesReadAllGeniesCollectionsPath = geniesScriptsRootPath + "/geniesCollection/read_all_genies_collections.cdc"
-	geniesReadGeniesCollectionPath     = geniesScriptsRootPath + "/geniesCollection/read_genies_collection.cdc"
-	geniesReadCollectionIDsPath        = geniesScriptsRootPath + "/nfts/read_collection_ids.cdc"
-	geniesReadCollectionLengthPath     = geniesScriptsRootPath + "/nfts/read_collection_length.cdc"
-	geniesReadGeniesSupplyPath         = geniesScriptsRootPath + "/nfts/read_genies_supply.cdc"
-	geniesReadNFTPropertiesPath        = geniesScriptsRootPath + "/nfts/read_nft_properties.cdc"
-	geniesReadAllSeriesNamesPath       = geniesScriptsRootPath + "/series/read_all_series_names.cdc"
-	geniesReadAllSeriesPath            = geniesScriptsRootPath + "/series/read_all_series.cdc"
-	geniesReadCurrentSeriesPath        = geniesScriptsRootPath + "/series/read_current_series.cdc"
-	geniesReadSeriesByIDPath           = geniesScriptsRootPath + "/series/read_series_by_id.cdc"
-	geniesReadSeriesByNamePath         = geniesScriptsRootPath + "/series/read_series_by_name.cdc"
-	geniesAccountIsSetupPath           = geniesScriptsRootPath + "/user/account_is_setup.cdc"
+	// ShardedCollection
+	showdownShardedCollectionPath                            = "../../../contracts/ShowdownShardedCollection.cdc"
+	showdownSetupShardedCollectionPath                       = showdownTransactionsRootPath + "/admin/sharded_collection/setup_sharded_collection.cdc"
+	showdownTransferMomentNFTFromShardedCollectionPath       = showdownTransactionsRootPath + "/admin/sharded_collection/transfer_showdown_nft_from_sharded_collection.cdc"
+	showdownBatchTransferMomentNFTsFromShardedCollectionPath = showdownTransactionsRootPath + "/admin/sharded_collection/batch_transfer_showdown_nfts_from_sharded_collection.cdc"
+
+	// Series
+	showdownCreateSeriesPath       = showdownTransactionsRootPath + "/admin/series/create_series.cdc"
+	showdownCloseSeriesPath        = showdownTransactionsRootPath + "/admin/series/close_series.cdc"
+	showdownReadAllSeriesPath      = showdownScriptsRootPath + "/series/read_all_series.cdc"
+	showdownReadSeriesByIDPath     = showdownScriptsRootPath + "/series/read_series_by_id.cdc"
+	showdownReadSeriesByNamePath   = showdownScriptsRootPath + "/series/read_series_by_name.cdc"
+	showdownReadAllSeriesNamesPath = showdownScriptsRootPath + "/series/read_all_series_names.cdc"
+
+	// Sets
+	showdownCreateSetPath       = showdownTransactionsRootPath + "/admin/sets/create_set.cdc"
+	showdownReadAllSetsPath     = showdownScriptsRootPath + "/sets/read_all_sets.cdc"
+	showdownReadSetByIDPath     = showdownScriptsRootPath + "/sets/read_set_by_id.cdc"
+	showdownReadSetsByNamePath  = showdownScriptsRootPath + "/sets/read_sets_by_name.cdc"
+	showdownReadAllSetNamesPath = showdownScriptsRootPath + "/sets/read_all_set_names.cdc"
+
+	// Plays
+	showdownCreatePlayPath   = showdownTransactionsRootPath + "/admin/plays/create_play.cdc"
+	showdownReadPlayByIDPath = showdownScriptsRootPath + "/plays/read_play_by_id.cdc"
+	showdownReadAllPlaysPath = showdownScriptsRootPath + "/plays/read_all_plays.cdc"
+
+	// Editions
+	showdownCreateEditionPath   = showdownTransactionsRootPath + "/admin/editions/create_edition.cdc"
+	showdownCloseEditionPath    = showdownTransactionsRootPath + "/admin/editions/close_edition.cdc"
+	showdownReadEditionByIDPath = showdownScriptsRootPath + "/editions/read_edition_by_id.cdc"
+	showdownReadAllEditionsPath = showdownScriptsRootPath + "/edition/read_all_editions.cdc"
+
+	// Moment NFTs
+	showdownMintMomentNFTPath           = showdownTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
+	showdownMintMomentNFTMultiPath      = showdownTransactionsRootPath + "/admin/nfts/mint_moment_nft_multi.cdc"
+	showdownTransferNFTPath             = showdownTransactionsRootPath + "/user/transfer_moment_nft.cdc"
+	showdownReadMomentNFTSupplyPath     = showdownScriptsRootPath + "/nfts/read_moment_nft_supply.cdc"
+	showdownReadMomentNFTPropertiesPath = showdownScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
+	showdownReadCollectionNFTLengthPath = showdownScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
+	showdownReadCollectionNFTIDsPath    = showdownScriptsRootPath + "/nfts/read_collection_nft_ids.cdc"
 )
 
+//------------------------------------------------------------
+// Accounts
+//------------------------------------------------------------
 func replaceAddresses(code []byte, contracts Contracts) []byte {
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+contracts.NFTAddress.String()))
 
-	geniesRe := regexp.MustCompile(geniesAddressPlaceholder)
-	code = geniesRe.ReplaceAll(code, []byte("0x"+contracts.GeniesAddress.String()))
+	showdownRe := regexp.MustCompile(showdownAddressPlaceholder)
+	code = showdownRe.ReplaceAll(code, []byte("0x"+contracts.ShowdownAddress.String()))
 
-	geniesShardedCollectionRe := regexp.MustCompile(geniesShardedCollectionAddressPlaceholder)
-	code = geniesShardedCollectionRe.ReplaceAll(code, []byte("0x"+contracts.GeniesShardedCollectionAddress.String()))
+	showdownShardedCollectionRe := regexp.MustCompile(showdownShardedCollectionAddressPlaceholder)
+	code = showdownShardedCollectionRe.ReplaceAll(code, []byte("0x"+contracts.ShowdownShardedCollectionAddress.String()))
 
 	return code
 }
 
-func loadGenies(nftAddress flow.Address) []byte {
-	code := readFile(geniesPath)
+func loadShowdown(nftAddress flow.Address) []byte {
+	code := readFile(showdownPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
@@ -71,195 +90,242 @@ func loadGenies(nftAddress flow.Address) []byte {
 	return code
 }
 
-func loadGeniesShardedCollection(nftAddress flow.Address, geniesAddress flow.Address) []byte {
-	code := readFile(geniesShardedCollectionPath)
+func loadShowdownSetupAccountTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(showdownSetupAccountPath),
+		contracts,
+	)
+}
+
+func loadShowdownAccountIsSetupScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(showdownAccountIsSetupPath),
+		contracts,
+	)
+}
+
+//------------------------------------------------------------
+// Sharded Collection
+//------------------------------------------------------------
+func loadShowdownShardedCollection(nftAddress flow.Address, showdownAddress flow.Address) []byte {
+	code := readFile(showdownShardedCollectionPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
 
-	geniesRe := regexp.MustCompile(geniesAddressPlaceholder)
-	code = geniesRe.ReplaceAll(code, []byte("0x"+geniesAddress.String()))
+	showdownRe := regexp.MustCompile(showdownAddressPlaceholder)
+	code = showdownRe.ReplaceAll(code, []byte("0x"+showdownAddress.String()))
 
 	return code
 }
 
-func loadGeniesAddEditionTransaction(contracts Contracts) []byte {
+func loadShowdownSetupShardedCollectionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesAddEditionPath),
+		readFile(showdownSetupShardedCollectionPath),
 		contracts,
 	)
 }
 
-func loadGeniesRetireEditionTransaction(contracts Contracts) []byte {
+func loadShowdownTransferMomentNFTFromShardedCollectionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesRetireEditionPath),
+		readFile(showdownTransferMomentNFTFromShardedCollectionPath),
 		contracts,
 	)
 }
 
-func loadGeniesAddGeniesCollectionTransaction(contracts Contracts) []byte {
+func loadShowdownBatchTransferMomentNFTsFromShardedCollectionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesAddGeniesCollectionPath),
+		readFile(showdownBatchTransferMomentNFTsFromShardedCollectionPath),
 		contracts,
 	)
 }
 
-func loadGeniesCloseGeniesCollectionTransaction(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Series
+//------------------------------------------------------------
+func loadShowdownCreateSeriesTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesCloseGeniesCollectionPath),
+		readFile(showdownCreateSeriesPath),
 		contracts,
 	)
 }
 
-func loadGeniesMintGeniesNFTMultiTransaction(contracts Contracts) []byte {
+func loadShowdownReadSeriesByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesMintGeniesNFTMultiPath),
+		readFile(showdownReadSeriesByIDPath),
 		contracts,
 	)
 }
 
-func loadGeniesMintGeniesNFTTransaction(contracts Contracts) []byte {
+func loadShowdownReadSeriesByNameScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesMintGeniesNFTPath),
+		readFile(showdownReadSeriesByNamePath),
 		contracts,
 	)
 }
 
-func loadGeniesAdvanceSeriesTransaction(contracts Contracts) []byte {
+func loadShowdownReadAllSeriesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesAdvanceSeriesPath),
+		readFile(showdownReadAllSeriesPath),
 		contracts,
 	)
 }
 
-func loadGeniesSetupAccountTransaction(contracts Contracts) []byte {
+func loadShowdownReadAllSeriesNamesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesSetupAccountPath),
+		readFile(showdownReadAllSeriesNamesPath),
 		contracts,
 	)
 }
 
-func loadGeniesTransferNFTTransaction(contracts Contracts) []byte {
+func loadShowdownCloseSeriesTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesTransferNFTPath),
+		readFile(showdownCloseSeriesPath),
 		contracts,
 	)
 }
 
-func loadGeniesSetupShardedCollectionTransaction(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Sets
+//------------------------------------------------------------
+func loadShowdownCreateSetTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesSetupShardedCollectionPath),
+		readFile(showdownCreateSetPath),
 		contracts,
 	)
 }
 
-func loadGeniesTransferGeniesNFTFromShardedCollectionTransaction(contracts Contracts) []byte {
+func loadShowdownReadSetByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesTransferGeniesNFTFromShardedCollectionPath),
+		readFile(showdownReadSetByIDPath),
 		contracts,
 	)
 }
 
-func loadGeniesBatchTransferGeniesNFTsFromShardedCollectionTransaction(contracts Contracts) []byte {
+func loadShowdownReadAllSetsScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesBatchTransferGeniesNFTsFromShardedCollectionPath),
+		readFile(showdownReadAllSetsPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadAllEditionsScript(contracts Contracts) []byte {
+func loadShowdownReadSetsByNameScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadAllEditionsPath),
+		readFile(showdownReadSetsByNamePath),
 		contracts,
 	)
 }
 
-func loadGeniesReadEditionScript(contracts Contracts) []byte {
+func loadShowdownReadAllSetNamesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadEditionPath),
+		readFile(showdownReadAllSetNamesPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadAllGeniesCollectionsScript(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Plays
+//------------------------------------------------------------
+func loadShowdownCreatePlayTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadAllGeniesCollectionsPath),
+		readFile(showdownCreatePlayPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadGeniesCollectionScript(contracts Contracts) []byte {
+func loadShowdownReadPlayByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadGeniesCollectionPath),
+		readFile(showdownReadPlayByIDPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadCollectionIDsScript(contracts Contracts) []byte {
+func loadShowdownReadAllPlaysScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadCollectionIDsPath),
+		readFile(showdownReadAllPlaysPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadCollectionLengthScript(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Editions
+//------------------------------------------------------------
+func loadShowdownCreateEditionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadCollectionLengthPath),
+		readFile(showdownCreateEditionPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadGeniesSupplyScript(contracts Contracts) []byte {
+func loadShowdownReadEditionByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadGeniesSupplyPath),
-		contracts,
-	)
-}
-func loadGeniesReadNFTPropertiesScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(geniesReadNFTPropertiesPath),
+		readFile(showdownReadEditionByIDPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadAllSeriesNamesScript(contracts Contracts) []byte {
+func loadShowdownCloseEditionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadAllSeriesNamesPath),
+		readFile(showdownCloseEditionPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadAllSeriesScript(contracts Contracts) []byte {
+func loadShowdownReadAllEditionsScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadAllSeriesPath),
+		readFile(showdownReadAllEditionsPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadCurrentSeriesScript(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Moment NFTs
+//------------------------------------------------------------
+func loadShowdownMintMomentNFTTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadCurrentSeriesPath),
+		readFile(showdownMintMomentNFTPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadSeriesByIDScript(contracts Contracts) []byte {
+func loadShowdownMintMomentNFTMultiTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadSeriesByIDPath),
+		readFile(showdownMintMomentNFTMultiPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadSeriesByNameScript(contracts Contracts) []byte {
+func loadShowdownReadMomentNFTSupplyScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadSeriesByNamePath),
+		readFile(showdownReadMomentNFTSupplyPath),
 		contracts,
 	)
 }
 
-func loadGeniesAccountIsSetupScript(contracts Contracts) []byte {
+func loadShowdownReadMomentNFTPropertiesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesAccountIsSetupPath),
+		readFile(showdownReadMomentNFTPropertiesPath),
+		contracts,
+	)
+}
+
+func loadShowdownReadCollectionNFTLengthScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(showdownReadCollectionNFTLengthPath),
+		contracts,
+	)
+}
+
+func loadShowdownReadCollectionNFTIDsScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(showdownReadCollectionNFTIDsPath),
+		contracts,
+	)
+}
+
+func loadShowdownTransferNFTTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(showdownTransferNFTPath),
 		contracts,
 	)
 }

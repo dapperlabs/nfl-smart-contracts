@@ -1,6 +1,7 @@
 /*
     Adapted from: Genies.cdc
     Author: Rhea Myers rhea.myers@dapperlabs.com
+    Author: Sadie Freeman sadie.freeman@dapperlabs.com
 */
 
 
@@ -165,7 +166,6 @@ pub contract Showdown: NonFungibleToken {
             self.id = Showdown.nextSeriesID
             self.name = name
             self.active = true   
-
 
             // Cache the new series's name => ID
             Showdown.seriesIDByName[name] = self.id
@@ -350,8 +350,6 @@ pub contract Showdown: NonFungibleToken {
 
         return Showdown.PlayData(id: id)
     }
-
-
 
     //------------------------------------------------------------
     // Edition
@@ -838,4 +836,3 @@ pub contract Showdown: NonFungibleToken {
         emit ContractInitialized()
     }
 }
- 

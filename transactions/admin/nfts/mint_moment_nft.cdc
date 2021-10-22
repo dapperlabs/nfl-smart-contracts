@@ -28,3 +28,4 @@ transaction(recipientAddress: Address, editionID: UInt32) {
         self.recipient.deposit(token: <- (momentNFT as @NonFungibleToken.NFT))
     }
 }
+

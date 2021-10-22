@@ -11,3 +11,4 @@ pub fun main(address: Address): Bool {
         }>(Showdown.CollectionPublicPath)
         != nil
 }
+

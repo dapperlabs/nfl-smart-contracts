@@ -6,3 +6,4 @@ import Showdown from "../../contracts/Showdown.cdc"
 pub fun main(id: UInt32): Showdown.PlayData {
     return Showdown.getPlayData(id: id)
 }
+

@@ -5,3 +5,4 @@ import Showdown from "../../contracts/Showdown.cdc"
 pub fun main(): UInt64 {    
     return Showdown.totalSupply
 }
+

@@ -34,3 +34,4 @@ transaction(recipient: Address, momentID: UInt64) {
         receiverRef.deposit(token: <-self.transferToken)
     }
 }
+

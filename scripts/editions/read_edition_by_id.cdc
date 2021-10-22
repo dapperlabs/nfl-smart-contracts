@@ -5,3 +5,4 @@ import Showdown from "../../contracts/Showdown.cdc"
 pub fun main(editionID: UInt32): Showdown.EditionData {
     return Showdown.getEditionData(id: editionID)
 }
+

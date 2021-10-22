@@ -11,3 +11,4 @@ pub fun main(address: Address): [UInt64] {
     
     return collectionRef.getIDs()
 }
+

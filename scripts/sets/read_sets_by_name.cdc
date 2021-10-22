@@ -6,3 +6,4 @@ import Showdown from "../../contracts/Showdown.cdc"
 pub fun main(setName: String): Showdown.SetData {
     return Showdown.getSetDataByName(name: setName)
 }
+

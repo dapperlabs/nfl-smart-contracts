@@ -15,3 +15,4 @@ pub fun main(address: Address, id: UInt64): [AnyStruct] {
 
     return [nft.id, nft.editionID, nft.serialNumber, nft.mintingDate]
 }
+

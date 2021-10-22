@@ -6,3 +6,4 @@ import Showdown from "../../contracts/Showdown.cdc"
 pub fun main(seriesName: String): Showdown.SeriesData {
     return Showdown.getSeriesDataByName(name: seriesName)
 }
+

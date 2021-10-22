@@ -12,3 +12,4 @@ pub fun main(address: Address): Int {
     
     return collectionRef.getIDs().length
 }
+

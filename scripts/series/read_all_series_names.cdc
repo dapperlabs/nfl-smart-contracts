@@ -6,3 +6,4 @@ import Showdown from "../../contracts/Showdown.cdc"
 pub fun main(): [String] {
     return Showdown.getAllSeriesNames()
 }
+

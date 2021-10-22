@@ -13,3 +13,4 @@ pub fun main(): [Showdown.SeriesData] {
     }
     return series
 }
+

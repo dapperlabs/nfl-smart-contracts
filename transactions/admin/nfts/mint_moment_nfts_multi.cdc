@@ -40,3 +40,4 @@ transaction(recipientAddress: Address, editionIDs: [UInt32], counts: [UInt32]) {
         }
     }
 }
+

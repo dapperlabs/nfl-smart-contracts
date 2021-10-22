@@ -276,7 +276,7 @@ pub contract Showdown: NonFungibleToken {
             Showdown.setByID[id] != nil: "Cannot borrow set, no such id"
         }
 
-        return SetData(id: id)
+        return Showdown.SetData(id: id)
     }
 
     // Get the publicly available data for a Set by name
@@ -348,7 +348,7 @@ pub contract Showdown: NonFungibleToken {
             Showdown.playByID[id] != nil: "Cannot borrow play, no such id"
         }
 
-        return PlayData(id: id)
+        return Showdown.PlayData(id: id)
     }
 
 
@@ -487,7 +487,7 @@ pub contract Showdown: NonFungibleToken {
             Showdown.editionByID[id] != nil: "Cannot borrow edition, no such id"
         }
 
-        return EditionData(id: id)
+        return Showdown.EditionData(id: id)
     }
 
     //------------------------------------------------------------

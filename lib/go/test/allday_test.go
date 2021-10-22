@@ -11,16 +11,16 @@ import (
 //------------------------------------------------------------
 // Setup
 //------------------------------------------------------------
-func TestShowdownDeployContracts(t *testing.T) {
+func TestAllDayDeployContracts(t *testing.T) {
 	b := newEmulator()
-	showdownDeployContracts(t, b)
+	AllDayDeployContracts(t, b)
 }
 
-func TestShowdownSetupAccount(t *testing.T) {
+func TestAllDaySetupAccount(t *testing.T) {
 	b := newEmulator()
-	contracts := showdownDeployContracts(t, b)
+	contracts := AllDayDeployContracts(t, b)
 	userAddress, userSigner := createAccount(t, b)
-	setupShowdown(t, b, userAddress, userSigner, contracts)
+	setupAllDay(t, b, userAddress, userSigner, contracts)
 
 	t.Run("Account should be set up", func(t *testing.T) {
 		accountIsSetUp := accountIsSetup(
@@ -38,7 +38,7 @@ func TestShowdownSetupAccount(t *testing.T) {
 //------------------------------------------------------------
 func TestSeries(t *testing.T) {
 	b := newEmulator()
-	contracts := showdownDeployContracts(t, b)
+	contracts := AllDayDeployContracts(t, b)
 	createTestSeries(t, b, contracts)
 }
 
@@ -130,7 +130,7 @@ func testCloseSeries(
 //------------------------------------------------------------
 func TestSets(t *testing.T) {
 	b := newEmulator()
-	contracts := showdownDeployContracts(t, b)
+	contracts := AllDayDeployContracts(t, b)
 	createTestSets(t, b, contracts)
 
 }
@@ -187,7 +187,7 @@ func testCreateSet(
 //------------------------------------------------------------
 func TestPlays(t *testing.T) {
 	b := newEmulator()
-	contracts := showdownDeployContracts(t, b)
+	contracts := AllDayDeployContracts(t, b)
 	createTestPlays(t, b, contracts)
 }
 
@@ -248,7 +248,7 @@ func testCreatePlay(
 //------------------------------------------------------------
 func TestEditions(t *testing.T) {
 	b := newEmulator()
-	contracts := showdownDeployContracts(t, b)
+	contracts := AllDayDeployContracts(t, b)
 	createTestEditions(t, b, contracts)
 }
 
@@ -409,9 +409,9 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 // ------------------------------------------------------------
 func TestMomentNFTs(t *testing.T) {
 	b := newEmulator()
-	contracts := showdownDeployContracts(t, b)
+	contracts := AllDayDeployContracts(t, b)
 	userAddress, userSigner := createAccount(t, b)
-	setupShowdown(t, b, userAddress, userSigner, contracts)
+	setupAllDay(t, b, userAddress, userSigner, contracts)
 
 	createTestEditions(t, b, contracts)
 
@@ -545,7 +545,7 @@ func testMintMomentNFT(
 func TestShardedCollection(t *testing.T) {
 	b := newEmulator()
 
-	contracts := showdownDeployContracts(t, b)
+	contracts := AllDayDeployContracts(t, b)
 	// Set up for NFT Minting
 	createTestEditions(t, b, contracts)
 	user1Address, user1Signer := createAccount(t, b)
@@ -593,7 +593,7 @@ func TestShardedCollection(t *testing.T) {
 	})
 
 	t.Run("Transferring from a sharded collection to a collection should work", func(t *testing.T) {
-		setupShowdown(t, b, user2Address, user2Signer, contracts)
+		setupAllDay(t, b, user2Address, user2Signer, contracts)
 		// Transfer the first 10 moments from ShardedCollection to Collection
 		for i := uint64(1); i <= 10; i++ {
 			transferMomentNFTFromShardedCollection(
@@ -611,7 +611,7 @@ func TestShardedCollection(t *testing.T) {
 
 	t.Run("Batch transferring from a sharded collection to a collection should work", func(t *testing.T) {
 		user2Address, user2Signer := createAccount(t, b)
-		setupShowdown(t, b, user2Address, user2Signer, contracts)
+		setupAllDay(t, b, user2Address, user2Signer, contracts)
 
 		// Make the list of IDs to transfer
 		nftIDs := []uint64{}
@@ -633,7 +633,7 @@ func TestShardedCollection(t *testing.T) {
 
 	t.Run("Transferring from a collection to a collection should work", func(t *testing.T) {
 		user3Address, user3Signer := createAccount(t, b)
-		setupShowdown(t, b, user3Address, user3Signer, contracts)
+		setupAllDay(t, b, user3Address, user3Signer, contracts)
 
 		// Transfer the first 10 moments from Collection to Collection
 		for i := uint64(1); i <= 10; i++ {

@@ -1,24 +1,24 @@
 import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
-import Showdown from "../../../contracts/Showdown.cdc"
+import AllDay from "../../../contracts/AllDay.cdc"
 
 transaction(recipientAddress: Address, editionID: UInt32) {
     
     // local variable for storing the minter reference
-    let minter: &{Showdown.NFTMinter}
-    let recipient: &{Showdown.MomentNFTCollectionPublic}
+    let minter: &{AllDay.NFTMinter}
+    let recipient: &{AllDay.MomentNFTCollectionPublic}
 
     prepare(signer: AuthAccount) {
         // borrow a reference to the NFTMinter resource in storage
-        self.minter = signer.getCapability(Showdown.MinterPrivatePath)
-            .borrow<&{Showdown.NFTMinter}>()
+        self.minter = signer.getCapability(AllDay.MinterPrivatePath)
+            .borrow<&{AllDay.NFTMinter}>()
             ?? panic("Could not borrow a reference to the NFT minter")
 
         // get the recipients public account object
         let recipientAccount = getAccount(recipientAddress)
 
         // borrow a public reference to the receivers collection
-        self.recipient = recipientAccount.getCapability(Showdown.CollectionPublicPath)
-            .borrow<&{Showdown.MomentNFTCollectionPublic}>()
+        self.recipient = recipientAccount.getCapability(AllDay.CollectionPublicPath)
+            .borrow<&{AllDay.MomentNFTCollectionPublic}>()
             ?? panic("Could not borrow a reference to the collection receiver")
     }
 

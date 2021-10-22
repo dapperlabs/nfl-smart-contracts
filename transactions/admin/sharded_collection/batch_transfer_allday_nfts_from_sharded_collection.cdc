@@ -1,6 +1,6 @@
 import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
-import Showdown from "../../../contracts/Showdown.cdc"
-import ShowdownShardedCollection from "../../../contracts/ShowdownShardedCollection.cdc"
+import AllDay from "../../../contracts/AllDay.cdc"
+import AllDayShardedCollection from "../../../contracts/AllDayShardedCollection.cdc"
 
 // This transaction deposits a number of NFTs to a recipient
 
@@ -15,8 +15,8 @@ transaction(recipient: Address, momentNFTIDs: [UInt64]) {
     
     prepare(acct: AuthAccount) {
         
-        self.transferTokens <- acct.borrow<&ShowdownShardedCollection.ShardedCollection>(
-            from: ShowdownShardedCollection.CollectionStoragePath
+        self.transferTokens <- acct.borrow<&AllDayShardedCollection.ShardedCollection>(
+            from: AllDayShardedCollection.CollectionStoragePath
             )!
             .batchWithdraw(ids: momentNFTIDs)
     }
@@ -27,8 +27,8 @@ transaction(recipient: Address, momentNFTIDs: [UInt64]) {
         let recipient = getAccount(recipient)
 
         // get the Collection reference for the receiver
-        let receiverRef = recipient.getCapability(Showdown.CollectionPublicPath)
-            .borrow<&{Showdown.MomentNFTCollectionPublic}>()!
+        let receiverRef = recipient.getCapability(AllDay.CollectionPublicPath)
+            .borrow<&{AllDay.MomentNFTCollectionPublic}>()!
 
         // deposit the NFT in the receivers collection
         receiverRef.batchDeposit(tokens: <-self.transferTokens)

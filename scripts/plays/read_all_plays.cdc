@@ -1,14 +1,14 @@
-import Showdown from "../../contracts/Showdown.cdc"
+import AllDay from "../../contracts/AllDay.cdc"
 
 // This script returns all the Set structs.
 // This will eventually be *long*.
 
-pub fun main(): [Showdown.PlayData] {
-    let plays: [Showdown.PlayData] = []
+pub fun main(): [AllDay.PlayData] {
+    let plays: [AllDay.PlayData] = []
     var id: UInt32 = 1
     // Note < , as nextPlayID has not yet been used
-    while id < Showdown.nextPlayID {
-        plays.append(Showdown.getPlayData(id: id))
+    while id < AllDay.nextPlayID {
+        plays.append(AllDay.getPlayData(id: id))
         id = id + 1
     }
     return plays

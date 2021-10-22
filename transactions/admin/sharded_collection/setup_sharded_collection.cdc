@@ -1,6 +1,6 @@
 import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
-import Showdown from "../../../contracts/Showdown.cdc"
-import ShowdownShardedCollection from "../../../contracts/ShowdownShardedCollection.cdc"
+import AllDay from "../../../contracts/AllDay.cdc"
+import AllDayShardedCollection from "../../../contracts/AllDayShardedCollection.cdc"
 
 // This transaction creates and stores an empty NFT collection 
 // and creates a public capability for it.
@@ -15,18 +15,18 @@ transaction(numBuckets: UInt64) {
 
     prepare(acct: AuthAccount) {
 
-        if acct.borrow<&ShowdownShardedCollection.ShardedCollection>(from: ShowdownShardedCollection.CollectionStoragePath) == nil {
+        if acct.borrow<&AllDayShardedCollection.ShardedCollection>(from: AllDayShardedCollection.CollectionStoragePath) == nil {
 
-            let collection <- ShowdownShardedCollection.createEmptyCollection(numBuckets: numBuckets)
+            let collection <- AllDayShardedCollection.createEmptyCollection(numBuckets: numBuckets)
             // Put a new Collection in storage
-            acct.save(<-collection, to: ShowdownShardedCollection.CollectionStoragePath)
+            acct.save(<-collection, to: AllDayShardedCollection.CollectionStoragePath)
 
             // create a public capability for the collection
-            if acct.link<&{Showdown.MomentNFTCollectionPublic}>(Showdown.CollectionPublicPath, target: ShowdownShardedCollection.CollectionStoragePath) == nil {
-                acct.unlink(Showdown.CollectionPublicPath)
+            if acct.link<&{AllDay.MomentNFTCollectionPublic}>(AllDay.CollectionPublicPath, target: AllDayShardedCollection.CollectionStoragePath) == nil {
+                acct.unlink(AllDay.CollectionPublicPath)
             }
 
-            acct.link<&{Showdown.MomentNFTCollectionPublic}>(Showdown.CollectionPublicPath, target: ShowdownShardedCollection.CollectionStoragePath)
+            acct.link<&{AllDay.MomentNFTCollectionPublic}>(AllDay.CollectionPublicPath, target: AllDayShardedCollection.CollectionStoragePath)
         } else {
             panic("Sharded Collection already exists!")
         }

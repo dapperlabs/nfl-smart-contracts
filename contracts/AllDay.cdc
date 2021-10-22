@@ -8,7 +8,7 @@
 import NonFungibleToken from "./NonFungibleToken.cdc"
 
 /*
-    Showdown is structured similarly to Genies and TopShot.
+    AllDay is structured similarly to Genies and TopShot.
     Unlike TopShot, we use resources for all entities and manage access to their data
     by copying it to structs (this simplifies access control, in particular write access).
     We also encapsulate resource creation for the admin in member functions on the parent type.
@@ -28,9 +28,9 @@ import NonFungibleToken from "./NonFungibleToken.cdc"
     This is enabled by encapsulation and saves gas for entity lifecycle operations.
  */
 
-// The Showdown NFTs and metadata contract
+// The AllDay NFTs and metadata contract
 //
-pub contract Showdown: NonFungibleToken {
+pub contract AllDay: NonFungibleToken {
     //------------------------------------------------------------
     // Events
     //------------------------------------------------------------
@@ -131,7 +131,7 @@ pub contract Showdown: NonFungibleToken {
         // initializer
         //
         init (id: UInt32) {
-            let series = &Showdown.seriesByID[id] as! &Showdown.Series
+            let series = &AllDay.seriesByID[id] as! &AllDay.Series
             self.id = series.id
             self.name = series.name
             self.active = series.active
@@ -161,16 +161,16 @@ pub contract Showdown: NonFungibleToken {
         //
         init (name: String) {
             pre {
-                !Showdown.seriesIDByName.containsKey(name): "A Series with that name already exists"
+                !AllDay.seriesIDByName.containsKey(name): "A Series with that name already exists"
             }
-            self.id = Showdown.nextSeriesID
+            self.id = AllDay.nextSeriesID
             self.name = name
             self.active = true   
 
             // Cache the new series's name => ID
-            Showdown.seriesIDByName[name] = self.id
+            AllDay.seriesIDByName[name] = self.id
             // Increment for the nextSeriesID
-            Showdown.nextSeriesID = self.id + 1 as UInt32
+            AllDay.nextSeriesID = self.id + 1 as UInt32
 
             emit SeriesCreated(id: self.id, name: self.name)
         }
@@ -178,36 +178,36 @@ pub contract Showdown: NonFungibleToken {
 
     // Get the publicly available data for a Series by id
     //
-    pub fun getSeriesData(id: UInt32): Showdown.SeriesData {
+    pub fun getSeriesData(id: UInt32): AllDay.SeriesData {
         pre {
-            Showdown.seriesByID[id] != nil: "Cannot borrow series, no such id"
+            AllDay.seriesByID[id] != nil: "Cannot borrow series, no such id"
         }
 
-        return Showdown.SeriesData(id: id)
+        return AllDay.SeriesData(id: id)
     }
 
     // Get the publicly available data for a Series by name
     //
-    pub fun getSeriesDataByName(name: String): Showdown.SeriesData {
+    pub fun getSeriesDataByName(name: String): AllDay.SeriesData {
         pre {
-            Showdown.seriesIDByName[name] != nil: "Cannot borrow series, no such name"
+            AllDay.seriesIDByName[name] != nil: "Cannot borrow series, no such name"
         }
 
-        let id = Showdown.seriesIDByName[name]!
+        let id = AllDay.seriesIDByName[name]!
 
-        return Showdown.SeriesData(id: id)
+        return AllDay.SeriesData(id: id)
     }
 
     // Get all series names (this will be *long*)
     //
     pub fun getAllSeriesNames(): [String] {
-        return Showdown.seriesIDByName.keys
+        return AllDay.seriesIDByName.keys
     }
 
     // Get series id for name
     //
     pub fun getSeriesIDByName(name: String): UInt32? {
-        return Showdown.seriesIDByName[name]
+        return AllDay.seriesIDByName[name]
     }
 
     //------------------------------------------------------------
@@ -229,7 +229,7 @@ pub contract Showdown: NonFungibleToken {
         // initializer
         //
         init (id: UInt32) {
-            let set = &Showdown.setByID[id] as! &Showdown.Set
+            let set = &AllDay.setByID[id] as! &AllDay.Set
             self.id = id
             self.name = set.name
             self.setPlaysInEditions = set.setPlaysInEditions
@@ -254,16 +254,16 @@ pub contract Showdown: NonFungibleToken {
         //
         init (name: String) {
             pre {
-                !Showdown.setIDByName.containsKey(name): "A Set with that name already exists"
+                !AllDay.setIDByName.containsKey(name): "A Set with that name already exists"
             }
-            self.id = Showdown.nextSetID
+            self.id = AllDay.nextSetID
             self.name = name
             self.setPlaysInEditions = {}
 
             // Cache the new set's name => ID
-            Showdown.setIDByName[name] = self.id
+            AllDay.setIDByName[name] = self.id
             // Increment for the nextSeriesID
-            Showdown.nextSetID = self.id + 1 as UInt32
+            AllDay.nextSetID = self.id + 1 as UInt32
 
             emit SetCreated(id: self.id, name: self.name)
         }
@@ -271,30 +271,30 @@ pub contract Showdown: NonFungibleToken {
 
     // Get the publicly available data for a Set
     //
-    pub fun getSetData(id: UInt32): Showdown.SetData {
+    pub fun getSetData(id: UInt32): AllDay.SetData {
         pre {
-            Showdown.setByID[id] != nil: "Cannot borrow set, no such id"
+            AllDay.setByID[id] != nil: "Cannot borrow set, no such id"
         }
 
-        return Showdown.SetData(id: id)
+        return AllDay.SetData(id: id)
     }
 
     // Get the publicly available data for a Set by name
     //
-    pub fun getSetDataByName(name: String): Showdown.SetData {
+    pub fun getSetDataByName(name: String): AllDay.SetData {
         pre {
-            Showdown.setIDByName[name] != nil: "Cannot borrow set, no such name"
+            AllDay.setIDByName[name] != nil: "Cannot borrow set, no such name"
         }
 
-        let id = Showdown.setIDByName[name]!
+        let id = AllDay.setIDByName[name]!
 
-        return Showdown.SetData(id: id)
+        return AllDay.SetData(id: id)
     }
 
     // Get all set names (this will be *long*)
     //
     pub fun getAllSetNames(): [String] {
-        return Showdown.setIDByName.keys
+        return AllDay.setIDByName.keys
     }
 
 
@@ -312,7 +312,7 @@ pub contract Showdown: NonFungibleToken {
         // initializer
         //
         init (id: UInt32) {
-            let play = &Showdown.playByID[id] as! &Showdown.Play
+            let play = &AllDay.playByID[id] as! &AllDay.Play
             self.id = id
             self.classification = play.classification
             self.metadata = play.metadata
@@ -331,11 +331,11 @@ pub contract Showdown: NonFungibleToken {
         // initializer
         //
         init (classification: String, metadata: {String: String}) {
-            self.id = Showdown.nextPlayID
+            self.id = AllDay.nextPlayID
             self.classification = classification
             self.metadata = metadata
 
-            Showdown.nextPlayID = self.id + 1 as UInt32
+            AllDay.nextPlayID = self.id + 1 as UInt32
 
             emit PlayCreated(id: self.id, classification: self.classification, metadata: self.metadata)
         }
@@ -343,12 +343,12 @@ pub contract Showdown: NonFungibleToken {
 
     // Get the publicly available data for a Play
     //
-    pub fun getPlayData(id: UInt32): Showdown.PlayData {
+    pub fun getPlayData(id: UInt32): AllDay.PlayData {
         pre {
-            Showdown.playByID[id] != nil: "Cannot borrow play, no such id"
+            AllDay.playByID[id] != nil: "Cannot borrow play, no such id"
         }
 
-        return Showdown.PlayData(id: id)
+        return AllDay.PlayData(id: id)
     }
 
     //------------------------------------------------------------
@@ -374,7 +374,7 @@ pub contract Showdown: NonFungibleToken {
         // initializer
         //
         init (id: UInt32) {
-            let edition = &Showdown.editionByID[id] as! &Showdown.Edition
+            let edition = &AllDay.editionByID[id] as! &AllDay.Edition
             self.id = id
             self.seriesID = edition.seriesID
             self.playID = edition.playID
@@ -413,18 +413,18 @@ pub contract Showdown: NonFungibleToken {
         // Mint a Moment NFT in this edition, with the given minting mintingDate.
         // Note that this will panic if the max mint size has already been reached.
         //
-        pub fun mint(): @Showdown.NFT {
+        pub fun mint(): @AllDay.NFT {
             pre {
                 self.numMinted != self.maxMintSize: "max number of minted moments has been reached"
             }
 
             // Create the Moment NFT, filled out with our information
             let momentNFT <- create NFT(
-                id: Showdown.totalSupply + 1,
+                id: AllDay.totalSupply + 1,
                 editionID: self.id,
                 serialNumber: self.numMinted + 1
             )
-            Showdown.totalSupply = Showdown.totalSupply + 1
+            AllDay.totalSupply = AllDay.totalSupply + 1
             // Keep a running total (you'll notice we used this as the serial number)
             self.numMinted = self.numMinted + 1 as UInt32
 
@@ -442,14 +442,14 @@ pub contract Showdown: NonFungibleToken {
         ) {
             pre {
                 maxMintSize != 0: "max mint size is zero, must either be null or greater than 0"
-                Showdown.seriesByID.containsKey(seriesID): "seriesID does not exist"
-                Showdown.setByID.containsKey(setID): "setID does not exist"
-                Showdown.playByID.containsKey(playID): "playID does not exist"
+                AllDay.seriesByID.containsKey(seriesID): "seriesID does not exist"
+                AllDay.setByID.containsKey(setID): "setID does not exist"
+                AllDay.playByID.containsKey(playID): "playID does not exist"
                 SeriesData(id: seriesID).active == true: "cannot create an Edition with a closed Series"
                 SetData(id: setID).setPlayExistsInEdition(playID: playID) != true: "set play combination already exists in an edition"
             }
 
-            self.id = Showdown.nextEditionID
+            self.id = AllDay.nextEditionID
             self.seriesID = seriesID
             self.setID = setID
             self.playID = playID
@@ -464,8 +464,8 @@ pub contract Showdown: NonFungibleToken {
             self.tier = tier
             self.numMinted = 0 as UInt32
 
-            Showdown.nextEditionID = Showdown.nextEditionID + 1 as UInt32
-            Showdown.setByID[setID]?.insertNewPlay(playID: playID)
+            AllDay.nextEditionID = AllDay.nextEditionID + 1 as UInt32
+            AllDay.setByID[setID]?.insertNewPlay(playID: playID)
 
             emit EditionCreated(
                 id: self.id,
@@ -482,10 +482,10 @@ pub contract Showdown: NonFungibleToken {
     //
     pub fun getEditionData(id: UInt32): EditionData {
         pre {
-            Showdown.editionByID[id] != nil: "Cannot borrow edition, no such id"
+            AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
         }
 
-        return Showdown.EditionData(id: id)
+        return AllDay.EditionData(id: id)
     }
 
     //------------------------------------------------------------
@@ -514,7 +514,7 @@ pub contract Showdown: NonFungibleToken {
             serialNumber: UInt32
         ) {
             pre {
-                Showdown.editionByID[editionID] != nil: "no such editionID"
+                AllDay.editionByID[editionID] != nil: "no such editionID"
                 EditionData(id: editionID).maxEditionMintSizeReached() != true: "max edition size already reached"
             }
 
@@ -538,7 +538,7 @@ pub contract Showdown: NonFungibleToken {
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowMomentNFT(id: UInt64): &Showdown.NFT? {
+        pub fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
@@ -575,7 +575,7 @@ pub contract Showdown: NonFungibleToken {
         // and adds the ID to the id array
         //
         pub fun deposit(token: @NonFungibleToken.NFT) {
-            let token <- token as! @Showdown.NFT
+            let token <- token as! @AllDay.NFT
             let id: UInt64 = token.id
 
             // add the new token to the dictionary which removes the old one
@@ -616,10 +616,10 @@ pub contract Showdown: NonFungibleToken {
 
         // borrowMomentNFT gets a reference to an NFT in the collection
         //
-        pub fun borrowMomentNFT(id: UInt64): &Showdown.NFT? {
+        pub fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
             if self.ownedNFTs[id] != nil {
                 let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &Showdown.NFT
+                return ref as! &AllDay.NFT
             } else {
                 return nil
             }
@@ -654,7 +654,7 @@ pub contract Showdown: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt32): @Showdown.NFT
+        pub fun mintNFT(editionID: UInt32): @AllDay.NFT
     }
 
     // A resource that allows managing metadata and minting NFTs
@@ -662,53 +662,53 @@ pub contract Showdown: NonFungibleToken {
     pub resource Admin: NFTMinter {
         // Borrow a Series
         //
-        pub fun borrowSeries(id: UInt32): &Showdown.Series {
+        pub fun borrowSeries(id: UInt32): &AllDay.Series {
             pre {
-                Showdown.seriesByID[id] != nil: "Cannot borrow series, no such id"
+                AllDay.seriesByID[id] != nil: "Cannot borrow series, no such id"
             }
 
-            return &Showdown.seriesByID[id] as &Showdown.Series
+            return &AllDay.seriesByID[id] as &AllDay.Series
         }
 
         // Borrow a Set
         //
-        pub fun borrowSet(id: UInt32): &Showdown.Set {
+        pub fun borrowSet(id: UInt32): &AllDay.Set {
             pre {
-                Showdown.setByID[id] != nil: "Cannot borrow Set, no such id"
+                AllDay.setByID[id] != nil: "Cannot borrow Set, no such id"
             }
 
-            return &Showdown.setByID[id] as &Showdown.Set
+            return &AllDay.setByID[id] as &AllDay.Set
         }
 
         // Borrow a Play
         //
-        pub fun borrowPlay(id: UInt32): &Showdown.Play {
+        pub fun borrowPlay(id: UInt32): &AllDay.Play {
             pre {
-                Showdown.playByID[id] != nil: "Cannot borrow Play, no such id"
+                AllDay.playByID[id] != nil: "Cannot borrow Play, no such id"
             }
 
-            return &Showdown.playByID[id] as &Showdown.Play
+            return &AllDay.playByID[id] as &AllDay.Play
         }
 
         // Borrow an Edition
         //
-        pub fun borrowEdition(id: UInt32): &Showdown.Edition {
+        pub fun borrowEdition(id: UInt32): &AllDay.Edition {
             pre {
-                Showdown.editionByID[id] != nil: "Cannot borrow edition, no such id"
+                AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
             }
 
-            return &Showdown.editionByID[id] as &Showdown.Edition
+            return &AllDay.editionByID[id] as &AllDay.Edition
         }
 
         // Create a Series
         //
         pub fun createSeries(name: String): UInt32 {
             // Create and store the new series
-            let series <- create Showdown.Series(
+            let series <- create AllDay.Series(
                 name: name,
             )
             let seriesID = series.id
-            Showdown.seriesByID[series.id] <-! series
+            AllDay.seriesByID[series.id] <-! series
 
             // Return the new ID for convenience
             return seriesID
@@ -717,7 +717,7 @@ pub contract Showdown: NonFungibleToken {
         // Close a Series
         //
         pub fun closeSeries(id: UInt32): UInt32 {
-            let series = &Showdown.seriesByID[id] as &Showdown.Series
+            let series = &AllDay.seriesByID[id] as &AllDay.Series
             series.close()
             return series.id
         }
@@ -726,11 +726,11 @@ pub contract Showdown: NonFungibleToken {
         //
         pub fun createSet(name: String): UInt32 {
             // Create and store the new set
-            let set <- create Showdown.Set(
+            let set <- create AllDay.Set(
                 name: name,
             )
             let setID = set.id
-            Showdown.setByID[set.id] <-! set
+            AllDay.setByID[set.id] <-! set
 
             // Return the new ID for convenience
             return setID
@@ -740,12 +740,12 @@ pub contract Showdown: NonFungibleToken {
         //
         pub fun createPlay(classification: String, metadata: {String: String}): UInt32 {
             // Create and store the new play
-            let play <- create Showdown.Play(
+            let play <- create AllDay.Play(
                 classification: classification,
                 metadata: metadata,
             )
             let playID = play.id
-            Showdown.playByID[play.id] <-! play
+            AllDay.playByID[play.id] <-! play
 
             // Return the new ID for convenience
             return playID
@@ -768,7 +768,7 @@ pub contract Showdown: NonFungibleToken {
                 tier: tier,
             )
             let editionID = edition.id
-            Showdown.editionByID[edition.id] <-! edition
+            AllDay.editionByID[edition.id] <-! edition
 
             return editionID
         }
@@ -776,7 +776,7 @@ pub contract Showdown: NonFungibleToken {
         // Close an Edition
         //
         pub fun closeEdition(id: UInt32): UInt32 {
-            let edition = &Showdown.editionByID[id] as &Showdown.Edition
+            let edition = &AllDay.editionByID[id] as &AllDay.Edition
             edition.close()
             return edition.id
         }
@@ -784,10 +784,10 @@ pub contract Showdown: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt32): @Showdown.NFT {
+        pub fun mintNFT(editionID: UInt32): @AllDay.NFT {
             pre {
                 // Make sure the edition we are creating this NFT in exists
-                Showdown.editionByID.containsKey(editionID): "No such EditionID"
+                AllDay.editionByID.containsKey(editionID): "No such EditionID"
             }
 
             return <- self.borrowEdition(id: editionID).mint()
@@ -798,14 +798,14 @@ pub contract Showdown: NonFungibleToken {
     // Contract lifecycle
     //------------------------------------------------------------
 
-    // Showdown contract initializer
+    // AllDay contract initializer
     //
     init() {
         // Set the named paths
-        self.CollectionStoragePath = /storage/ShowdownNFTCollection
-        self.CollectionPublicPath = /public/ShowdownNFTCollection
-        self.AdminStoragePath = /storage/ShowdownAdmin
-        self.MinterPrivatePath = /private/ShowdownMinter
+        self.CollectionStoragePath = /storage/AllDayNFTCollection
+        self.CollectionPublicPath = /public/AllDayNFTCollection
+        self.AdminStoragePath = /storage/AllDayAdmin
+        self.MinterPrivatePath = /private/AllDayMinter
 
         // Initialize the entity counts
         self.totalSupply = 0
@@ -827,7 +827,7 @@ pub contract Showdown: NonFungibleToken {
         self.account.save(<-admin, to: self.AdminStoragePath)
         // Link capabilites to the admin constrained to the Minter
         // and Metadata interfaces
-        self.account.link<&Showdown.Admin{Showdown.NFTMinter}>(
+        self.account.link<&AllDay.Admin{AllDay.NFTMinter}>(
             self.MinterPrivatePath,
             target: self.AdminStoragePath
         )

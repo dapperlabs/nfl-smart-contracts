@@ -1,9 +1,9 @@
-import Showdown from "../../contracts/Showdown.cdc"
+import AllDay from "../../contracts/AllDay.cdc"
 
 // This script returns a Series struct for the given name,
 // if it exists
 
-pub fun main(seriesName: String): Showdown.SeriesData {
-    return Showdown.getSeriesDataByName(name: seriesName)
+pub fun main(seriesName: String): AllDay.SeriesData {
+    return AllDay.getSeriesDataByName(name: seriesName)
 }
 

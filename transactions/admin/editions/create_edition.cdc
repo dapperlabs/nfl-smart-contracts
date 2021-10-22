@@ -1,4 +1,4 @@
-import Showdown from "../../../contracts/Showdown.cdc"
+import AllDay from "../../../contracts/AllDay.cdc"
 
 transaction(
     seriesID: UInt32,
@@ -8,12 +8,12 @@ transaction(
     maxMintSize: UInt32?,
    ) {
     // local variable for the admin reference
-    let admin: &Showdown.Admin
+    let admin: &AllDay.Admin
 
     prepare(signer: AuthAccount) {
         // borrow a reference to the Admin resource
-        self.admin = signer.borrow<&Showdown.Admin>(from: Showdown.AdminStoragePath)
-            ?? panic("Could not borrow a reference to the Showdown Admin capability")
+        self.admin = signer.borrow<&AllDay.Admin>(from: AllDay.AdminStoragePath)
+            ?? panic("Could not borrow a reference to the AllDay Admin capability")
     }
 
     execute {

@@ -10,59 +10,59 @@ import (
 
 const (
 	nftAddressPlaceholder                       = "\"[^\"]*NonFungibleToken.cdc\""
-	showdownAddressPlaceholder                  = "\"[^\"]*Showdown.cdc\""
-	showdownShardedCollectionAddressPlaceholder = "\"[^\"]*ShowdownShardedCollection.cdc\""
+	AllDayAddressPlaceholder                  = "\"[^\"]*AllDay.cdc\""
+	AllDayShardedCollectionAddressPlaceholder = "\"[^\"]*AllDayShardedCollection.cdc\""
 )
 
 const (
-	showdownPath                 = "../../../contracts/Showdown.cdc"
-	showdownTransactionsRootPath = "../../../transactions"
-	showdownScriptsRootPath      = "../../../scripts"
+	AllDayPath                 = "../../../contracts/AllDay.cdc"
+	AllDayTransactionsRootPath = "../../../transactions"
+	AllDayScriptsRootPath      = "../../../scripts"
 
 	// Accounts
-	showdownSetupAccountPath   = showdownTransactionsRootPath + "/user/setup_showdown_account.cdc"
-	showdownAccountIsSetupPath = showdownScriptsRootPath + "/user/account_is_setup.cdc"
+	AllDaySetupAccountPath   = AllDayTransactionsRootPath + "/user/setup_AllDay_account.cdc"
+	AllDayAccountIsSetupPath = AllDayScriptsRootPath + "/user/account_is_setup.cdc"
 
 	// ShardedCollection
-	showdownShardedCollectionPath                            = "../../../contracts/ShowdownShardedCollection.cdc"
-	showdownSetupShardedCollectionPath                       = showdownTransactionsRootPath + "/admin/sharded_collection/setup_sharded_collection.cdc"
-	showdownTransferMomentNFTFromShardedCollectionPath       = showdownTransactionsRootPath + "/admin/sharded_collection/transfer_showdown_nft_from_sharded_collection.cdc"
-	showdownBatchTransferMomentNFTsFromShardedCollectionPath = showdownTransactionsRootPath + "/admin/sharded_collection/batch_transfer_showdown_nfts_from_sharded_collection.cdc"
+	AllDayShardedCollectionPath                            = "../../../contracts/AllDayShardedCollection.cdc"
+	AllDaySetupShardedCollectionPath                       = AllDayTransactionsRootPath + "/admin/sharded_collection/setup_sharded_collection.cdc"
+	AllDayTransferMomentNFTFromShardedCollectionPath       = AllDayTransactionsRootPath + "/admin/sharded_collection/transfer_AllDay_nft_from_sharded_collection.cdc"
+	AllDayBatchTransferMomentNFTsFromShardedCollectionPath = AllDayTransactionsRootPath + "/admin/sharded_collection/batch_transfer_AllDay_nfts_from_sharded_collection.cdc"
 
 	// Series
-	showdownCreateSeriesPath       = showdownTransactionsRootPath + "/admin/series/create_series.cdc"
-	showdownCloseSeriesPath        = showdownTransactionsRootPath + "/admin/series/close_series.cdc"
-	showdownReadAllSeriesPath      = showdownScriptsRootPath + "/series/read_all_series.cdc"
-	showdownReadSeriesByIDPath     = showdownScriptsRootPath + "/series/read_series_by_id.cdc"
-	showdownReadSeriesByNamePath   = showdownScriptsRootPath + "/series/read_series_by_name.cdc"
-	showdownReadAllSeriesNamesPath = showdownScriptsRootPath + "/series/read_all_series_names.cdc"
+	AllDayCreateSeriesPath       = AllDayTransactionsRootPath + "/admin/series/create_series.cdc"
+	AllDayCloseSeriesPath        = AllDayTransactionsRootPath + "/admin/series/close_series.cdc"
+	AllDayReadAllSeriesPath      = AllDayScriptsRootPath + "/series/read_all_series.cdc"
+	AllDayReadSeriesByIDPath     = AllDayScriptsRootPath + "/series/read_series_by_id.cdc"
+	AllDayReadSeriesByNamePath   = AllDayScriptsRootPath + "/series/read_series_by_name.cdc"
+	AllDayReadAllSeriesNamesPath = AllDayScriptsRootPath + "/series/read_all_series_names.cdc"
 
 	// Sets
-	showdownCreateSetPath       = showdownTransactionsRootPath + "/admin/sets/create_set.cdc"
-	showdownReadAllSetsPath     = showdownScriptsRootPath + "/sets/read_all_sets.cdc"
-	showdownReadSetByIDPath     = showdownScriptsRootPath + "/sets/read_set_by_id.cdc"
-	showdownReadSetsByNamePath  = showdownScriptsRootPath + "/sets/read_sets_by_name.cdc"
-	showdownReadAllSetNamesPath = showdownScriptsRootPath + "/sets/read_all_set_names.cdc"
+	AllDayCreateSetPath       = AllDayTransactionsRootPath + "/admin/sets/create_set.cdc"
+	AllDayReadAllSetsPath     = AllDayScriptsRootPath + "/sets/read_all_sets.cdc"
+	AllDayReadSetByIDPath     = AllDayScriptsRootPath + "/sets/read_set_by_id.cdc"
+	AllDayReadSetsByNamePath  = AllDayScriptsRootPath + "/sets/read_sets_by_name.cdc"
+	AllDayReadAllSetNamesPath = AllDayScriptsRootPath + "/sets/read_all_set_names.cdc"
 
 	// Plays
-	showdownCreatePlayPath   = showdownTransactionsRootPath + "/admin/plays/create_play.cdc"
-	showdownReadPlayByIDPath = showdownScriptsRootPath + "/plays/read_play_by_id.cdc"
-	showdownReadAllPlaysPath = showdownScriptsRootPath + "/plays/read_all_plays.cdc"
+	AllDayCreatePlayPath   = AllDayTransactionsRootPath + "/admin/plays/create_play.cdc"
+	AllDayReadPlayByIDPath = AllDayScriptsRootPath + "/plays/read_play_by_id.cdc"
+	AllDayReadAllPlaysPath = AllDayScriptsRootPath + "/plays/read_all_plays.cdc"
 
 	// Editions
-	showdownCreateEditionPath   = showdownTransactionsRootPath + "/admin/editions/create_edition.cdc"
-	showdownCloseEditionPath    = showdownTransactionsRootPath + "/admin/editions/close_edition.cdc"
-	showdownReadEditionByIDPath = showdownScriptsRootPath + "/editions/read_edition_by_id.cdc"
-	showdownReadAllEditionsPath = showdownScriptsRootPath + "/edition/read_all_editions.cdc"
+	AllDayCreateEditionPath   = AllDayTransactionsRootPath + "/admin/editions/create_edition.cdc"
+	AllDayCloseEditionPath    = AllDayTransactionsRootPath + "/admin/editions/close_edition.cdc"
+	AllDayReadEditionByIDPath = AllDayScriptsRootPath + "/editions/read_edition_by_id.cdc"
+	AllDayReadAllEditionsPath = AllDayScriptsRootPath + "/edition/read_all_editions.cdc"
 
 	// Moment NFTs
-	showdownMintMomentNFTPath           = showdownTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
-	showdownMintMomentNFTMultiPath      = showdownTransactionsRootPath + "/admin/nfts/mint_moment_nft_multi.cdc"
-	showdownTransferNFTPath             = showdownTransactionsRootPath + "/user/transfer_moment_nft.cdc"
-	showdownReadMomentNFTSupplyPath     = showdownScriptsRootPath + "/nfts/read_moment_nft_supply.cdc"
-	showdownReadMomentNFTPropertiesPath = showdownScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
-	showdownReadCollectionNFTLengthPath = showdownScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
-	showdownReadCollectionNFTIDsPath    = showdownScriptsRootPath + "/nfts/read_collection_nft_ids.cdc"
+	AllDayMintMomentNFTPath           = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
+	AllDayMintMomentNFTMultiPath      = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft_multi.cdc"
+	AllDayTransferNFTPath             = AllDayTransactionsRootPath + "/user/transfer_moment_nft.cdc"
+	AllDayReadMomentNFTSupplyPath     = AllDayScriptsRootPath + "/nfts/read_moment_nft_supply.cdc"
+	AllDayReadMomentNFTPropertiesPath = AllDayScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
+	AllDayReadCollectionNFTLengthPath = AllDayScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
+	AllDayReadCollectionNFTIDsPath    = AllDayScriptsRootPath + "/nfts/read_collection_nft_ids.cdc"
 )
 
 //------------------------------------------------------------
@@ -72,17 +72,17 @@ func replaceAddresses(code []byte, contracts Contracts) []byte {
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+contracts.NFTAddress.String()))
 
-	showdownRe := regexp.MustCompile(showdownAddressPlaceholder)
-	code = showdownRe.ReplaceAll(code, []byte("0x"+contracts.ShowdownAddress.String()))
+	AllDayRe := regexp.MustCompile(AllDayAddressPlaceholder)
+	code = AllDayRe.ReplaceAll(code, []byte("0x"+contracts.AllDayAddress.String()))
 
-	showdownShardedCollectionRe := regexp.MustCompile(showdownShardedCollectionAddressPlaceholder)
-	code = showdownShardedCollectionRe.ReplaceAll(code, []byte("0x"+contracts.ShowdownShardedCollectionAddress.String()))
+	AllDayShardedCollectionRe := regexp.MustCompile(AllDayShardedCollectionAddressPlaceholder)
+	code = AllDayShardedCollectionRe.ReplaceAll(code, []byte("0x"+contracts.AllDayShardedCollectionAddress.String()))
 
 	return code
 }
 
-func LoadShowdown(nftAddress flow.Address) []byte {
-	code := readFile(showdownPath)
+func LoadAllDay(nftAddress flow.Address) []byte {
+	code := readFile(AllDayPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
@@ -90,16 +90,16 @@ func LoadShowdown(nftAddress flow.Address) []byte {
 	return code
 }
 
-func loadShowdownSetupAccountTransaction(contracts Contracts) []byte {
+func loadAllDaySetupAccountTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownSetupAccountPath),
+		readFile(AllDaySetupAccountPath),
 		contracts,
 	)
 }
 
-func loadShowdownAccountIsSetupScript(contracts Contracts) []byte {
+func loadAllDayAccountIsSetupScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownAccountIsSetupPath),
+		readFile(AllDayAccountIsSetupPath),
 		contracts,
 	)
 }
@@ -107,35 +107,35 @@ func loadShowdownAccountIsSetupScript(contracts Contracts) []byte {
 //------------------------------------------------------------
 // Sharded Collection
 //------------------------------------------------------------
-func loadShowdownShardedCollection(nftAddress flow.Address, showdownAddress flow.Address) []byte {
-	code := readFile(showdownShardedCollectionPath)
+func loadAllDayShardedCollection(nftAddress flow.Address, AllDayAddress flow.Address) []byte {
+	code := readFile(AllDayShardedCollectionPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
 
-	showdownRe := regexp.MustCompile(showdownAddressPlaceholder)
-	code = showdownRe.ReplaceAll(code, []byte("0x"+showdownAddress.String()))
+	AllDayRe := regexp.MustCompile(AllDayAddressPlaceholder)
+	code = AllDayRe.ReplaceAll(code, []byte("0x"+AllDayAddress.String()))
 
 	return code
 }
 
-func loadShowdownSetupShardedCollectionTransaction(contracts Contracts) []byte {
+func loadAllDaySetupShardedCollectionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownSetupShardedCollectionPath),
+		readFile(AllDaySetupShardedCollectionPath),
 		contracts,
 	)
 }
 
-func loadShowdownTransferMomentNFTFromShardedCollectionTransaction(contracts Contracts) []byte {
+func loadAllDayTransferMomentNFTFromShardedCollectionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownTransferMomentNFTFromShardedCollectionPath),
+		readFile(AllDayTransferMomentNFTFromShardedCollectionPath),
 		contracts,
 	)
 }
 
-func loadShowdownBatchTransferMomentNFTsFromShardedCollectionTransaction(contracts Contracts) []byte {
+func loadAllDayBatchTransferMomentNFTsFromShardedCollectionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownBatchTransferMomentNFTsFromShardedCollectionPath),
+		readFile(AllDayBatchTransferMomentNFTsFromShardedCollectionPath),
 		contracts,
 	)
 }
@@ -143,44 +143,44 @@ func loadShowdownBatchTransferMomentNFTsFromShardedCollectionTransaction(contrac
 //------------------------------------------------------------
 // Series
 //------------------------------------------------------------
-func loadShowdownCreateSeriesTransaction(contracts Contracts) []byte {
+func loadAllDayCreateSeriesTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownCreateSeriesPath),
+		readFile(AllDayCreateSeriesPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadSeriesByIDScript(contracts Contracts) []byte {
+func loadAllDayReadSeriesByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadSeriesByIDPath),
+		readFile(AllDayReadSeriesByIDPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadSeriesByNameScript(contracts Contracts) []byte {
+func loadAllDayReadSeriesByNameScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadSeriesByNamePath),
+		readFile(AllDayReadSeriesByNamePath),
 		contracts,
 	)
 }
 
-func loadShowdownReadAllSeriesScript(contracts Contracts) []byte {
+func loadAllDayReadAllSeriesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadAllSeriesPath),
+		readFile(AllDayReadAllSeriesPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadAllSeriesNamesScript(contracts Contracts) []byte {
+func loadAllDayReadAllSeriesNamesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadAllSeriesNamesPath),
+		readFile(AllDayReadAllSeriesNamesPath),
 		contracts,
 	)
 }
 
-func loadShowdownCloseSeriesTransaction(contracts Contracts) []byte {
+func loadAllDayCloseSeriesTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownCloseSeriesPath),
+		readFile(AllDayCloseSeriesPath),
 		contracts,
 	)
 }
@@ -188,37 +188,37 @@ func loadShowdownCloseSeriesTransaction(contracts Contracts) []byte {
 //------------------------------------------------------------
 // Sets
 //------------------------------------------------------------
-func loadShowdownCreateSetTransaction(contracts Contracts) []byte {
+func loadAllDayCreateSetTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownCreateSetPath),
+		readFile(AllDayCreateSetPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadSetByIDScript(contracts Contracts) []byte {
+func loadAllDayReadSetByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadSetByIDPath),
+		readFile(AllDayReadSetByIDPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadAllSetsScript(contracts Contracts) []byte {
+func loadAllDayReadAllSetsScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadAllSetsPath),
+		readFile(AllDayReadAllSetsPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadSetsByNameScript(contracts Contracts) []byte {
+func loadAllDayReadSetsByNameScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadSetsByNamePath),
+		readFile(AllDayReadSetsByNamePath),
 		contracts,
 	)
 }
 
-func loadShowdownReadAllSetNamesScript(contracts Contracts) []byte {
+func loadAllDayReadAllSetNamesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadAllSetNamesPath),
+		readFile(AllDayReadAllSetNamesPath),
 		contracts,
 	)
 }
@@ -226,23 +226,23 @@ func loadShowdownReadAllSetNamesScript(contracts Contracts) []byte {
 //------------------------------------------------------------
 // Plays
 //------------------------------------------------------------
-func loadShowdownCreatePlayTransaction(contracts Contracts) []byte {
+func loadAllDayCreatePlayTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownCreatePlayPath),
+		readFile(AllDayCreatePlayPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadPlayByIDScript(contracts Contracts) []byte {
+func loadAllDayReadPlayByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadPlayByIDPath),
+		readFile(AllDayReadPlayByIDPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadAllPlaysScript(contracts Contracts) []byte {
+func loadAllDayReadAllPlaysScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadAllPlaysPath),
+		readFile(AllDayReadAllPlaysPath),
 		contracts,
 	)
 }
@@ -250,30 +250,30 @@ func loadShowdownReadAllPlaysScript(contracts Contracts) []byte {
 //------------------------------------------------------------
 // Editions
 //------------------------------------------------------------
-func loadShowdownCreateEditionTransaction(contracts Contracts) []byte {
+func loadAllDayCreateEditionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownCreateEditionPath),
+		readFile(AllDayCreateEditionPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadEditionByIDScript(contracts Contracts) []byte {
+func loadAllDayReadEditionByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadEditionByIDPath),
+		readFile(AllDayReadEditionByIDPath),
 		contracts,
 	)
 }
 
-func loadShowdownCloseEditionTransaction(contracts Contracts) []byte {
+func loadAllDayCloseEditionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownCloseEditionPath),
+		readFile(AllDayCloseEditionPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadAllEditionsScript(contracts Contracts) []byte {
+func loadAllDayReadAllEditionsScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadAllEditionsPath),
+		readFile(AllDayReadAllEditionsPath),
 		contracts,
 	)
 }
@@ -281,51 +281,51 @@ func loadShowdownReadAllEditionsScript(contracts Contracts) []byte {
 //------------------------------------------------------------
 // Moment NFTs
 //------------------------------------------------------------
-func loadShowdownMintMomentNFTTransaction(contracts Contracts) []byte {
+func loadAllDayMintMomentNFTTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownMintMomentNFTPath),
+		readFile(AllDayMintMomentNFTPath),
 		contracts,
 	)
 }
 
-func loadShowdownMintMomentNFTMultiTransaction(contracts Contracts) []byte {
+func loadAllDayMintMomentNFTMultiTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownMintMomentNFTMultiPath),
+		readFile(AllDayMintMomentNFTMultiPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadMomentNFTSupplyScript(contracts Contracts) []byte {
+func loadAllDayReadMomentNFTSupplyScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadMomentNFTSupplyPath),
+		readFile(AllDayReadMomentNFTSupplyPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadMomentNFTPropertiesScript(contracts Contracts) []byte {
+func loadAllDayReadMomentNFTPropertiesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadMomentNFTPropertiesPath),
+		readFile(AllDayReadMomentNFTPropertiesPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadCollectionNFTLengthScript(contracts Contracts) []byte {
+func loadAllDayReadCollectionNFTLengthScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadCollectionNFTLengthPath),
+		readFile(AllDayReadCollectionNFTLengthPath),
 		contracts,
 	)
 }
 
-func loadShowdownReadCollectionNFTIDsScript(contracts Contracts) []byte {
+func loadAllDayReadCollectionNFTIDsScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownReadCollectionNFTIDsPath),
+		readFile(AllDayReadCollectionNFTIDsPath),
 		contracts,
 	)
 }
 
-func loadShowdownTransferNFTTransaction(contracts Contracts) []byte {
+func loadAllDayTransferNFTTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(showdownTransferNFTPath),
+		readFile(AllDayTransferNFTPath),
 		contracts,
 	)
 }

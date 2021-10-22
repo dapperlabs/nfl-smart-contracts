@@ -1,9 +1,9 @@
-import Showdown from "../../contracts/Showdown.cdc"
+import AllDay from "../../contracts/AllDay.cdc"
 
 // This script returns a Play struct for the given id,
 // if it exists
 
-pub fun main(id: UInt32): Showdown.PlayData {
-    return Showdown.getPlayData(id: id)
+pub fun main(id: UInt32): AllDay.PlayData {
+    return AllDay.getPlayData(id: id)
 }
 

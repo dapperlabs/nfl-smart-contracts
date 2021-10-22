@@ -1,7 +1,7 @@
 import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
-import Showdown from "../../contracts/Showdown.cdc"
+import AllDay from "../../contracts/AllDay.cdc"
 
-// This transaction transfers a Showdown NFT from one account to another.
+// This transaction transfers a AllDay NFT from one account to another.
 
 transaction(recipientAddress: Address, withdrawID: UInt64) {
     prepare(signer: AuthAccount) {
@@ -10,11 +10,11 @@ transaction(recipientAddress: Address, withdrawID: UInt64) {
         let recipient = getAccount(recipientAddress)
 
         // borrow a reference to the signer's NFT collection
-        let collectionRef = signer.borrow<&Showdown.Collection>(from: Showdown.CollectionStoragePath)
+        let collectionRef = signer.borrow<&AllDay.Collection>(from: AllDay.CollectionStoragePath)
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // borrow a public reference to the receivers collection
-        let depositRef = recipient.getCapability(Showdown.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>()!
+        let depositRef = recipient.getCapability(AllDay.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>()!
 
         // withdraw the NFT from the owner's collection
         let nft <- collectionRef.withdraw(withdrawID: withdrawID)

@@ -13,25 +13,25 @@
 */
 
 import NonFungibleToken from "./NonFungibleToken.cdc"
-import Showdown from "./Showdown.cdc"
+import AllDay from "./AllDay.cdc"
 
-pub contract ShowdownShardedCollection {
+pub contract AllDayShardedCollection {
     // Named Paths
     //
     pub let CollectionStoragePath:  StoragePath
 
-    // ShardedCollection stores a dictionary of Showdown Collections
-    // A Showdown NFT is stored in the field that corresponds to its id % numBuckets
+    // ShardedCollection stores a dictionary of AllDay Collections
+    // A AllDay NFT is stored in the field that corresponds to its id % numBuckets
     pub resource ShardedCollection:
-        Showdown.MomentNFTCollectionPublic,
+        AllDay.MomentNFTCollectionPublic,
         NonFungibleToken.Provider,
         NonFungibleToken.Receiver,
         NonFungibleToken.CollectionPublic
     {
-        // Dictionary of Showdown collections
-        pub var collections: @{UInt64: Showdown.Collection}
+        // Dictionary of AllDay collections
+        pub var collections: @{UInt64: AllDay.Collection}
 
-        // The number of buckets to split Showdown NFTs into
+        // The number of buckets to split AllDay NFTs into
         // This makes storage more efficient and performant
         pub let numBuckets: UInt64
 
@@ -43,13 +43,13 @@ pub contract ShowdownShardedCollection {
             var i: UInt64 = 0
             while i < numBuckets {
 
-                self.collections[i] <-! Showdown.createEmptyCollection() as! @Showdown.Collection
+                self.collections[i] <-! AllDay.createEmptyCollection() as! @AllDay.Collection
 
                 i = i + (1 as UInt64)
             }
         }
 
-        // withdraw removes a Showdown NFT from one of the Collections
+        // withdraw removes a AllDay NFT from one of the Collections
         // and moves it to the caller
         pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
             post {
@@ -58,7 +58,7 @@ pub contract ShowdownShardedCollection {
             // Find the bucket it should be withdrawn from
             let bucket = withdrawID % self.numBuckets
 
-            // Withdraw the Showdown NFT
+            // Withdraw the AllDay NFT
             let token <- self.collections[bucket]?.withdraw(withdrawID: withdrawID)!
             
             return <-token
@@ -68,10 +68,10 @@ pub contract ShowdownShardedCollection {
         //
         // Parameters: ids: an array of the IDs to be withdrawn from the Collection
         //
-        // Returns: @NonFungibleToken.Collection a Collection containing the Showdown NFTs
+        // Returns: @NonFungibleToken.Collection a Collection containing the AllDay NFTs
         //          that were withdrawn
         pub fun batchWithdraw(ids: [UInt64]): @NonFungibleToken.Collection {
-            var batchCollection <- Showdown.createEmptyCollection()
+            var batchCollection <- AllDay.createEmptyCollection()
             
             // Iterate through the ids and withdraw them from the Collection
             for id in ids {
@@ -80,7 +80,7 @@ pub contract ShowdownShardedCollection {
             return <-batchCollection
         }
 
-        // deposit takes a Showdown NFT and adds it to the Collections dictionary
+        // deposit takes a AllDay NFT and adds it to the Collections dictionary
         pub fun deposit(token: @NonFungibleToken.NFT) {
 
             // Find the bucket this corresponds to
@@ -121,7 +121,7 @@ pub contract ShowdownShardedCollection {
             return ids
         }
 
-        // borrowNFT Returns a borrowed reference to a Showdown NFT in the Collection
+        // borrowNFT Returns a borrowed reference to a AllDay NFT in the Collection
         // so that the caller can read data and call methods from it
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
             post {
@@ -135,7 +135,7 @@ pub contract ShowdownShardedCollection {
             return self.collections[bucket]?.borrowNFT(id: id)!
         }
 
-        // borrowMomentNFT Returns a borrowed reference to a Showdown NFT in the Collection
+        // borrowMomentNFT Returns a borrowed reference to a AllDay NFT in the Collection
         // so that the caller can read data and call methods from it
         // They can use this to read its setID, playID, serialNumber,
         // or any of the setData or Play Data associated with it by
@@ -145,7 +145,7 @@ pub contract ShowdownShardedCollection {
         // Parameters: id: The ID of the NFT to get the reference for
         //
         // Returns: A reference to the NFT
-        pub fun borrowMomentNFT(id: UInt64): &Showdown.NFT? {
+        pub fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
 
             // Get the bucket of the nft to be borrowed
             let bucket = id % self.numBuckets
@@ -167,7 +167,7 @@ pub contract ShowdownShardedCollection {
 
     init() {
         // Set the named paths
-        self.CollectionStoragePath = /storage/ShowdownShardedNFTCollection
+        self.CollectionStoragePath = /storage/AllDayShardedNFTCollection
     }
 }
  

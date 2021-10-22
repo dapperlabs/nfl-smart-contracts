@@ -1,9 +1,9 @@
-import Showdown from "../../contracts/Showdown.cdc"
+import AllDay from "../../contracts/AllDay.cdc"
 
 // This script returns a Set struct for the given name,
 // if it exists
 
-pub fun main(setName: String): Showdown.SetData {
-    return Showdown.getSetDataByName(name: setName)
+pub fun main(setName: String): AllDay.SetData {
+    return AllDay.getSetDataByName(name: setName)
 }
 

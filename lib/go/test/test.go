@@ -30,9 +30,9 @@ var (
 
 type Contracts struct {
 	NFTAddress                       flow.Address
-	ShowdownAddress                  flow.Address
-	ShowdownSigner                   crypto.Signer
-	ShowdownShardedCollectionAddress flow.Address
+	AllDayAddress                  flow.Address
+	AllDaySigner                   crypto.Signer
+	AllDayShardedCollectionAddress flow.Address
 }
 
 func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
@@ -53,27 +53,27 @@ func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
 	return nftAddress
 }
 
-func showdownDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
+func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	accountKeys := test.AccountKeyGenerator()
 
 	nftAddress := deployNFTContract(t, b)
 
-	showdownAccountKey, showdownSigner := accountKeys.NewWithSigner()
-	showdownCode := LoadShowdown(nftAddress)
+	AllDayAccountKey, AllDaySigner := accountKeys.NewWithSigner()
+	AllDayCode := LoadAllDay(nftAddress)
 
-	showdownAddress, err := b.CreateAccount(
-		[]*flow.AccountKey{showdownAccountKey},
+	AllDayAddress, err := b.CreateAccount(
+		[]*flow.AccountKey{AllDayAccountKey},
 		nil,
 	)
 	require.NoError(t, err)
 
-	fundAccount(t, b, showdownAddress, defaultAccountFunding)
+	fundAccount(t, b, AllDayAddress, defaultAccountFunding)
 
 	tx1 := sdktemplates.AddAccountContract(
-		showdownAddress,
+		AllDayAddress,
 		sdktemplates.Contract{
-			Name:   "Showdown",
-			Source: string(showdownCode),
+			Name:   "AllDay",
+			Source: string(AllDayCode),
 		},
 	)
 
@@ -84,30 +84,30 @@ func showdownDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 
 	signAndSubmit(
 		t, b, tx1,
-		[]flow.Address{b.ServiceKey().Address, showdownAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), showdownSigner},
+		[]flow.Address{b.ServiceKey().Address, AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), AllDaySigner},
 		false,
 	)
 
 	_, err = b.CommitBlock()
 	require.NoError(t, err)
 
-	showdownShardedCollectionAccountKey, showdownShardedCollectionSigner := accountKeys.NewWithSigner()
-	showdownShardedCollectionCode := loadShowdownShardedCollection(nftAddress, showdownAddress)
+	AllDayShardedCollectionAccountKey, AllDayShardedCollectionSigner := accountKeys.NewWithSigner()
+	AllDayShardedCollectionCode := loadAllDayShardedCollection(nftAddress, AllDayAddress)
 
-	showdownShardedCollectionAddress, err := b.CreateAccount(
-		[]*flow.AccountKey{showdownShardedCollectionAccountKey},
+	AllDayShardedCollectionAddress, err := b.CreateAccount(
+		[]*flow.AccountKey{AllDayShardedCollectionAccountKey},
 		nil,
 	)
 	require.NoError(t, err)
 
-	fundAccount(t, b, showdownShardedCollectionAddress, defaultAccountFunding)
+	fundAccount(t, b, AllDayShardedCollectionAddress, defaultAccountFunding)
 
 	tx2 := sdktemplates.AddAccountContract(
-		showdownShardedCollectionAddress,
+		AllDayShardedCollectionAddress,
 		sdktemplates.Contract{
-			Name:   "ShowdownShardedCollection",
-			Source: string(showdownShardedCollectionCode),
+			Name:   "AllDayShardedCollection",
+			Source: string(AllDayShardedCollectionCode),
 		},
 	)
 
@@ -118,8 +118,8 @@ func showdownDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 
 	signAndSubmit(
 		t, b, tx2,
-		[]flow.Address{b.ServiceKey().Address, showdownShardedCollectionAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), showdownShardedCollectionSigner},
+		[]flow.Address{b.ServiceKey().Address, AllDayShardedCollectionAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), AllDayShardedCollectionSigner},
 		false,
 	)
 
@@ -128,9 +128,9 @@ func showdownDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 
 	return Contracts{
 		nftAddress,
-		showdownAddress,
-		showdownSigner,
-		showdownShardedCollectionAddress,
+		AllDayAddress,
+		AllDaySigner,
+		AllDayShardedCollectionAddress,
 	}
 }
 
@@ -241,7 +241,7 @@ func createAccount(t *testing.T, b *emulator.Blockchain) (sdk.Address, crypto.Si
 	return address, signer
 }
 
-func setupShowdown(
+func setupAllDay(
 	t *testing.T,
 	b *emulator.Blockchain,
 	userAddress sdk.Address,
@@ -249,7 +249,7 @@ func setupShowdown(
 	contracts Contracts,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownSetupAccountTransaction(contracts)).
+		SetScript(loadAllDaySetupAccountTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -270,7 +270,7 @@ func setupAccount(
 	signer crypto.Signer,
 	contracts Contracts,
 ) (sdk.Address, crypto.Signer) {
-	setupShowdown(t, b, address, signer, contracts)
+	setupAllDay(t, b, address, signer, contracts)
 	fundAccount(t, b, address, defaultAccountFunding)
 
 	return address, signer

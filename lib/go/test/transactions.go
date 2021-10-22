@@ -65,7 +65,7 @@ func setupShardedCollection(
 	)
 
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownSetupShardedCollectionTransaction(contracts)).
+		SetScript(loadAllDaySetupShardedCollectionTransaction(contracts)).
 		SetGasLimit(800).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -91,7 +91,7 @@ func transferMomentNFTFromShardedCollection(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownTransferMomentNFTFromShardedCollectionTransaction(contracts)).
+		SetScript(loadAllDayTransferMomentNFTFromShardedCollectionTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -126,7 +126,7 @@ func batchTransferMomentNFTsFromShardedCollection(
 		cadenceIDs[i] = cadence.NewUInt64(id)
 	}
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownBatchTransferMomentNFTsFromShardedCollectionTransaction(contracts)).
+		SetScript(loadAllDayBatchTransferMomentNFTsFromShardedCollectionTransaction(contracts)).
 		SetGasLimit(uint64(100+(50*len(nftIDs)))).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -153,17 +153,17 @@ func createSeries(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownCreateSeriesTransaction(contracts)).
+		SetScript(loadAllDayCreateSeriesTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.ShowdownAddress)
+		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewString(name))
 
 	signAndSubmit(
 		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.ShowdownAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.ShowdownSigner},
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -176,17 +176,17 @@ func closeSeries(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownCloseSeriesTransaction(contracts)).
+		SetScript(loadAllDayCloseSeriesTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.ShowdownAddress)
+		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewUInt32(id))
 
 	signAndSubmit(
 		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.ShowdownAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.ShowdownSigner},
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -202,17 +202,17 @@ func createSet(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownCreateSetTransaction(contracts)).
+		SetScript(loadAllDayCreateSetTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.ShowdownAddress)
+		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewString(name))
 
 	signAndSubmit(
 		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.ShowdownAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.ShowdownSigner},
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -229,18 +229,18 @@ func createPlay(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownCreatePlayTransaction(contracts)).
+		SetScript(loadAllDayCreatePlayTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.ShowdownAddress)
+		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewString(classification))
 	tx.AddArgument(metadataDict(metadata))
 
 	signAndSubmit(
 		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.ShowdownAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.ShowdownSigner},
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -260,11 +260,11 @@ func createEdition(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownCreateEditionTransaction(contracts)).
+		SetScript(loadAllDayCreateEditionTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.ShowdownAddress)
+		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewUInt32(seriesID))
 	tx.AddArgument(cadence.NewUInt32(setID))
 	tx.AddArgument(cadence.NewUInt32(playID))
@@ -277,8 +277,8 @@ func createEdition(
 
 	signAndSubmit(
 		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.ShowdownAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.ShowdownSigner},
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -291,17 +291,17 @@ func closeEdition(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownCloseEditionTransaction(contracts)).
+		SetScript(loadAllDayCloseEditionTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.ShowdownAddress)
+		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewUInt32(editionID))
 
 	signAndSubmit(
 		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.ShowdownAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.ShowdownSigner},
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -318,18 +318,18 @@ func mintMomentNFT(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownMintMomentNFTTransaction(contracts)).
+		SetScript(loadAllDayMintMomentNFTTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.ShowdownAddress)
+		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
 	tx.AddArgument(cadence.NewUInt32(editionID))
 
 	signAndSubmit(
 		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.ShowdownAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.ShowdownSigner},
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -345,7 +345,7 @@ func transferMomentNFT(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadShowdownTransferNFTTransaction(contracts)).
+		SetScript(loadAllDayTransferNFTTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).

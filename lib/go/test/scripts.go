@@ -16,7 +16,7 @@ func accountIsSetup(
 	contracts Contracts,
 	address flow.Address,
 ) bool {
-	script := loadShowdownAccountIsSetupScript(contracts)
+	script := loadAllDayAccountIsSetupScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.BytesToAddress(address.Bytes()))})
 
 	return result.ToGoValue().(bool)
@@ -28,7 +28,7 @@ func getSeriesData(
 	contracts Contracts,
 	id uint32,
 ) SeriesData {
-	script := loadShowdownReadSeriesByIDScript(contracts)
+	script := loadAllDayReadSeriesByIDScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
 
 	return parseSeriesData(result)
@@ -40,7 +40,7 @@ func getSetData(
 	contracts Contracts,
 	id uint32,
 ) SetData {
-	script := loadShowdownReadSetByIDScript(contracts)
+	script := loadAllDayReadSetByIDScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
 
 	return parseSetData(result)
@@ -52,7 +52,7 @@ func getPlayData(
 	contracts Contracts,
 	id uint32,
 ) PlayData {
-	script := loadShowdownReadPlayByIDScript(contracts)
+	script := loadAllDayReadPlayByIDScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
 
 	return parsePlayData(result)
@@ -64,7 +64,7 @@ func getEditionData(
 	contracts Contracts,
 	id uint32,
 ) EditionData {
-	script := loadShowdownReadEditionByIDScript(contracts)
+	script := loadAllDayReadEditionByIDScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
 
 	return parseEditionData(result)
@@ -75,7 +75,7 @@ func getMomentNFTSupply(
 	b *emulator.Blockchain,
 	contracts Contracts,
 ) uint64 {
-	script := loadShowdownReadMomentNFTSupplyScript(contracts)
+	script := loadAllDayReadMomentNFTSupplyScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{})
 
 	return result.ToGoValue().(uint64)
@@ -88,7 +88,7 @@ func getMomentNFTProperties(
 	collectionAddress flow.Address,
 	nftID uint64,
 ) OurNFTData {
-	script := loadShowdownReadMomentNFTPropertiesScript(contracts)
+	script := loadAllDayReadMomentNFTPropertiesScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{
 		jsoncdc.MustEncode(cadence.BytesToAddress(collectionAddress.Bytes())),
 		jsoncdc.MustEncode(cadence.UInt64(nftID)),

@@ -27,8 +27,7 @@ transaction(
 
         log("====================================")
         log("New Edition:")
-        log("editionID")
-        log(id)
+        log("EditionID: ".concat(id.toString()))
         log("====================================")
     }
 }

@@ -15,8 +15,7 @@ transaction(seriesID: UInt32) {
 
         log("====================================")
         log("Closed Series:")
-        log("seriesID")
-        log(id)
+        log("SeriesID: ".concat(id.toString()))
         log("====================================")
     }
 }

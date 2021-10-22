@@ -17,8 +17,7 @@ transaction(name: String) {
 
         log("====================================")
         log("New Series: ".concat(name))
-        log("seriesID")
-        log(id)
+        log("SeriesID: ".concat(id.toString()))
         log("====================================")
     }
 }

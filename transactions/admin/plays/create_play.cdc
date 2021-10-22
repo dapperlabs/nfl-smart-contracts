@@ -21,8 +21,7 @@ transaction(
 
         log("====================================")
         log("New Play:")
-        log("playID")
-        log(id)
+        log("PlayID: ".concat(id.toString()))
         log("====================================")
     }
 }

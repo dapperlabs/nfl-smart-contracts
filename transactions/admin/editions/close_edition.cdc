@@ -15,8 +15,7 @@ transaction(editionID: UInt32) {
 
         log("====================================")
         log("Closed Edition:")
-        log("editionID")
-        log(id)
+        log("EditionID: ".concat(id.toString()))
         log("====================================")
     }
 }

@@ -59,7 +59,7 @@ func showdownDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	nftAddress := deployNFTContract(t, b)
 
 	showdownAccountKey, showdownSigner := accountKeys.NewWithSigner()
-	showdownCode := loadShowdown(nftAddress)
+	showdownCode := LoadShowdown(nftAddress)
 
 	showdownAddress, err := b.CreateAccount(
 		[]*flow.AccountKey{showdownAccountKey},

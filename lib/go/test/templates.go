@@ -81,7 +81,7 @@ func replaceAddresses(code []byte, contracts Contracts) []byte {
 	return code
 }
 
-func loadShowdown(nftAddress flow.Address) []byte {
+func LoadShowdown(nftAddress flow.Address) []byte {
 	code := readFile(showdownPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)

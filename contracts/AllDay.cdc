@@ -758,8 +758,7 @@ pub contract AllDay: NonFungibleToken {
             setID: UInt32,
             playID: UInt32,
             maxMintSize: UInt32?,
-            tier: String
-            ): UInt32 {
+            tier: String): UInt32 {
             let edition <- create Edition(
                 seriesID: seriesID,
                 setID: setID,

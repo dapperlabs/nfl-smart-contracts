@@ -10,6 +10,9 @@ import (
 	"github.com/onflow/flow-go-sdk/crypto"
 )
 
+//------------------------------------------------------------
+// Setup
+//------------------------------------------------------------
 func fundAccount(
 	t *testing.T,
 	b *emulator.Blockchain,
@@ -40,183 +43,6 @@ func fundAccount(
 	)
 }
 
-func advanceSeries(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	name string,
-	metadata map[string]string,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadGeniesAdvanceSeriesTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.GeniesAddress)
-	tx.AddArgument(cadence.NewString(name))
-	tx.AddArgument(metadataDict(metadata))
-
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.GeniesAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.GeniesSigner},
-		shouldRevert,
-	)
-}
-
-func addGeniesCollection(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	name string,
-	seriesID uint32,
-	metadata map[string]string,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadGeniesAddGeniesCollectionTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.GeniesAddress)
-	tx.AddArgument(cadence.NewString(name))
-	tx.AddArgument(cadence.NewUInt32(seriesID))
-	tx.AddArgument(metadataDict(metadata))
-
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.GeniesAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.GeniesSigner},
-		shouldRevert,
-	)
-}
-
-func closeGeniesCollection(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	id uint32,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadGeniesCloseGeniesCollectionTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.GeniesAddress)
-	tx.AddArgument(cadence.NewUInt32(id))
-
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.GeniesAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.GeniesSigner},
-		shouldRevert,
-	)
-}
-
-func addEdition(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	name string,
-	collectionID uint32,
-	metadata map[string]string,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadGeniesAddEditionTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.GeniesAddress)
-	tx.AddArgument(cadence.NewString(name))
-	tx.AddArgument(cadence.NewUInt32(collectionID))
-	tx.AddArgument(metadataDict(metadata))
-
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.GeniesAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.GeniesSigner},
-		shouldRevert,
-	)
-}
-
-func retireEdition(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	id uint32,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadGeniesRetireEditionTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.GeniesAddress)
-	tx.AddArgument(cadence.NewUInt32(id))
-
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.GeniesAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.GeniesSigner},
-		shouldRevert,
-	)
-}
-
-func mintGeniesNFT(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	recipientAddress flow.Address,
-	editionID uint32,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadGeniesMintGeniesNFTTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.GeniesAddress)
-	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
-	tx.AddArgument(cadence.NewUInt32(editionID))
-
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.GeniesAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.GeniesSigner},
-		shouldRevert,
-	)
-}
-
-func transferGeniesNFT(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	senderAddress flow.Address,
-	senderSigner crypto.Signer,
-	nftID uint64,
-	recipientAddress flow.Address,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadGeniesTransferNFTTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(senderAddress)
-	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
-	tx.AddArgument(cadence.NewUInt64(nftID))
-
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, senderAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), senderSigner},
-		shouldRevert,
-	)
-}
-
 /*
 	NOTE: This requires extra storage, and higher gas.
 */
@@ -239,7 +65,7 @@ func setupShardedCollection(
 	)
 
 	tx := flow.NewTransaction().
-		SetScript(loadGeniesSetupShardedCollectionTransaction(contracts)).
+		SetScript(loadAllDaySetupShardedCollectionTransaction(contracts)).
 		SetGasLimit(800).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -254,7 +80,7 @@ func setupShardedCollection(
 	)
 }
 
-func transferGeniesNFTFromShardedCollection(
+func transferMomentNFTFromShardedCollection(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
@@ -265,7 +91,7 @@ func transferGeniesNFTFromShardedCollection(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadGeniesTransferGeniesNFTFromShardedCollectionTransaction(contracts)).
+		SetScript(loadAllDayTransferMomentNFTFromShardedCollectionTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -285,7 +111,7 @@ func transferGeniesNFTFromShardedCollection(
 	NOTE: This requires higher gas.
 */
 
-func batchTransferGeniesNFTsFromShardedCollection(
+func batchTransferMomentNFTsFromShardedCollection(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
@@ -300,13 +126,232 @@ func batchTransferGeniesNFTsFromShardedCollection(
 		cadenceIDs[i] = cadence.NewUInt64(id)
 	}
 	tx := flow.NewTransaction().
-		SetScript(loadGeniesBatchTransferGeniesNFTsFromShardedCollectionTransaction(contracts)).
+		SetScript(loadAllDayBatchTransferMomentNFTsFromShardedCollectionTransaction(contracts)).
 		SetGasLimit(uint64(100+(50*len(nftIDs)))).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(senderAddress)
 	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
 	tx.AddArgument(cadence.NewArray(cadenceIDs))
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, senderAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), senderSigner},
+		shouldRevert,
+	)
+}
+
+//------------------------------------------------------------
+// Series
+//------------------------------------------------------------
+func createSeries(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	name string,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayCreateSeriesTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.NewString(name))
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func closeSeries(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	id uint32,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayCloseSeriesTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.NewUInt32(id))
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+//------------------------------------------------------------
+// Sets
+//------------------------------------------------------------
+func createSet(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	name string,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayCreateSetTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.NewString(name))
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+//------------------------------------------------------------
+// Plays
+//------------------------------------------------------------
+func createPlay(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	classification string,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayCreatePlayTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.NewString(classification))
+	tx.AddArgument(metadataDict(metadata))
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+//------------------------------------------------------------
+// Editions
+//------------------------------------------------------------
+func createEdition(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	seriesID uint32,
+	setID uint32,
+	playID uint32,
+	maxMintSize *uint32,
+	tier string,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayCreateEditionTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.NewUInt32(seriesID))
+	tx.AddArgument(cadence.NewUInt32(setID))
+	tx.AddArgument(cadence.NewUInt32(playID))
+	tx.AddArgument(cadence.NewString(tier))
+	if maxMintSize != nil {
+		tx.AddArgument(cadence.NewUInt32(*maxMintSize))
+	} else {
+		tx.AddArgument(cadence.Optional{})
+	}
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func closeEdition(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	editionID uint32,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayCloseEditionTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.NewUInt32(editionID))
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+//------------------------------------------------------------
+// MomentNFTs
+//------------------------------------------------------------
+func mintMomentNFT(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	recipientAddress flow.Address,
+	editionID uint32,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayMintMomentNFTTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
+	tx.AddArgument(cadence.NewUInt32(editionID))
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func transferMomentNFT(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	senderAddress flow.Address,
+	senderSigner crypto.Signer,
+	nftID uint64,
+	recipientAddress flow.Address,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayTransferNFTTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(senderAddress)
+	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
+	tx.AddArgument(cadence.NewUInt64(nftID))
 
 	signAndSubmit(
 		t, b, tx,

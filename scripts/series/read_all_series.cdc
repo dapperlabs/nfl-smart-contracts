@@ -1,15 +1,16 @@
-import Genies from "../../contracts/Genies.cdc"
+import AllDay from "../../contracts/AllDay.cdc"
 
 // This script returns all the Series structs.
 // This will eventually be *long*.
 
-pub fun main(): [Genies.SeriesData] {
-    let geniesNFTs: [Genies.SeriesData] = []
-    var id: UInt32 = 0
-    // Note <= , as currentSeriesID is inclusive
-    while id <= Genies.currentSeriesID {
-        geniesNFTs.append(Genies.getSeriesData(id: id))
+pub fun main(): [AllDay.SeriesData] {
+    let series: [AllDay.SeriesData] = []
+    var id: UInt32 = 1
+    // Note < , as nextSeriesID has not yet been used
+    while id < AllDay.nextSeriesID {
+        series.append(AllDay.getSeriesData(id: id))
         id = id + 1
     }
-    return geniesNFTs
+    return series
 }
+

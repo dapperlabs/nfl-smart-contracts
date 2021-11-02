@@ -1,24 +1,24 @@
 import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
-import Genies from "../../../contracts/Genies.cdc"
-import GeniesShardedCollection from "../../../contracts/GeniesShardedCollection.cdc"
+import AllDay from "../../../contracts/AllDay.cdc"
+import AllDayShardedCollection from "../../../contracts/AllDayShardedCollection.cdc"
 
 // This transaction deposits a number of NFTs to a recipient
 
 // Parameters
 //
 // recipient: the Flow address who will receive the NFTs
-// geniesNFTIDs: an array of geniesNFT IDs of NFTs that recipient will receive
+// momentNFTIDs: an array of momentNFT IDs of NFTs that recipient will receive
 
-transaction(recipient: Address, geniesNFTIDs: [UInt64]) {
+transaction(recipient: Address, momentNFTIDs: [UInt64]) {
 
     let transferTokens: @NonFungibleToken.Collection
     
     prepare(acct: AuthAccount) {
         
-        self.transferTokens <- acct.borrow<&GeniesShardedCollection.ShardedCollection>(
-            from: GeniesShardedCollection.CollectionStoragePath
+        self.transferTokens <- acct.borrow<&AllDayShardedCollection.ShardedCollection>(
+            from: AllDayShardedCollection.CollectionStoragePath
             )!
-            .batchWithdraw(ids: geniesNFTIDs)
+            .batchWithdraw(ids: momentNFTIDs)
     }
 
     execute {
@@ -27,10 +27,11 @@ transaction(recipient: Address, geniesNFTIDs: [UInt64]) {
         let recipient = getAccount(recipient)
 
         // get the Collection reference for the receiver
-        let receiverRef = recipient.getCapability(Genies.CollectionPublicPath)
-            .borrow<&{Genies.GeniesNFTCollectionPublic}>()!
+        let receiverRef = recipient.getCapability(AllDay.CollectionPublicPath)
+            .borrow<&{AllDay.MomentNFTCollectionPublic}>()!
 
         // deposit the NFT in the receivers collection
         receiverRef.batchDeposit(tokens: <-self.transferTokens)
     }
 }
+

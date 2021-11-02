@@ -1,9 +1,10 @@
 /*
-    Description: Central Collection for a large number of Genies NFTs
+    Description: Central Collection for a large number of Moment NFTs
 
-    Adapted from: TopShotShardedCollection.cdc
+    Adapted from: GeniesShardedCollection.cdc
     Authors: Joshua Hannan joshua.hannan@dapperlabs.com
              Bastian Muller bastian@dapperlabs.com
+             Rhea Myers rhea.myers@dapperlabs.com
 
     [...]
 
@@ -12,25 +13,25 @@
 */
 
 import NonFungibleToken from "./NonFungibleToken.cdc"
-import Genies from "./Genies.cdc"
+import AllDay from "./AllDay.cdc"
 
-pub contract GeniesShardedCollection {
+pub contract AllDayShardedCollection {
     // Named Paths
     //
     pub let CollectionStoragePath:  StoragePath
 
-    // ShardedCollection stores a dictionary of Genies Collections
-    // A Genies NFT is stored in the field that corresponds to its id % numBuckets
+    // ShardedCollection stores a dictionary of AllDay Collections
+    // A AllDay NFT is stored in the field that corresponds to its id % numBuckets
     pub resource ShardedCollection:
-        Genies.GeniesNFTCollectionPublic,
+        AllDay.MomentNFTCollectionPublic,
         NonFungibleToken.Provider,
         NonFungibleToken.Receiver,
         NonFungibleToken.CollectionPublic
     {
-        // Dictionary of Genies collections
-        pub var collections: @{UInt64: Genies.Collection}
+        // Dictionary of AllDay collections
+        pub var collections: @{UInt64: AllDay.Collection}
 
-        // The number of buckets to split Genies NFTs into
+        // The number of buckets to split AllDay NFTs into
         // This makes storage more efficient and performant
         pub let numBuckets: UInt64
 
@@ -42,13 +43,13 @@ pub contract GeniesShardedCollection {
             var i: UInt64 = 0
             while i < numBuckets {
 
-                self.collections[i] <-! Genies.createEmptyCollection() as! @Genies.Collection
+                self.collections[i] <-! AllDay.createEmptyCollection() as! @AllDay.Collection
 
                 i = i + (1 as UInt64)
             }
         }
 
-        // withdraw removes a Genies NFT from one of the Collections
+        // withdraw removes a AllDay NFT from one of the Collections
         // and moves it to the caller
         pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
             post {
@@ -57,7 +58,7 @@ pub contract GeniesShardedCollection {
             // Find the bucket it should be withdrawn from
             let bucket = withdrawID % self.numBuckets
 
-            // Withdraw the Genies NFT
+            // Withdraw the AllDay NFT
             let token <- self.collections[bucket]?.withdraw(withdrawID: withdrawID)!
             
             return <-token
@@ -67,10 +68,10 @@ pub contract GeniesShardedCollection {
         //
         // Parameters: ids: an array of the IDs to be withdrawn from the Collection
         //
-        // Returns: @NonFungibleToken.Collection a Collection containing the Genies NFTs
+        // Returns: @NonFungibleToken.Collection a Collection containing the AllDay NFTs
         //          that were withdrawn
         pub fun batchWithdraw(ids: [UInt64]): @NonFungibleToken.Collection {
-            var batchCollection <- Genies.createEmptyCollection()
+            var batchCollection <- AllDay.createEmptyCollection()
             
             // Iterate through the ids and withdraw them from the Collection
             for id in ids {
@@ -79,7 +80,7 @@ pub contract GeniesShardedCollection {
             return <-batchCollection
         }
 
-        // deposit takes a Genies NFT and adds it to the Collections dictionary
+        // deposit takes a AllDay NFT and adds it to the Collections dictionary
         pub fun deposit(token: @NonFungibleToken.NFT) {
 
             // Find the bucket this corresponds to
@@ -120,7 +121,7 @@ pub contract GeniesShardedCollection {
             return ids
         }
 
-        // borrowNFT Returns a borrowed reference to a Genies NFT in the Collection
+        // borrowNFT Returns a borrowed reference to a AllDay NFT in the Collection
         // so that the caller can read data and call methods from it
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
             post {
@@ -134,7 +135,7 @@ pub contract GeniesShardedCollection {
             return self.collections[bucket]?.borrowNFT(id: id)!
         }
 
-        // borrowGeniesNFT Returns a borrowed reference to a Genies NFT in the Collection
+        // borrowMomentNFT Returns a borrowed reference to a AllDay NFT in the Collection
         // so that the caller can read data and call methods from it
         // They can use this to read its setID, playID, serialNumber,
         // or any of the setData or Play Data associated with it by
@@ -144,12 +145,12 @@ pub contract GeniesShardedCollection {
         // Parameters: id: The ID of the NFT to get the reference for
         //
         // Returns: A reference to the NFT
-        pub fun borrowGeniesNFT(id: UInt64): &Genies.NFT? {
+        pub fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
 
             // Get the bucket of the nft to be borrowed
             let bucket = id % self.numBuckets
 
-            return self.collections[bucket]?.borrowGeniesNFT(id: id) ?? nil
+            return self.collections[bucket]?.borrowMomentNFT(id: id) ?? nil
         }
 
         // If a transaction destroys the Collection object,
@@ -166,7 +167,7 @@ pub contract GeniesShardedCollection {
 
     init() {
         // Set the named paths
-        self.CollectionStoragePath = /storage/GeniesShardedNFTCollection
+        self.CollectionStoragePath = /storage/AllDayShardedNFTCollection
     }
 }
  

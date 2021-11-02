@@ -9,61 +9,80 @@ import (
 // Handle relative paths by making these regular expressions
 
 const (
-	nftAddressPlaceholder                     = "\"[^\"]*NonFungibleToken.cdc\""
-	geniesAddressPlaceholder                  = "\"[^\"]*Genies.cdc\""
-	geniesShardedCollectionAddressPlaceholder = "\"[^\"]*GeniesShardedCollection.cdc\""
+	nftAddressPlaceholder                       = "\"[^\"]*NonFungibleToken.cdc\""
+	AllDayAddressPlaceholder                  = "\"[^\"]*AllDay.cdc\""
+	AllDayShardedCollectionAddressPlaceholder = "\"[^\"]*AllDayShardedCollection.cdc\""
 )
 
 const (
-	geniesPath                  = "../../../contracts/Genies.cdc"
-	geniesShardedCollectionPath = "../../../contracts/GeniesShardedCollection.cdc"
-	geniesTransactionsRootPath  = "../../../transactions"
-	geniesScriptsRootPath       = "../../../scripts"
+	AllDayPath                 = "../../../contracts/AllDay.cdc"
+	AllDayTransactionsRootPath = "../../../transactions"
+	AllDayScriptsRootPath      = "../../../scripts"
 
-	geniesAddEditionPath                                   = geniesTransactionsRootPath + "/admin/edition/add_edition.cdc"
-	geniesRetireEditionPath                                = geniesTransactionsRootPath + "/admin/edition/retire_edition.cdc"
-	geniesAddGeniesCollectionPath                          = geniesTransactionsRootPath + "/admin/geniesCollection/add_genies_collection.cdc"
-	geniesCloseGeniesCollectionPath                        = geniesTransactionsRootPath + "/admin/geniesCollection/close_genies_collection.cdc"
-	geniesMintGeniesNFTMultiPath                           = geniesTransactionsRootPath + "/admin/nfts/mint_genies_nft_multi.cdc"
-	geniesMintGeniesNFTPath                                = geniesTransactionsRootPath + "/admin/nfts/mint_genies_nft.cdc"
-	geniesAdvanceSeriesPath                                = geniesTransactionsRootPath + "/admin/series/advance_series.cdc"
-	geniesSetupAccountPath                                 = geniesTransactionsRootPath + "/user/setup_genies_account.cdc"
-	geniesTransferNFTPath                                  = geniesTransactionsRootPath + "/user/transfer_genies_nft.cdc"
-	geniesSetupShardedCollectionPath                       = geniesTransactionsRootPath + "/admin/sharded_collection/setup_sharded_collection.cdc"
-	geniesTransferGeniesNFTFromShardedCollectionPath       = geniesTransactionsRootPath + "/admin/sharded_collection/transfer_genies_nft_from_sharded_collection.cdc"
-	geniesBatchTransferGeniesNFTsFromShardedCollectionPath = geniesTransactionsRootPath + "/admin/sharded_collection/batch_transfer_genies_nfts_from_sharded_collection.cdc"
+	// Accounts
+	AllDaySetupAccountPath   = AllDayTransactionsRootPath + "/user/setup_AllDay_account.cdc"
+	AllDayAccountIsSetupPath = AllDayScriptsRootPath + "/user/account_is_setup.cdc"
 
-	geniesReadAllEditionsPath          = geniesScriptsRootPath + "/edition/read_all_editions.cdc"
-	geniesReadEditionPath              = geniesScriptsRootPath + "/edition/read_edition.cdc"
-	geniesReadAllGeniesCollectionsPath = geniesScriptsRootPath + "/geniesCollection/read_all_genies_collections.cdc"
-	geniesReadGeniesCollectionPath     = geniesScriptsRootPath + "/geniesCollection/read_genies_collection.cdc"
-	geniesReadCollectionIDsPath        = geniesScriptsRootPath + "/nfts/read_collection_ids.cdc"
-	geniesReadCollectionLengthPath     = geniesScriptsRootPath + "/nfts/read_collection_length.cdc"
-	geniesReadGeniesSupplyPath         = geniesScriptsRootPath + "/nfts/read_genies_supply.cdc"
-	geniesReadNFTPropertiesPath        = geniesScriptsRootPath + "/nfts/read_nft_properties.cdc"
-	geniesReadAllSeriesNamesPath       = geniesScriptsRootPath + "/series/read_all_series_names.cdc"
-	geniesReadAllSeriesPath            = geniesScriptsRootPath + "/series/read_all_series.cdc"
-	geniesReadCurrentSeriesPath        = geniesScriptsRootPath + "/series/read_current_series.cdc"
-	geniesReadSeriesByIDPath           = geniesScriptsRootPath + "/series/read_series_by_id.cdc"
-	geniesReadSeriesByNamePath         = geniesScriptsRootPath + "/series/read_series_by_name.cdc"
-	geniesAccountIsSetupPath           = geniesScriptsRootPath + "/user/account_is_setup.cdc"
+	// ShardedCollection
+	AllDayShardedCollectionPath                            = "../../../contracts/AllDayShardedCollection.cdc"
+	AllDaySetupShardedCollectionPath                       = AllDayTransactionsRootPath + "/admin/sharded_collection/setup_sharded_collection.cdc"
+	AllDayTransferMomentNFTFromShardedCollectionPath       = AllDayTransactionsRootPath + "/admin/sharded_collection/transfer_AllDay_nft_from_sharded_collection.cdc"
+	AllDayBatchTransferMomentNFTsFromShardedCollectionPath = AllDayTransactionsRootPath + "/admin/sharded_collection/batch_transfer_AllDay_nfts_from_sharded_collection.cdc"
+
+	// Series
+	AllDayCreateSeriesPath       = AllDayTransactionsRootPath + "/admin/series/create_series.cdc"
+	AllDayCloseSeriesPath        = AllDayTransactionsRootPath + "/admin/series/close_series.cdc"
+	AllDayReadAllSeriesPath      = AllDayScriptsRootPath + "/series/read_all_series.cdc"
+	AllDayReadSeriesByIDPath     = AllDayScriptsRootPath + "/series/read_series_by_id.cdc"
+	AllDayReadSeriesByNamePath   = AllDayScriptsRootPath + "/series/read_series_by_name.cdc"
+	AllDayReadAllSeriesNamesPath = AllDayScriptsRootPath + "/series/read_all_series_names.cdc"
+
+	// Sets
+	AllDayCreateSetPath       = AllDayTransactionsRootPath + "/admin/sets/create_set.cdc"
+	AllDayReadAllSetsPath     = AllDayScriptsRootPath + "/sets/read_all_sets.cdc"
+	AllDayReadSetByIDPath     = AllDayScriptsRootPath + "/sets/read_set_by_id.cdc"
+	AllDayReadSetsByNamePath  = AllDayScriptsRootPath + "/sets/read_sets_by_name.cdc"
+	AllDayReadAllSetNamesPath = AllDayScriptsRootPath + "/sets/read_all_set_names.cdc"
+
+	// Plays
+	AllDayCreatePlayPath   = AllDayTransactionsRootPath + "/admin/plays/create_play.cdc"
+	AllDayReadPlayByIDPath = AllDayScriptsRootPath + "/plays/read_play_by_id.cdc"
+	AllDayReadAllPlaysPath = AllDayScriptsRootPath + "/plays/read_all_plays.cdc"
+
+	// Editions
+	AllDayCreateEditionPath   = AllDayTransactionsRootPath + "/admin/editions/create_edition.cdc"
+	AllDayCloseEditionPath    = AllDayTransactionsRootPath + "/admin/editions/close_edition.cdc"
+	AllDayReadEditionByIDPath = AllDayScriptsRootPath + "/editions/read_edition_by_id.cdc"
+	AllDayReadAllEditionsPath = AllDayScriptsRootPath + "/edition/read_all_editions.cdc"
+
+	// Moment NFTs
+	AllDayMintMomentNFTPath           = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
+	AllDayMintMomentNFTMultiPath      = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft_multi.cdc"
+	AllDayTransferNFTPath             = AllDayTransactionsRootPath + "/user/transfer_moment_nft.cdc"
+	AllDayReadMomentNFTSupplyPath     = AllDayScriptsRootPath + "/nfts/read_moment_nft_supply.cdc"
+	AllDayReadMomentNFTPropertiesPath = AllDayScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
+	AllDayReadCollectionNFTLengthPath = AllDayScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
+	AllDayReadCollectionNFTIDsPath    = AllDayScriptsRootPath + "/nfts/read_collection_nft_ids.cdc"
 )
 
+//------------------------------------------------------------
+// Accounts
+//------------------------------------------------------------
 func replaceAddresses(code []byte, contracts Contracts) []byte {
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+contracts.NFTAddress.String()))
 
-	geniesRe := regexp.MustCompile(geniesAddressPlaceholder)
-	code = geniesRe.ReplaceAll(code, []byte("0x"+contracts.GeniesAddress.String()))
+	AllDayRe := regexp.MustCompile(AllDayAddressPlaceholder)
+	code = AllDayRe.ReplaceAll(code, []byte("0x"+contracts.AllDayAddress.String()))
 
-	geniesShardedCollectionRe := regexp.MustCompile(geniesShardedCollectionAddressPlaceholder)
-	code = geniesShardedCollectionRe.ReplaceAll(code, []byte("0x"+contracts.GeniesShardedCollectionAddress.String()))
+	AllDayShardedCollectionRe := regexp.MustCompile(AllDayShardedCollectionAddressPlaceholder)
+	code = AllDayShardedCollectionRe.ReplaceAll(code, []byte("0x"+contracts.AllDayShardedCollectionAddress.String()))
 
 	return code
 }
 
-func loadGenies(nftAddress flow.Address) []byte {
-	code := readFile(geniesPath)
+func LoadAllDay(nftAddress flow.Address) []byte {
+	code := readFile(AllDayPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
@@ -71,195 +90,242 @@ func loadGenies(nftAddress flow.Address) []byte {
 	return code
 }
 
-func loadGeniesShardedCollection(nftAddress flow.Address, geniesAddress flow.Address) []byte {
-	code := readFile(geniesShardedCollectionPath)
+func loadAllDaySetupAccountTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDaySetupAccountPath),
+		contracts,
+	)
+}
+
+func loadAllDayAccountIsSetupScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayAccountIsSetupPath),
+		contracts,
+	)
+}
+
+//------------------------------------------------------------
+// Sharded Collection
+//------------------------------------------------------------
+func loadAllDayShardedCollection(nftAddress flow.Address, AllDayAddress flow.Address) []byte {
+	code := readFile(AllDayShardedCollectionPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
 
-	geniesRe := regexp.MustCompile(geniesAddressPlaceholder)
-	code = geniesRe.ReplaceAll(code, []byte("0x"+geniesAddress.String()))
+	AllDayRe := regexp.MustCompile(AllDayAddressPlaceholder)
+	code = AllDayRe.ReplaceAll(code, []byte("0x"+AllDayAddress.String()))
 
 	return code
 }
 
-func loadGeniesAddEditionTransaction(contracts Contracts) []byte {
+func loadAllDaySetupShardedCollectionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesAddEditionPath),
+		readFile(AllDaySetupShardedCollectionPath),
 		contracts,
 	)
 }
 
-func loadGeniesRetireEditionTransaction(contracts Contracts) []byte {
+func loadAllDayTransferMomentNFTFromShardedCollectionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesRetireEditionPath),
+		readFile(AllDayTransferMomentNFTFromShardedCollectionPath),
 		contracts,
 	)
 }
 
-func loadGeniesAddGeniesCollectionTransaction(contracts Contracts) []byte {
+func loadAllDayBatchTransferMomentNFTsFromShardedCollectionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesAddGeniesCollectionPath),
+		readFile(AllDayBatchTransferMomentNFTsFromShardedCollectionPath),
 		contracts,
 	)
 }
 
-func loadGeniesCloseGeniesCollectionTransaction(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Series
+//------------------------------------------------------------
+func loadAllDayCreateSeriesTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesCloseGeniesCollectionPath),
+		readFile(AllDayCreateSeriesPath),
 		contracts,
 	)
 }
 
-func loadGeniesMintGeniesNFTMultiTransaction(contracts Contracts) []byte {
+func loadAllDayReadSeriesByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesMintGeniesNFTMultiPath),
+		readFile(AllDayReadSeriesByIDPath),
 		contracts,
 	)
 }
 
-func loadGeniesMintGeniesNFTTransaction(contracts Contracts) []byte {
+func loadAllDayReadSeriesByNameScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesMintGeniesNFTPath),
+		readFile(AllDayReadSeriesByNamePath),
 		contracts,
 	)
 }
 
-func loadGeniesAdvanceSeriesTransaction(contracts Contracts) []byte {
+func loadAllDayReadAllSeriesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesAdvanceSeriesPath),
+		readFile(AllDayReadAllSeriesPath),
 		contracts,
 	)
 }
 
-func loadGeniesSetupAccountTransaction(contracts Contracts) []byte {
+func loadAllDayReadAllSeriesNamesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesSetupAccountPath),
+		readFile(AllDayReadAllSeriesNamesPath),
 		contracts,
 	)
 }
 
-func loadGeniesTransferNFTTransaction(contracts Contracts) []byte {
+func loadAllDayCloseSeriesTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesTransferNFTPath),
+		readFile(AllDayCloseSeriesPath),
 		contracts,
 	)
 }
 
-func loadGeniesSetupShardedCollectionTransaction(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Sets
+//------------------------------------------------------------
+func loadAllDayCreateSetTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesSetupShardedCollectionPath),
+		readFile(AllDayCreateSetPath),
 		contracts,
 	)
 }
 
-func loadGeniesTransferGeniesNFTFromShardedCollectionTransaction(contracts Contracts) []byte {
+func loadAllDayReadSetByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesTransferGeniesNFTFromShardedCollectionPath),
+		readFile(AllDayReadSetByIDPath),
 		contracts,
 	)
 }
 
-func loadGeniesBatchTransferGeniesNFTsFromShardedCollectionTransaction(contracts Contracts) []byte {
+func loadAllDayReadAllSetsScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesBatchTransferGeniesNFTsFromShardedCollectionPath),
+		readFile(AllDayReadAllSetsPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadAllEditionsScript(contracts Contracts) []byte {
+func loadAllDayReadSetsByNameScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadAllEditionsPath),
+		readFile(AllDayReadSetsByNamePath),
 		contracts,
 	)
 }
 
-func loadGeniesReadEditionScript(contracts Contracts) []byte {
+func loadAllDayReadAllSetNamesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadEditionPath),
+		readFile(AllDayReadAllSetNamesPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadAllGeniesCollectionsScript(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Plays
+//------------------------------------------------------------
+func loadAllDayCreatePlayTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadAllGeniesCollectionsPath),
+		readFile(AllDayCreatePlayPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadGeniesCollectionScript(contracts Contracts) []byte {
+func loadAllDayReadPlayByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadGeniesCollectionPath),
+		readFile(AllDayReadPlayByIDPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadCollectionIDsScript(contracts Contracts) []byte {
+func loadAllDayReadAllPlaysScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadCollectionIDsPath),
+		readFile(AllDayReadAllPlaysPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadCollectionLengthScript(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Editions
+//------------------------------------------------------------
+func loadAllDayCreateEditionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadCollectionLengthPath),
+		readFile(AllDayCreateEditionPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadGeniesSupplyScript(contracts Contracts) []byte {
+func loadAllDayReadEditionByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadGeniesSupplyPath),
-		contracts,
-	)
-}
-func loadGeniesReadNFTPropertiesScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(geniesReadNFTPropertiesPath),
+		readFile(AllDayReadEditionByIDPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadAllSeriesNamesScript(contracts Contracts) []byte {
+func loadAllDayCloseEditionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadAllSeriesNamesPath),
+		readFile(AllDayCloseEditionPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadAllSeriesScript(contracts Contracts) []byte {
+func loadAllDayReadAllEditionsScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadAllSeriesPath),
+		readFile(AllDayReadAllEditionsPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadCurrentSeriesScript(contracts Contracts) []byte {
+//------------------------------------------------------------
+// Moment NFTs
+//------------------------------------------------------------
+func loadAllDayMintMomentNFTTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadCurrentSeriesPath),
+		readFile(AllDayMintMomentNFTPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadSeriesByIDScript(contracts Contracts) []byte {
+func loadAllDayMintMomentNFTMultiTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadSeriesByIDPath),
+		readFile(AllDayMintMomentNFTMultiPath),
 		contracts,
 	)
 }
 
-func loadGeniesReadSeriesByNameScript(contracts Contracts) []byte {
+func loadAllDayReadMomentNFTSupplyScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesReadSeriesByNamePath),
+		readFile(AllDayReadMomentNFTSupplyPath),
 		contracts,
 	)
 }
 
-func loadGeniesAccountIsSetupScript(contracts Contracts) []byte {
+func loadAllDayReadMomentNFTPropertiesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(geniesAccountIsSetupPath),
+		readFile(AllDayReadMomentNFTPropertiesPath),
+		contracts,
+	)
+}
+
+func loadAllDayReadCollectionNFTLengthScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayReadCollectionNFTLengthPath),
+		contracts,
+	)
+}
+
+func loadAllDayReadCollectionNFTIDsScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayReadCollectionNFTIDsPath),
+		contracts,
+	)
+}
+
+func loadAllDayTransferNFTTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayTransferNFTPath),
 		contracts,
 	)
 }

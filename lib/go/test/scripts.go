@@ -9,15 +9,17 @@ import (
 	"github.com/onflow/flow-go-sdk"
 )
 
-func getCurrentSeriesData(
+// Accounts
+func accountIsSetup(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-) SeriesData {
-	script := loadGeniesReadCurrentSeriesScript(contracts)
-	result := executeScriptAndCheck(t, b, script, nil)
+	address flow.Address,
+) bool {
+	script := loadAllDayAccountIsSetupScript(contracts)
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.BytesToAddress(address.Bytes()))})
 
-	return parseSeriesData(result)
+	return result.ToGoValue().(bool)
 }
 
 func getSeriesData(
@@ -26,22 +28,34 @@ func getSeriesData(
 	contracts Contracts,
 	id uint32,
 ) SeriesData {
-	script := loadGeniesReadSeriesByIDScript(contracts)
+	script := loadAllDayReadSeriesByIDScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
 
 	return parseSeriesData(result)
 }
 
-func getGeniesCollectionData(
+func getSetData(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
 	id uint32,
-) GeniesCollectionData {
-	script := loadGeniesReadGeniesCollectionScript(contracts)
+) SetData {
+	script := loadAllDayReadSetByIDScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
 
-	return parseGeniesCollectionData(result)
+	return parseSetData(result)
+}
+
+func getPlayData(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	id uint32,
+) PlayData {
+	script := loadAllDayReadPlayByIDScript(contracts)
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
+
+	return parsePlayData(result)
 }
 
 func getEditionData(
@@ -50,31 +64,31 @@ func getEditionData(
 	contracts Contracts,
 	id uint32,
 ) EditionData {
-	script := loadGeniesReadEditionScript(contracts)
+	script := loadAllDayReadEditionByIDScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
 
 	return parseEditionData(result)
 }
 
-func getGeniesSupply(
+func getMomentNFTSupply(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
 ) uint64 {
-	script := loadGeniesReadGeniesSupplyScript(contracts)
+	script := loadAllDayReadMomentNFTSupplyScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{})
 
 	return result.ToGoValue().(uint64)
 }
 
-func getGeniesNFTProperties(
+func getMomentNFTProperties(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
 	collectionAddress flow.Address,
 	nftID uint64,
 ) OurNFTData {
-	script := loadGeniesReadNFTPropertiesScript(contracts)
+	script := loadAllDayReadMomentNFTPropertiesScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{
 		jsoncdc.MustEncode(cadence.BytesToAddress(collectionAddress.Bytes())),
 		jsoncdc.MustEncode(cadence.UInt64(nftID)),

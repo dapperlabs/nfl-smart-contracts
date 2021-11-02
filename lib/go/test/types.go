@@ -5,33 +5,27 @@ import (
 )
 
 type SeriesData struct {
-	ID              uint32
-	Name            string
-	Metadata        map[string]string
-	Active          bool
-	CollectionIDs   []uint32
-	CollectionsOpen uint32
+	ID     uint32
+	Name   string
+	Active bool
 }
-
-type GeniesCollectionData struct {
+type SetData struct {
+	ID   uint32
+	Name string
+}
+type PlayData struct {
 	ID             uint32
-	SeriesID       uint32
-	Name           string
+	Classification string
 	Metadata       map[string]string
-	Open           bool
-	EditionIDs     []uint32
-	EditionsActive uint32
 }
-
 type EditionData struct {
-	ID           uint32
-	CollectionID uint32
-	Name         string
-	Metadata     map[string]string
-	Open         bool
-	NumMinted    uint32
+	ID          uint32
+	SeriesID    uint32
+	SetID       uint32
+	PlayID      uint32
+	MaxMintSize *uint32
+	Tier        string
 }
-
 type OurNFTData struct {
 	ID           uint64
 	EditionID    uint32
@@ -48,48 +42,45 @@ func cadenceStringDictToGo(cadenceDict cadence.Dictionary) map[string]string {
 	return goDict
 }
 
-func cadenceUInt32ArrToGo(cadenceArr cadence.Array) []uint32 {
-	goArr := make([]uint32, len(cadenceArr.Values))
-	for i, val := range cadenceArr.Values {
-		goArr[i] = val.ToGoValue().(uint32)
-	}
-	return goArr
-}
-
 func parseSeriesData(value cadence.Value) SeriesData {
 	fields := value.(cadence.Struct).Fields
 	return SeriesData{
 		fields[0].ToGoValue().(uint32),
 		fields[1].ToGoValue().(string),
-		cadenceStringDictToGo(fields[2].(cadence.Dictionary)),
-		fields[3].ToGoValue().(bool),
-		cadenceUInt32ArrToGo(fields[4].(cadence.Array)),
-		fields[5].ToGoValue().(uint32),
+		fields[2].ToGoValue().(bool),
 	}
 }
 
-func parseGeniesCollectionData(value cadence.Value) GeniesCollectionData {
+func parseSetData(value cadence.Value) SetData {
 	fields := value.(cadence.Struct).Fields
-	return GeniesCollectionData{
+	return SetData{
 		fields[0].ToGoValue().(uint32),
-		fields[1].ToGoValue().(uint32),
-		fields[2].ToGoValue().(string),
-		cadenceStringDictToGo(fields[3].(cadence.Dictionary)),
-		fields[4].ToGoValue().(bool),
-		cadenceUInt32ArrToGo(fields[5].(cadence.Array)),
-		fields[6].ToGoValue().(uint32),
+		fields[1].ToGoValue().(string),
+	}
+}
+
+func parsePlayData(value cadence.Value) PlayData {
+	fields := value.(cadence.Struct).Fields
+	return PlayData{
+		fields[0].ToGoValue().(uint32),
+		fields[1].ToGoValue().(string),
+		cadenceStringDictToGo(fields[2].(cadence.Dictionary)),
 	}
 }
 
 func parseEditionData(value cadence.Value) EditionData {
 	fields := value.(cadence.Struct).Fields
+	var maxMintSize uint32
+	if fields[4] != nil && fields[4].ToGoValue() != nil {
+		maxMintSize = fields[4].ToGoValue().(uint32)
+	}
 	return EditionData{
 		fields[0].ToGoValue().(uint32),
 		fields[1].ToGoValue().(uint32),
-		fields[2].ToGoValue().(string),
-		cadenceStringDictToGo(fields[3].(cadence.Dictionary)),
-		fields[4].ToGoValue().(bool),
-		fields[5].ToGoValue().(uint32),
+		fields[2].ToGoValue().(uint32),
+		fields[3].ToGoValue().(uint32),
+		&maxMintSize,
+		fields[5].ToGoValue().(string),
 	}
 }
 

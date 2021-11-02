@@ -1,6 +1,6 @@
 import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
-import Genies from "../../../contracts/Genies.cdc"
-import GeniesShardedCollection from "../../../contracts/GeniesShardedCollection.cdc"
+import AllDay from "../../../contracts/AllDay.cdc"
+import AllDayShardedCollection from "../../../contracts/AllDayShardedCollection.cdc"
 
 // This transaction creates and stores an empty NFT collection 
 // and creates a public capability for it.
@@ -15,20 +15,21 @@ transaction(numBuckets: UInt64) {
 
     prepare(acct: AuthAccount) {
 
-        if acct.borrow<&GeniesShardedCollection.ShardedCollection>(from: GeniesShardedCollection.CollectionStoragePath) == nil {
+        if acct.borrow<&AllDayShardedCollection.ShardedCollection>(from: AllDayShardedCollection.CollectionStoragePath) == nil {
 
-            let collection <- GeniesShardedCollection.createEmptyCollection(numBuckets: numBuckets)
+            let collection <- AllDayShardedCollection.createEmptyCollection(numBuckets: numBuckets)
             // Put a new Collection in storage
-            acct.save(<-collection, to: GeniesShardedCollection.CollectionStoragePath)
+            acct.save(<-collection, to: AllDayShardedCollection.CollectionStoragePath)
 
             // create a public capability for the collection
-            if acct.link<&{Genies.GeniesNFTCollectionPublic}>(Genies.CollectionPublicPath, target: GeniesShardedCollection.CollectionStoragePath) == nil {
-                acct.unlink(Genies.CollectionPublicPath)
+            if acct.link<&{AllDay.MomentNFTCollectionPublic}>(AllDay.CollectionPublicPath, target: AllDayShardedCollection.CollectionStoragePath) == nil {
+                acct.unlink(AllDay.CollectionPublicPath)
             }
 
-            acct.link<&{Genies.GeniesNFTCollectionPublic}>(Genies.CollectionPublicPath, target: GeniesShardedCollection.CollectionStoragePath)
+            acct.link<&{AllDay.MomentNFTCollectionPublic}>(AllDay.CollectionPublicPath, target: AllDayShardedCollection.CollectionStoragePath)
         } else {
             panic("Sharded Collection already exists!")
         }
     }
 }
+

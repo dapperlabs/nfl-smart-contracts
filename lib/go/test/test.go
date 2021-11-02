@@ -29,10 +29,10 @@ var (
 )
 
 type Contracts struct {
-	NFTAddress                     flow.Address
-	GeniesAddress                  flow.Address
-	GeniesSigner                   crypto.Signer
-	GeniesShardedCollectionAddress flow.Address
+	NFTAddress                       flow.Address
+	AllDayAddress                  flow.Address
+	AllDaySigner                   crypto.Signer
+	AllDayShardedCollectionAddress flow.Address
 }
 
 func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
@@ -53,27 +53,27 @@ func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
 	return nftAddress
 }
 
-func geniesDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
+func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	accountKeys := test.AccountKeyGenerator()
 
 	nftAddress := deployNFTContract(t, b)
 
-	geniesAccountKey, geniesSigner := accountKeys.NewWithSigner()
-	geniesCode := loadGenies(nftAddress)
+	AllDayAccountKey, AllDaySigner := accountKeys.NewWithSigner()
+	AllDayCode := LoadAllDay(nftAddress)
 
-	geniesAddress, err := b.CreateAccount(
-		[]*flow.AccountKey{geniesAccountKey},
+	AllDayAddress, err := b.CreateAccount(
+		[]*flow.AccountKey{AllDayAccountKey},
 		nil,
 	)
 	require.NoError(t, err)
 
-	fundAccount(t, b, geniesAddress, defaultAccountFunding)
+	fundAccount(t, b, AllDayAddress, defaultAccountFunding)
 
 	tx1 := sdktemplates.AddAccountContract(
-		geniesAddress,
+		AllDayAddress,
 		sdktemplates.Contract{
-			Name:   "Genies",
-			Source: string(geniesCode),
+			Name:   "AllDay",
+			Source: string(AllDayCode),
 		},
 	)
 
@@ -84,30 +84,30 @@ func geniesDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 
 	signAndSubmit(
 		t, b, tx1,
-		[]flow.Address{b.ServiceKey().Address, geniesAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), geniesSigner},
+		[]flow.Address{b.ServiceKey().Address, AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), AllDaySigner},
 		false,
 	)
 
 	_, err = b.CommitBlock()
 	require.NoError(t, err)
 
-	geniesShardedCollectionAccountKey, geniesShardedCollectionSigner := accountKeys.NewWithSigner()
-	geniesShardedCollectionCode := loadGeniesShardedCollection(nftAddress, geniesAddress)
+	AllDayShardedCollectionAccountKey, AllDayShardedCollectionSigner := accountKeys.NewWithSigner()
+	AllDayShardedCollectionCode := loadAllDayShardedCollection(nftAddress, AllDayAddress)
 
-	geniesShardedCollectionAddress, err := b.CreateAccount(
-		[]*flow.AccountKey{geniesShardedCollectionAccountKey},
+	AllDayShardedCollectionAddress, err := b.CreateAccount(
+		[]*flow.AccountKey{AllDayShardedCollectionAccountKey},
 		nil,
 	)
 	require.NoError(t, err)
 
-	fundAccount(t, b, geniesShardedCollectionAddress, defaultAccountFunding)
+	fundAccount(t, b, AllDayShardedCollectionAddress, defaultAccountFunding)
 
 	tx2 := sdktemplates.AddAccountContract(
-		geniesShardedCollectionAddress,
+		AllDayShardedCollectionAddress,
 		sdktemplates.Contract{
-			Name:   "GeniesShardedCollection",
-			Source: string(geniesShardedCollectionCode),
+			Name:   "AllDayShardedCollection",
+			Source: string(AllDayShardedCollectionCode),
 		},
 	)
 
@@ -118,8 +118,8 @@ func geniesDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 
 	signAndSubmit(
 		t, b, tx2,
-		[]flow.Address{b.ServiceKey().Address, geniesShardedCollectionAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), geniesShardedCollectionSigner},
+		[]flow.Address{b.ServiceKey().Address, AllDayShardedCollectionAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), AllDayShardedCollectionSigner},
 		false,
 	)
 
@@ -128,9 +128,9 @@ func geniesDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 
 	return Contracts{
 		nftAddress,
-		geniesAddress,
-		geniesSigner,
-		geniesShardedCollectionAddress,
+		AllDayAddress,
+		AllDaySigner,
+		AllDayShardedCollectionAddress,
 	}
 }
 
@@ -207,7 +207,6 @@ func executeScriptAndCheck(t *testing.T, b *emulator.Blockchain, script []byte, 
 	if !assert.True(t, result.Succeeded()) {
 		t.Log(result.Error.Error())
 	}
-
 	return result.Value
 }
 
@@ -242,7 +241,7 @@ func createAccount(t *testing.T, b *emulator.Blockchain) (sdk.Address, crypto.Si
 	return address, signer
 }
 
-func setupGenies(
+func setupAllDay(
 	t *testing.T,
 	b *emulator.Blockchain,
 	userAddress sdk.Address,
@@ -250,7 +249,7 @@ func setupGenies(
 	contracts Contracts,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadGeniesSetupAccountTransaction(contracts)).
+		SetScript(loadAllDaySetupAccountTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -271,7 +270,7 @@ func setupAccount(
 	signer crypto.Signer,
 	contracts Contracts,
 ) (sdk.Address, crypto.Signer) {
-	setupGenies(t, b, address, signer, contracts)
+	setupAllDay(t, b, address, signer, contracts)
 	fundAccount(t, b, address, defaultAccountFunding)
 
 	return address, signer

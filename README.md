@@ -1,8 +1,8 @@
 # NFL Smart Contracts
 
 ## NFL Contract Addresses
-TBC
-
+| Testnet   | b69482c096f1e0ca  |
+| Mainnet   | TBC               |
 
 ## Entities
 
@@ -10,47 +10,57 @@ TBC
 Series encompass periods of time and will be named using strings like: `Summer 2021` or `Series 3`. 
 More that one series can be open at any given time, and in order for an Edition to be created, it must have a SeriesID.
 
-**Fields**
+**On Chain Fields**
 - FlowID
 - Name
+- Active
 
 **Transactions**
-- MintSeries: Mints a new series onto Flow
+- CreateSeries: Mints a new series onto Flow
 - CloseSeries: Stops any new Editions from using the specified series
-
 ### Sets
-Sets are categories of plays: `Greatest Touchdowns` or similar. Sets have a name and description.
-There can be many sets but only one may be used on an Edition. An Edition must have a SetID to be created.
-Sets do not close and cannot be retired.
+Sets are categories: `Greatest Touchdowns` or similar. Sets have a unique name.An Edition must have a SetID to be created.
+Sets do not close and cannot be retired. Sets contain a dictionary of all the SetID/PlayID combinations that exist within
+an Edition. This is checked everytime a new Edition is created to ensure they are unique.
 
-**Fields**
+**On Chain Fields**
 - FlowID
 - Name
-- Description
 
 **Transactions**
-- MintSet: Mints a new set onto Flow
+- CreateSet: Mints a new set onto Flow
 ### Plays
-Plays contain the actual play metadata, including stats from Sport Radar. 
+Plays contain the actual play metadata, including stats from NFL and Elias. 
 This will contain Player, Team, and Game metadata some of which may be blank depending on the type of moment.
 
-**Fields**
+**On Chain Fields**
 - FlowID
-- Classification (Name TBC: example, PLAYER, TEAM, PLAYER_MELT, TEAM_MELT)
-- Metadata
+- Classification (Name TBC: example, PLAYER_GAME, TEAM_GAME, PLAYER_MELT, TEAM_MELT)
+- Metadata (stored as a string map. This can technically be anything, but the agreeed upon fields are as follows)
+  - PlayType
+  - HomeTeamName
+  - AwayTeamName
+  - TeamName
+  - GameDate
+  - HomeTeamScore
+  - AwayTeamScore
+  - PlayerFirstName
+  - PlayerLastName
+  - PlayerPosition
+  - PlayerNumber
 
 **Transactions**
-- MintPlay: Mints a new Play on Flow
-
-
+- CreatePlay: Mints a new Play on Flow
 ### Editions
 Editions are the combination of a SeriesID, SetID, and PlayID and are what moments are minted out of.
 They also have a Max and Current Edition size so we can specify how many moments can ever be minted from 
 the edition. 
 
-The MaxEditionSize should be able to be added at any point and if empty allows for perpetual minting(for example, for editions we want to mint an unlimited number of). 
-Once it exists it is locked and cannot be changed. 
-Moments are minted out of editions, given an EditionID and a number to mint.
+The MaxEditionSize is optional. If it is not set, moments can be minted unlimitedly. An Edition will close, if either of these things happen:
+- The max number of moments are minted
+- The CloseEdition transaction is used
+- 
+`MaxEditionSize` cannot be changed once it is set.
 
 **Fields**
 - FlowID
@@ -58,20 +68,20 @@ Moments are minted out of editions, given an EditionID and a number to mint.
 - SetID
 - PlayID
 - MaxEditionSize
-- CurrentEditionSize
 - Tier
+- NumMinted
 
 **Transactions**
-- MintEdition: Mints a new Edition on Flow. It should check that no edition exists with the specific SetID/PlayID combination
-- SetMaxEditionSizeFromCurrentSize: Should set the max edition size to whatever the current edition size is to avoid minting any more moments
-
+- CreateEdition: Mints a new Edition on Flow.
+- CloseEdition: Closes an Edition so no new moments can be minted from it. This is irreversible. The Edition is closed by setting the MaxEditionSize to the value of NumMinted.
 
 ### Moment NFT
-Moments are minted out of editions. These are the NFTs that will be sold in packs
+Moments are minted out of editions. You can think of Editions as a "cookie cutter" for moments. The Serial Number is what makes each MomentNFT unique. These are the NFTs that will be sold in packs. 
 
 **Fields**
 - FlowID
 - EditionID
+- Serial Number
 
 **Transactions**
-- MintMoments: Mints moments out of the EditionID. Can only mint up to the MaxEditionSize
+- MintMomentNFT: Mints a moment out of an EditionID

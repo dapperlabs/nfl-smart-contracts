@@ -81,7 +81,7 @@ func testCreateSeries(
 	b *emulator.Blockchain,
 	contracts Contracts,
 	seriesName string,
-	shouldBeID uint32,
+	shouldBeID uint64,
 	shouldRevert bool,
 ) {
 	createSeries(
@@ -104,7 +104,7 @@ func testCloseSeries(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	seriesID uint32,
+	seriesID uint64,
 	shouldRevert bool,
 ) {
 	wasActive := getSeriesData(t, b, contracts, seriesID).Active
@@ -164,7 +164,7 @@ func testCreateSet(
 	b *emulator.Blockchain,
 	contracts Contracts,
 	setName string,
-	shouldBeID uint32,
+	shouldBeID uint64,
 	shouldRevert bool,
 ) {
 	createSet(
@@ -223,7 +223,7 @@ func testCreatePlay(
 	contracts Contracts,
 	classification string,
 	metadata map[string]string,
-	shouldBeID uint32,
+	shouldBeID uint64,
 	shouldRevert bool,
 ) {
 	createPlay(
@@ -256,12 +256,12 @@ func testCreateEdition(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	seriesID uint32,
-	setID uint32,
-	playID uint32,
-	maxMintSize *uint32,
+	seriesID uint64,
+	setID uint64,
+	playID uint64,
+	maxMintSize *uint64,
 	tier string,
-	shouldBeID uint32,
+	shouldBeID uint64,
 	shouldRevert bool,
 ) {
 	createEdition(
@@ -293,8 +293,8 @@ func testCloseEdition(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	editionID uint32,
-	shouldBeID uint32,
+	editionID uint64,
+	shouldBeID uint64,
 	shouldRevert bool,
 ) {
 	closeEdition(
@@ -312,7 +312,7 @@ func testCloseEdition(
 }
 
 func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contracts) {
-	var maxMintSize uint32 = 2
+	var maxMintSize uint64 = 2
 	createTestSeries(t, b, contracts)
 	createTestSets(t, b, contracts)
 	createTestPlays(t, b, contracts)
@@ -420,10 +420,10 @@ func TestMomentNFTs(t *testing.T) {
 			t,
 			b,
 			contracts,
-			uint32(1),
+			uint64(1),
 			userAddress,
 			uint64(1),
-			uint32(1),
+			uint64(1),
 			false,
 		)
 	})
@@ -433,10 +433,10 @@ func TestMomentNFTs(t *testing.T) {
 			t,
 			b,
 			contracts,
-			uint32(1),
+			uint64(1),
 			userAddress,
 			uint64(2),
-			uint32(2),
+			uint64(2),
 			false,
 		)
 	})
@@ -446,10 +446,10 @@ func TestMomentNFTs(t *testing.T) {
 			t,
 			b,
 			contracts,
-			uint32(2),
+			uint64(2),
 			userAddress,
 			uint64(3),
-			uint32(1),
+			uint64(1),
 			false,
 		)
 	})
@@ -459,10 +459,10 @@ func TestMomentNFTs(t *testing.T) {
 			t,
 			b,
 			contracts,
-			uint32(2),
+			uint64(2),
 			userAddress,
 			uint64(4),
-			uint32(2),
+			uint64(2),
 			false,
 		)
 	})
@@ -472,10 +472,10 @@ func TestMomentNFTs(t *testing.T) {
 			t,
 			b,
 			contracts,
-			uint32(1),
+			uint64(1),
 			userAddress,
 			uint64(3),
-			uint32(3),
+			uint64(3),
 			true,
 		)
 	})
@@ -485,10 +485,10 @@ func TestMomentNFTs(t *testing.T) {
 			t,
 			b,
 			contracts,
-			uint32(3),
+			uint64(3),
 			userAddress,
 			uint64(1),
-			uint32(1),
+			uint64(1),
 			true,
 		)
 	})
@@ -498,10 +498,10 @@ func testMintMomentNFT(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	editionID uint32,
+	editionID uint64,
 	userAddress flow.Address,
 	shouldBeID uint64,
-	shouldBeSerialNumber uint32,
+	shouldBeSerialNumber uint64,
 	shouldRevert bool,
 ) {
 	// Make sure the total supply of NFTs is tracked correctly
@@ -583,10 +583,10 @@ func TestShardedCollection(t *testing.T) {
 				t,
 				b,
 				contracts,
-				uint32(2),
+				uint64(2),
 				user1Address,
 				uint64(numMomentNFTsAlready+i),
-				uint32(numMomentNFTsAlready+i),
+				uint64(numMomentNFTsAlready+i),
 				false,
 			)
 		}

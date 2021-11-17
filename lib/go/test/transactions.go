@@ -172,7 +172,7 @@ func closeSeries(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	id uint32,
+	id uint64,
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
@@ -181,7 +181,7 @@ func closeSeries(
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
-	tx.AddArgument(cadence.NewUInt32(id))
+	tx.AddArgument(cadence.NewUInt64(id))
 
 	signAndSubmit(
 		t, b, tx,
@@ -252,10 +252,10 @@ func createEdition(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	seriesID uint32,
-	setID uint32,
-	playID uint32,
-	maxMintSize *uint32,
+	seriesID uint64,
+	setID uint64,
+	playID uint64,
+	maxMintSize *uint64,
 	tier string,
 	shouldRevert bool,
 ) {
@@ -265,12 +265,12 @@ func createEdition(
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
-	tx.AddArgument(cadence.NewUInt32(seriesID))
-	tx.AddArgument(cadence.NewUInt32(setID))
-	tx.AddArgument(cadence.NewUInt32(playID))
+	tx.AddArgument(cadence.NewUInt64(seriesID))
+	tx.AddArgument(cadence.NewUInt64(setID))
+	tx.AddArgument(cadence.NewUInt64(playID))
 	tx.AddArgument(cadence.NewString(tier))
 	if maxMintSize != nil {
-		tx.AddArgument(cadence.NewUInt32(*maxMintSize))
+		tx.AddArgument(cadence.NewUInt64(*maxMintSize))
 	} else {
 		tx.AddArgument(cadence.Optional{})
 	}
@@ -287,7 +287,7 @@ func closeEdition(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	editionID uint32,
+	editionID uint64,
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
@@ -296,7 +296,7 @@ func closeEdition(
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
-	tx.AddArgument(cadence.NewUInt32(editionID))
+	tx.AddArgument(cadence.NewUInt64(editionID))
 
 	signAndSubmit(
 		t, b, tx,
@@ -314,7 +314,7 @@ func mintMomentNFT(
 	b *emulator.Blockchain,
 	contracts Contracts,
 	recipientAddress flow.Address,
-	editionID uint32,
+	editionID uint64,
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
@@ -324,7 +324,7 @@ func mintMomentNFT(
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
-	tx.AddArgument(cadence.NewUInt32(editionID))
+	tx.AddArgument(cadence.NewUInt64(editionID))
 
 	signAndSubmit(
 		t, b, tx,

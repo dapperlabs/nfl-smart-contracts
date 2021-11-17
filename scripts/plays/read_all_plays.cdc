@@ -5,7 +5,7 @@ import AllDay from "../../contracts/AllDay.cdc"
 
 pub fun main(): [AllDay.PlayData] {
     let plays: [AllDay.PlayData] = []
-    var id: UInt32 = 1
+    var id: UInt64 = 1
     // Note < , as nextPlayID has not yet been used
     while id < AllDay.nextPlayID {
         plays.append(AllDay.getPlayData(id: id))

@@ -1,11 +1,11 @@
 import AllDay from "../../../contracts/AllDay.cdc"
 
 transaction(
-    seriesID: UInt32,
-    setID: UInt32,
-    playID: UInt32,
+    seriesID: UInt64,
+    setID: UInt64,
+    playID: UInt64,
     tier: String,
-    maxMintSize: UInt32?,
+    maxMintSize: UInt64?,
    ) {
     // local variable for the admin reference
     let admin: &AllDay.Admin

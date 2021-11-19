@@ -1,7 +1,7 @@
 # NFL Smart Contracts
 
 ## NFL Contract Addresses
-| Testnet   | b69482c096f1e0ca  |
+| Testnet   | TBC               |
 | Mainnet   | TBC               |
 
 ## Entities

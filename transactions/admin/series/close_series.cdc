@@ -1,6 +1,6 @@
 import AllDay from "../../../contracts/AllDay.cdc"
 
-transaction(seriesID: UInt32) {
+transaction(seriesID: UInt64) {
     // local variable for the admin reference
     let admin: &AllDay.Admin
 

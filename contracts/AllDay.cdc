@@ -47,37 +47,37 @@ pub contract AllDay: NonFungibleToken {
     // Series Events
     //
     // Emitted when a new series has been created by an admin
-    pub event SeriesCreated(id: UInt32, name: String)
+    pub event SeriesCreated(id: UInt64, name: String)
     // Emitted when a series is closed by an admin
-    pub event SeriesClosed(id: UInt32)
+    pub event SeriesClosed(id: UInt64)
 
     // Set Events
     //
     // Emitted when a new set has been created by an admin
-    pub event SetCreated(id: UInt32, name: String)
+    pub event SetCreated(id: UInt64, name: String)
 
     // Play Events
     //
     // Emitted when a new play has been created by an admin
-    pub event PlayCreated(id: UInt32, classification: String, metadata: {String: String})
+    pub event PlayCreated(id: UInt64, classification: String, metadata: {String: String})
 
     // Edition Events
     //
     // Emitted when a new edition has been created by an admin
     pub event EditionCreated(
-        id: UInt32, 
-        seriesID: UInt32, 
-        setID: UInt32, 
-        playID: UInt32, 
-        maxMintSize: UInt32?,
+        id: UInt64, 
+        seriesID: UInt64, 
+        setID: UInt64, 
+        playID: UInt64, 
+        maxMintSize: UInt64?,
         tier: String,
     )
     // Emitted when an edition is either closed by an admin, or the max amount of moments have been minted
-    pub event EditionClosed(id: UInt32)
+    pub event EditionClosed(id: UInt64)
 
     // NFT Events
     //
-    pub event MomentNFTMinted(id: UInt64, editionID: UInt32, serialNumber: UInt32)
+    pub event MomentNFTMinted(id: UInt64, editionID: UInt64, serialNumber: UInt64)
     pub event MomentNFTBurned(id: UInt64)
 
     //------------------------------------------------------------
@@ -98,10 +98,10 @@ pub contract AllDay: NonFungibleToken {
     // Entity Counts
     //
     pub var totalSupply:        UInt64
-    pub var nextSeriesID:       UInt32
-    pub var nextSetID:          UInt32
-    pub var nextPlayID:         UInt32
-    pub var nextEditionID:      UInt32
+    pub var nextSeriesID:       UInt64
+    pub var nextSetID:          UInt64
+    pub var nextPlayID:         UInt64
+    pub var nextEditionID:      UInt64
 
     //------------------------------------------------------------
     // Internal contract state
@@ -110,12 +110,12 @@ pub contract AllDay: NonFungibleToken {
     // Metadata Dictionaries
     //
     // This is so we can find Series by their names (via seriesByID)
-    access(self) let seriesIDByName:    {String: UInt32}
-    access(self) let seriesByID:        @{UInt32: Series}
-    access(self) let setIDByName:       {String: UInt32}
-    access(self) let setByID:           @{UInt32: Set}
-    access(self) let playByID:          @{UInt32: Play}
-    access(self) let editionByID:       @{UInt32: Edition}
+    access(self) let seriesIDByName:    {String: UInt64}
+    access(self) let seriesByID:        @{UInt64: Series}
+    access(self) let setIDByName:       {String: UInt64}
+    access(self) let setByID:           @{UInt64: Set}
+    access(self) let playByID:          @{UInt64: Play}
+    access(self) let editionByID:       @{UInt64: Edition}
 
     //------------------------------------------------------------
     // Series
@@ -124,13 +124,13 @@ pub contract AllDay: NonFungibleToken {
     // A public struct to access Series data
     //
     pub struct SeriesData {
-        pub let id: UInt32
+        pub let id: UInt64
         pub let name: String
         pub let active: Bool
 
         // initializer
         //
-        init (id: UInt32) {
+        init (id: UInt64) {
             let series = &AllDay.seriesByID[id] as! &AllDay.Series
             self.id = series.id
             self.name = series.name
@@ -141,7 +141,7 @@ pub contract AllDay: NonFungibleToken {
     // A top-level Series with a unique ID and name
     //
     pub resource Series {
-        pub let id: UInt32
+        pub let id: UInt64
         pub let name: String
         pub var active: Bool
 
@@ -170,7 +170,7 @@ pub contract AllDay: NonFungibleToken {
             // Cache the new series's name => ID
             AllDay.seriesIDByName[name] = self.id
             // Increment for the nextSeriesID
-            AllDay.nextSeriesID = self.id + 1 as UInt32
+            AllDay.nextSeriesID = self.id + 1 as UInt64
 
             emit SeriesCreated(id: self.id, name: self.name)
         }
@@ -178,7 +178,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for a Series by id
     //
-    pub fun getSeriesData(id: UInt32): AllDay.SeriesData {
+    pub fun getSeriesData(id: UInt64): AllDay.SeriesData {
         pre {
             AllDay.seriesByID[id] != nil: "Cannot borrow series, no such id"
         }
@@ -206,7 +206,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get series id for name
     //
-    pub fun getSeriesIDByName(name: String): UInt32? {
+    pub fun getSeriesIDByName(name: String): UInt64? {
         return AllDay.seriesIDByName[name]
     }
 
@@ -217,18 +217,18 @@ pub contract AllDay: NonFungibleToken {
     // A public struct to access Set data
     //
     pub struct SetData {
-        pub let id: UInt32
+        pub let id: UInt64
         pub let name: String
-        pub var setPlaysInEditions: {UInt32: Bool}
+        pub var setPlaysInEditions: {UInt64: Bool}
 
         // member function to check the setPlaysInEditions to see if this Set/Play combination already exists
-        pub fun setPlayExistsInEdition(playID: UInt32): Bool {
+        pub fun setPlayExistsInEdition(playID: UInt64): Bool {
            return self.setPlaysInEditions.containsKey(playID)
         }
 
         // initializer
         //
-        init (id: UInt32) {
+        init (id: UInt64) {
             let set = &AllDay.setByID[id] as! &AllDay.Set
             self.id = id
             self.name = set.name
@@ -239,14 +239,14 @@ pub contract AllDay: NonFungibleToken {
     // A top level Set with a unique ID and a name
     //
     pub resource Set {
-        pub let id: UInt32
+        pub let id: UInt64
         pub let name: String
         // Store a dictionary of all the Plays which are paired with the Set inside Editions
         // This enforces only one Set/Play unique pair can be used for an Edition
-        pub var setPlaysInEditions: {UInt32: Bool}
+        pub var setPlaysInEditions: {UInt64: Bool}
 
         // member function to insert a new Play to the setPlaysInEditions dictionary
-        pub fun insertNewPlay(playID: UInt32) {
+        pub fun insertNewPlay(playID: UInt64) {
             self.setPlaysInEditions[playID] = true
         }
 
@@ -263,7 +263,7 @@ pub contract AllDay: NonFungibleToken {
             // Cache the new set's name => ID
             AllDay.setIDByName[name] = self.id
             // Increment for the nextSeriesID
-            AllDay.nextSetID = self.id + 1 as UInt32
+            AllDay.nextSetID = self.id + 1 as UInt64
 
             emit SetCreated(id: self.id, name: self.name)
         }
@@ -271,7 +271,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for a Set
     //
-    pub fun getSetData(id: UInt32): AllDay.SetData {
+    pub fun getSetData(id: UInt64): AllDay.SetData {
         pre {
             AllDay.setByID[id] != nil: "Cannot borrow set, no such id"
         }
@@ -305,13 +305,13 @@ pub contract AllDay: NonFungibleToken {
     // A public struct to access Play data
     //
     pub struct PlayData {
-        pub let id: UInt32
+        pub let id: UInt64
         pub let classification: String
         pub let metadata: {String: String}
 
         // initializer
         //
-        init (id: UInt32) {
+        init (id: UInt64) {
             let play = &AllDay.playByID[id] as! &AllDay.Play
             self.id = id
             self.classification = play.classification
@@ -322,7 +322,7 @@ pub contract AllDay: NonFungibleToken {
     // A top level Play with a unique ID and a classification
     //
     pub resource Play {
-        pub let id: UInt32
+        pub let id: UInt64
         pub let classification: String
         // Contents writable if borrowed!
         // This is deliberate, as it allows admins to update the data.
@@ -335,7 +335,7 @@ pub contract AllDay: NonFungibleToken {
             self.classification = classification
             self.metadata = metadata
 
-            AllDay.nextPlayID = self.id + 1 as UInt32
+            AllDay.nextPlayID = self.id + 1 as UInt64
 
             emit PlayCreated(id: self.id, classification: self.classification, metadata: self.metadata)
         }
@@ -343,7 +343,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for a Play
     //
-    pub fun getPlayData(id: UInt32): AllDay.PlayData {
+    pub fun getPlayData(id: UInt64): AllDay.PlayData {
         pre {
             AllDay.playByID[id] != nil: "Cannot borrow play, no such id"
         }
@@ -358,13 +358,13 @@ pub contract AllDay: NonFungibleToken {
     // A public struct to access Edition data
     //
     pub struct EditionData {
-        pub let id: UInt32
-        pub let seriesID: UInt32
-        pub let setID: UInt32
-        pub let playID: UInt32
-        pub var maxMintSize: UInt32?
+        pub let id: UInt64
+        pub let seriesID: UInt64
+        pub let setID: UInt64
+        pub let playID: UInt64
+        pub var maxMintSize: UInt64?
         pub let tier: String
-        pub var numMinted: UInt32
+        pub var numMinted: UInt64
 
        // member function to check if max edition size has been reached
        pub fun maxEditionMintSizeReached(): Bool {
@@ -373,7 +373,7 @@ pub contract AllDay: NonFungibleToken {
 
         // initializer
         //
-        init (id: UInt32) {
+        init (id: UInt64) {
             let edition = &AllDay.editionByID[id] as! &AllDay.Edition
             self.id = id
             self.seriesID = edition.seriesID
@@ -388,15 +388,15 @@ pub contract AllDay: NonFungibleToken {
     // A top level Edition that contains a Series, Set, and Play
     //
     pub resource Edition {
-        pub let id: UInt32
-        pub let seriesID: UInt32
-        pub let setID: UInt32
-        pub let playID: UInt32
+        pub let id: UInt64
+        pub let seriesID: UInt64
+        pub let setID: UInt64
+        pub let playID: UInt64
         pub let tier: String
         // Null value indicates that there is unlimited minting potential for the Edition
-        pub var maxMintSize: UInt32?
+        pub var maxMintSize: UInt64?
         // Updates each time we mint a new moment for the Edition to keep a running total
-        pub var numMinted: UInt32
+        pub var numMinted: UInt64
 
         // Close this edition so that no more Moment NFTs can be minted in it
         //
@@ -426,7 +426,7 @@ pub contract AllDay: NonFungibleToken {
             )
             AllDay.totalSupply = AllDay.totalSupply + 1
             // Keep a running total (you'll notice we used this as the serial number)
-            self.numMinted = self.numMinted + 1 as UInt32
+            self.numMinted = self.numMinted + 1 as UInt64
 
             return <- momentNFT
         }
@@ -434,10 +434,10 @@ pub contract AllDay: NonFungibleToken {
         // initializer
         //
         init (
-            seriesID: UInt32,
-            setID: UInt32,
-            playID: UInt32,
-            maxMintSize: UInt32?,
+            seriesID: UInt64,
+            setID: UInt64,
+            playID: UInt64,
+            maxMintSize: UInt64?,
             tier: String,
         ) {
             pre {
@@ -462,9 +462,9 @@ pub contract AllDay: NonFungibleToken {
             }
 
             self.tier = tier
-            self.numMinted = 0 as UInt32
+            self.numMinted = 0 as UInt64
 
-            AllDay.nextEditionID = AllDay.nextEditionID + 1 as UInt32
+            AllDay.nextEditionID = AllDay.nextEditionID + 1 as UInt64
             AllDay.setByID[setID]?.insertNewPlay(playID: playID)
 
             emit EditionCreated(
@@ -480,7 +480,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for an Edition
     //
-    pub fun getEditionData(id: UInt32): EditionData {
+    pub fun getEditionData(id: UInt64): EditionData {
         pre {
             AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
         }
@@ -496,8 +496,8 @@ pub contract AllDay: NonFungibleToken {
     //
     pub resource NFT: NonFungibleToken.INFT {
         pub let id: UInt64
-        pub let editionID: UInt32
-        pub let serialNumber: UInt32
+        pub let editionID: UInt64
+        pub let serialNumber: UInt64
         pub let mintingDate: UFix64
 
         // Destructor
@@ -510,8 +510,8 @@ pub contract AllDay: NonFungibleToken {
         //
         init(
             id: UInt64,
-            editionID: UInt32,
-            serialNumber: UInt32
+            editionID: UInt64,
+            serialNumber: UInt64
         ) {
             pre {
                 AllDay.editionByID[editionID] != nil: "no such editionID"
@@ -654,7 +654,7 @@ pub contract AllDay: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt32): @AllDay.NFT
+        pub fun mintNFT(editionID: UInt64): @AllDay.NFT
     }
 
     // A resource that allows managing metadata and minting NFTs
@@ -662,7 +662,7 @@ pub contract AllDay: NonFungibleToken {
     pub resource Admin: NFTMinter {
         // Borrow a Series
         //
-        pub fun borrowSeries(id: UInt32): &AllDay.Series {
+        pub fun borrowSeries(id: UInt64): &AllDay.Series {
             pre {
                 AllDay.seriesByID[id] != nil: "Cannot borrow series, no such id"
             }
@@ -672,7 +672,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Borrow a Set
         //
-        pub fun borrowSet(id: UInt32): &AllDay.Set {
+        pub fun borrowSet(id: UInt64): &AllDay.Set {
             pre {
                 AllDay.setByID[id] != nil: "Cannot borrow Set, no such id"
             }
@@ -682,7 +682,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Borrow a Play
         //
-        pub fun borrowPlay(id: UInt32): &AllDay.Play {
+        pub fun borrowPlay(id: UInt64): &AllDay.Play {
             pre {
                 AllDay.playByID[id] != nil: "Cannot borrow Play, no such id"
             }
@@ -692,7 +692,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Borrow an Edition
         //
-        pub fun borrowEdition(id: UInt32): &AllDay.Edition {
+        pub fun borrowEdition(id: UInt64): &AllDay.Edition {
             pre {
                 AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
             }
@@ -702,7 +702,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Create a Series
         //
-        pub fun createSeries(name: String): UInt32 {
+        pub fun createSeries(name: String): UInt64 {
             // Create and store the new series
             let series <- create AllDay.Series(
                 name: name,
@@ -716,7 +716,7 @@ pub contract AllDay: NonFungibleToken {
         
         // Close a Series
         //
-        pub fun closeSeries(id: UInt32): UInt32 {
+        pub fun closeSeries(id: UInt64): UInt64 {
             let series = &AllDay.seriesByID[id] as &AllDay.Series
             series.close()
             return series.id
@@ -724,7 +724,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Create a Set
         //
-        pub fun createSet(name: String): UInt32 {
+        pub fun createSet(name: String): UInt64 {
             // Create and store the new set
             let set <- create AllDay.Set(
                 name: name,
@@ -738,7 +738,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Create a Play
         //
-        pub fun createPlay(classification: String, metadata: {String: String}): UInt32 {
+        pub fun createPlay(classification: String, metadata: {String: String}): UInt64 {
             // Create and store the new play
             let play <- create AllDay.Play(
                 classification: classification,
@@ -754,11 +754,11 @@ pub contract AllDay: NonFungibleToken {
         // Create an Edition
         //
         pub fun createEdition(            
-            seriesID: UInt32,
-            setID: UInt32,
-            playID: UInt32,
-            maxMintSize: UInt32?,
-            tier: String): UInt32 {
+            seriesID: UInt64,
+            setID: UInt64,
+            playID: UInt64,
+            maxMintSize: UInt64?,
+            tier: String): UInt64 {
             let edition <- create Edition(
                 seriesID: seriesID,
                 setID: setID,
@@ -774,7 +774,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Close an Edition
         //
-        pub fun closeEdition(id: UInt32): UInt32 {
+        pub fun closeEdition(id: UInt64): UInt64 {
             let edition = &AllDay.editionByID[id] as &AllDay.Edition
             edition.close()
             return edition.id
@@ -783,7 +783,7 @@ pub contract AllDay: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt32): @AllDay.NFT {
+        pub fun mintNFT(editionID: UInt64): @AllDay.NFT {
             pre {
                 // Make sure the edition we are creating this NFT in exists
                 AllDay.editionByID.containsKey(editionID): "No such EditionID"

@@ -26,10 +26,10 @@ func getSeriesData(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	id uint32,
+	id uint64,
 ) SeriesData {
 	script := loadAllDayReadSeriesByIDScript(contracts)
-	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt64(id))})
 
 	return parseSeriesData(result)
 }
@@ -38,10 +38,10 @@ func getSetData(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	id uint32,
+	id uint64,
 ) SetData {
 	script := loadAllDayReadSetByIDScript(contracts)
-	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt64(id))})
 
 	return parseSetData(result)
 }
@@ -50,10 +50,10 @@ func getPlayData(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	id uint32,
+	id uint64,
 ) PlayData {
 	script := loadAllDayReadPlayByIDScript(contracts)
-	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt64(id))})
 
 	return parsePlayData(result)
 }
@@ -62,10 +62,10 @@ func getEditionData(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
-	id uint32,
+	id uint64,
 ) EditionData {
 	script := loadAllDayReadEditionByIDScript(contracts)
-	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt32(id))})
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt64(id))})
 
 	return parseEditionData(result)
 }

@@ -1,7 +1,7 @@
 import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
 import AllDay from "../../../contracts/AllDay.cdc"
 
-transaction(recipientAddress: Address, editionIDs: [UInt32], counts: [UInt32]) {
+transaction(recipientAddress: Address, editionIDs: [UInt64], counts: [UInt64]) {
     
     // local variable for storing the minter reference
     let minter: &{AllDay.NFTMinter}

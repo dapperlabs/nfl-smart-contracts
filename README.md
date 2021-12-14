@@ -1,8 +1,8 @@
 # NFL Smart Contracts
 
 ## NFL Contract Addresses
-| Testnet   | TBC               |
-| Mainnet   | TBC               |
+| Testnet   | e4cf4bdc1751c65d               | [Flow View Source](https://flow-view-source.com/mainnet/account/0xe4cf4bdc1751c65d)
+| Mainnet   | 4dfd62c88d1b6462               | [Flow View Source](https://flow-view-source.com/testnet/account/0x4dfd62c88d1b6462)
 
 ## Entities
 

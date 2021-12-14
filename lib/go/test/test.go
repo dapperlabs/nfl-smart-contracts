@@ -29,10 +29,9 @@ var (
 )
 
 type Contracts struct {
-	NFTAddress                       flow.Address
-	AllDayAddress                  flow.Address
-	AllDaySigner                   crypto.Signer
-	AllDayShardedCollectionAddress flow.Address
+	NFTAddress    flow.Address
+	AllDayAddress flow.Address
+	AllDaySigner  crypto.Signer
 }
 
 func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
@@ -92,45 +91,10 @@ func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	_, err = b.CommitBlock()
 	require.NoError(t, err)
 
-	AllDayShardedCollectionAccountKey, AllDayShardedCollectionSigner := accountKeys.NewWithSigner()
-	AllDayShardedCollectionCode := loadAllDayShardedCollection(nftAddress, AllDayAddress)
-
-	AllDayShardedCollectionAddress, err := b.CreateAccount(
-		[]*flow.AccountKey{AllDayShardedCollectionAccountKey},
-		nil,
-	)
-	require.NoError(t, err)
-
-	fundAccount(t, b, AllDayShardedCollectionAddress, defaultAccountFunding)
-
-	tx2 := sdktemplates.AddAccountContract(
-		AllDayShardedCollectionAddress,
-		sdktemplates.Contract{
-			Name:   "AllDayShardedCollection",
-			Source: string(AllDayShardedCollectionCode),
-		},
-	)
-
-	tx2.
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address)
-
-	signAndSubmit(
-		t, b, tx2,
-		[]flow.Address{b.ServiceKey().Address, AllDayShardedCollectionAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), AllDayShardedCollectionSigner},
-		false,
-	)
-
-	_, err = b.CommitBlock()
-	require.NoError(t, err)
-
 	return Contracts{
 		nftAddress,
 		AllDayAddress,
 		AllDaySigner,
-		AllDayShardedCollectionAddress,
 	}
 }
 

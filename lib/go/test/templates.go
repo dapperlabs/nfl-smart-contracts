@@ -9,9 +9,8 @@ import (
 // Handle relative paths by making these regular expressions
 
 const (
-	nftAddressPlaceholder                       = "\"[^\"]*NonFungibleToken.cdc\""
-	AllDayAddressPlaceholder                  = "\"[^\"]*AllDay.cdc\""
-	AllDayShardedCollectionAddressPlaceholder = "\"[^\"]*AllDayShardedCollection.cdc\""
+	nftAddressPlaceholder    = "\"[^\"]*NonFungibleToken.cdc\""
+	AllDayAddressPlaceholder = "\"[^\"]*AllDay.cdc\""
 )
 
 const (
@@ -22,12 +21,6 @@ const (
 	// Accounts
 	AllDaySetupAccountPath   = AllDayTransactionsRootPath + "/user/setup_AllDay_account.cdc"
 	AllDayAccountIsSetupPath = AllDayScriptsRootPath + "/user/account_is_setup.cdc"
-
-	// ShardedCollection
-	AllDayShardedCollectionPath                            = "../../../contracts/AllDayShardedCollection.cdc"
-	AllDaySetupShardedCollectionPath                       = AllDayTransactionsRootPath + "/admin/sharded_collection/setup_sharded_collection.cdc"
-	AllDayTransferMomentNFTFromShardedCollectionPath       = AllDayTransactionsRootPath + "/admin/sharded_collection/transfer_AllDay_nft_from_sharded_collection.cdc"
-	AllDayBatchTransferMomentNFTsFromShardedCollectionPath = AllDayTransactionsRootPath + "/admin/sharded_collection/batch_transfer_AllDay_nfts_from_sharded_collection.cdc"
 
 	// Series
 	AllDayCreateSeriesPath       = AllDayTransactionsRootPath + "/admin/series/create_series.cdc"
@@ -75,9 +68,6 @@ func replaceAddresses(code []byte, contracts Contracts) []byte {
 	AllDayRe := regexp.MustCompile(AllDayAddressPlaceholder)
 	code = AllDayRe.ReplaceAll(code, []byte("0x"+contracts.AllDayAddress.String()))
 
-	AllDayShardedCollectionRe := regexp.MustCompile(AllDayShardedCollectionAddressPlaceholder)
-	code = AllDayShardedCollectionRe.ReplaceAll(code, []byte("0x"+contracts.AllDayShardedCollectionAddress.String()))
-
 	return code
 }
 
@@ -100,42 +90,6 @@ func loadAllDaySetupAccountTransaction(contracts Contracts) []byte {
 func loadAllDayAccountIsSetupScript(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayAccountIsSetupPath),
-		contracts,
-	)
-}
-
-//------------------------------------------------------------
-// Sharded Collection
-//------------------------------------------------------------
-func loadAllDayShardedCollection(nftAddress flow.Address, AllDayAddress flow.Address) []byte {
-	code := readFile(AllDayShardedCollectionPath)
-
-	nftRe := regexp.MustCompile(nftAddressPlaceholder)
-	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
-
-	AllDayRe := regexp.MustCompile(AllDayAddressPlaceholder)
-	code = AllDayRe.ReplaceAll(code, []byte("0x"+AllDayAddress.String()))
-
-	return code
-}
-
-func loadAllDaySetupShardedCollectionTransaction(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDaySetupShardedCollectionPath),
-		contracts,
-	)
-}
-
-func loadAllDayTransferMomentNFTFromShardedCollectionTransaction(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayTransferMomentNFTFromShardedCollectionPath),
-		contracts,
-	)
-}
-
-func loadAllDayBatchTransferMomentNFTsFromShardedCollectionTransaction(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayBatchTransferMomentNFTsFromShardedCollectionPath),
 		contracts,
 	)
 }

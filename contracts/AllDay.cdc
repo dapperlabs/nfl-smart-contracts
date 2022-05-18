@@ -131,7 +131,7 @@ pub contract AllDay: NonFungibleToken {
         // initializer
         //
         init (id: UInt64) {
-            let series = &AllDay.seriesByID[id] as! &AllDay.Series
+            let series = (&AllDay.seriesByID[id] as &AllDay.Series?)!
             self.id = series.id
             self.name = series.name
             self.active = series.active
@@ -229,7 +229,7 @@ pub contract AllDay: NonFungibleToken {
         // initializer
         //
         init (id: UInt64) {
-            let set = &AllDay.setByID[id] as! &AllDay.Set
+            let set = (&AllDay.setByID[id] as &AllDay.Set?)!
             self.id = id
             self.name = set.name
             self.setPlaysInEditions = set.setPlaysInEditions
@@ -312,7 +312,7 @@ pub contract AllDay: NonFungibleToken {
         // initializer
         //
         init (id: UInt64) {
-            let play = &AllDay.playByID[id] as! &AllDay.Play
+            let play = (&AllDay.playByID[id] as &AllDay.Play?)!
             self.id = id
             self.classification = play.classification
             self.metadata = play.metadata
@@ -374,7 +374,7 @@ pub contract AllDay: NonFungibleToken {
         // initializer
         //
         init (id: UInt64) {
-            let edition = &AllDay.editionByID[id] as! &AllDay.Edition
+            let edition = (&AllDay.editionByID[id] as &AllDay.Edition?)!
             self.id = id
             self.seriesID = edition.seriesID
             self.playID = edition.playID
@@ -611,14 +611,14 @@ pub contract AllDay: NonFungibleToken {
         // borrowNFT gets a reference to an NFT in the collection
         //
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
         // borrowMomentNFT gets a reference to an NFT in the collection
         //
         pub fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
             if self.ownedNFTs[id] != nil {
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+                let ref = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
                 return ref as! &AllDay.NFT
             } else {
                 return nil
@@ -667,7 +667,7 @@ pub contract AllDay: NonFungibleToken {
                 AllDay.seriesByID[id] != nil: "Cannot borrow series, no such id"
             }
 
-            return &AllDay.seriesByID[id] as &AllDay.Series
+            return (&AllDay.seriesByID[id] as &AllDay.Series?)!
         }
 
         // Borrow a Set
@@ -677,7 +677,7 @@ pub contract AllDay: NonFungibleToken {
                 AllDay.setByID[id] != nil: "Cannot borrow Set, no such id"
             }
 
-            return &AllDay.setByID[id] as &AllDay.Set
+            return (&AllDay.setByID[id] as &AllDay.Set?)!
         }
 
         // Borrow a Play
@@ -687,7 +687,7 @@ pub contract AllDay: NonFungibleToken {
                 AllDay.playByID[id] != nil: "Cannot borrow Play, no such id"
             }
 
-            return &AllDay.playByID[id] as &AllDay.Play
+            return (&AllDay.playByID[id] as &AllDay.Play?)!
         }
 
         // Borrow an Edition
@@ -697,7 +697,7 @@ pub contract AllDay: NonFungibleToken {
                 AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
             }
 
-            return &AllDay.editionByID[id] as &AllDay.Edition
+            return (&AllDay.editionByID[id] as &AllDay.Edition?)!
         }
 
         // Create a Series
@@ -717,7 +717,7 @@ pub contract AllDay: NonFungibleToken {
         // Close a Series
         //
         pub fun closeSeries(id: UInt64): UInt64 {
-            let series = &AllDay.seriesByID[id] as &AllDay.Series
+            let series = (&AllDay.seriesByID[id] as &AllDay.Series?)!
             series.close()
             return series.id
         }
@@ -775,7 +775,7 @@ pub contract AllDay: NonFungibleToken {
         // Close an Edition
         //
         pub fun closeEdition(id: UInt64): UInt64 {
-            let edition = &AllDay.editionByID[id] as &AllDay.Edition
+            let edition = (&AllDay.editionByID[id] as &AllDay.Edition?)!
             edition.close()
             return edition.id
         }

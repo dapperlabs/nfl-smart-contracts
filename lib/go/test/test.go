@@ -244,7 +244,9 @@ func metadataDict(dict map[string]string) cadence.Dictionary {
 	pairs := []cadence.KeyValuePair{}
 
 	for key, value := range dict {
-		pairs = append(pairs, cadence.KeyValuePair{Key: cadence.NewString(key), Value: cadence.NewString(value)})
+		k, _ := cadence.NewString(key)
+		v, _ := cadence.NewString(value)
+		pairs = append(pairs, cadence.KeyValuePair{Key: k, Value: v})
 	}
 
 	return cadence.NewDictionary(pairs)

@@ -19,10 +19,10 @@ func TestAllDaySeasonalSetupAccount(t *testing.T) {
 	b := newEmulator()
 	contracts := AllDaySeasonalDeployContracts(t, b)
 	userAddress, userSigner := createAccount(t, b)
-	setupAllDay(t, b, userAddress, userSigner, contracts)
+	setupAllDaySeasonal(t, b, userAddress, userSigner, contracts)
 
 	t.Run("Account should be set up", func(t *testing.T) {
-		accountIsSetUp := accountIsSetup(
+		accountIsSetUp := accountSeasonalIsSetup(
 			t,
 			b,
 			contracts,

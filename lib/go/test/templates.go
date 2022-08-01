@@ -15,12 +15,15 @@ const (
 
 const (
 	AllDayPath                 = "../../../contracts/AllDay.cdc"
+	AllDaySeasonalPath         = "../../../contracts/AllDaySeasonal.cdc"
 	AllDayTransactionsRootPath = "../../../transactions"
 	AllDayScriptsRootPath      = "../../../scripts"
 
 	// Accounts
-	AllDaySetupAccountPath   = AllDayTransactionsRootPath + "/user/setup_AllDay_account.cdc"
-	AllDayAccountIsSetupPath = AllDayScriptsRootPath + "/user/account_is_setup.cdc"
+	AllDaySetupAccountPath           = AllDayTransactionsRootPath + "/user/setup_allday_account.cdc"
+	AllDaySeasonalSetupAccountPath   = AllDayTransactionsRootPath + "/user/setup_allday_seasonal_account.cdc"
+	AllDayAccountIsSetupPath         = AllDayScriptsRootPath + "/user/account_is_setup.cdc"
+	AllDaySeasonalAccountIsSetupPath = AllDayScriptsRootPath + "/user/account_seasonal_is_setup.cdc"
 
 	// Series
 	AllDayCreateSeriesPath       = AllDayTransactionsRootPath + "/admin/series/create_series.cdc"
@@ -81,6 +84,15 @@ func LoadAllDay(nftAddress flow.Address) []byte {
 	return code
 }
 
+func LoadAllDaySeasonal(nftAddress flow.Address) []byte {
+	code := readFile(AllDaySeasonalPath)
+
+	nftRe := regexp.MustCompile(nftAddressPlaceholder)
+	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
+
+	return code
+}
+
 func loadAllDaySetupAccountTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDaySetupAccountPath),
@@ -88,9 +100,23 @@ func loadAllDaySetupAccountTransaction(contracts Contracts) []byte {
 	)
 }
 
+func loadAllDaySeasonalSetupAccountTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDaySeasonalSetupAccountPath),
+		contracts,
+	)
+}
+
 func loadAllDayAccountIsSetupScript(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayAccountIsSetupPath),
+		contracts,
+	)
+}
+
+func loadAllDaySeasonalAccountIsSetupScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDaySeasonalAccountIsSetupPath),
 		contracts,
 	)
 }

@@ -121,18 +121,18 @@ pub contract AllDaySeasonal: NonFungibleToken {
         // Mint a Seasonal NFT in this edition, with the given minting mintingDate.
         // Note that this will panic if the max mint size has already been reached.
         //
-        pub fun mint(): @AllDay.NFT {
+        pub fun mint(): @AllDaySeasonal.NFT {
             pre {
                 self.active: "edition closed, cannot mint"
             }
 
             // Create the Moment NFT, filled out with our information
             let momentNFT <- create NFT(
-                id: AllDay.totalSupply + 1,
+                id: AllDaySeasonal.totalSupply + 1,
                 editionID: self.id,
                 serialNumber: self.numMinted + 1
             )
-            AllDay.totalSupply = AllDay.totalSupply + 1
+            AllDaySeasonal.totalSupply = AllDaySeasonal.totalSupply + 1
             // Keep a running total (you'll notice we used this as the serial number)
             self.numMinted = self.numMinted + 1 as UInt64
 
@@ -142,111 +142,22 @@ pub contract AllDaySeasonal: NonFungibleToken {
         // initializer
         //
         init (metadata: {String: String}) {
-            self.id = AllDay.nextEditionID
+            self.id = AllDaySeasonal.nextEditionID
             self.metadata = metadata
 
-            AllDay.nextEditionID = self.id + 1 as UInt64
+            AllDaySeasonal.nextEditionID = self.id + 1 as UInt64
             emit EditionCreated(id: self.id, metadata: self.metadata)
         }
     }
 
     // Get the publicly available data for a Edition
     //
-    pub fun getEditionData(id: UInt64): AllDay.EditionData {
+    pub fun getEditionData(id: UInt64): AllDaySeasonal.EditionData {
         pre {
-            AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
+            AllDaySeasonal.editionByID[id] != nil: "Cannot borrow edition, no such id"
         }
 
-        return AllDay.EditionData(id: id)
-    }
-
-
-    // A top level Edition that contains a Series, Set, and Play
-    //
-    pub resource Edition {
-        pub let id: UInt64
-        pub let seriesID: UInt64
-        pub let setID: UInt64
-        pub let playID: UInt64
-        pub let tier: String
-    
-   
-        // Mint a Moment NFT in this edition, with the given minting mintingDate.
-        // Note that this will panic if the max mint size has already been reached.
-        //
-        pub fun mint(): @AllDay.NFT {
-            pre {
-                self.numMinted != self.maxMintSize: "max number of minted moments has been reached"
-            }
-
-            // Create the Moment NFT, filled out with our information
-            let momentNFT <- create NFT(
-                id: AllDay.totalSupply + 1,
-                editionID: self.id,
-                serialNumber: self.numMinted + 1
-            )
-            AllDay.totalSupply = AllDay.totalSupply + 1
-            // Keep a running total (you'll notice we used this as the serial number)
-            self.numMinted = self.numMinted + 1 as UInt64
-
-            return <- momentNFT
-        }
-
-        // initializer
-        //
-        init (
-            seriesID: UInt64,
-            setID: UInt64,
-            playID: UInt64,
-            maxMintSize: UInt64?,
-            tier: String,
-        ) {
-            pre {
-                maxMintSize != 0: "max mint size is zero, must either be null or greater than 0"
-                AllDay.seriesByID.containsKey(seriesID): "seriesID does not exist"
-                AllDay.setByID.containsKey(setID): "setID does not exist"
-                AllDay.playByID.containsKey(playID): "playID does not exist"
-                SeriesData(id: seriesID).active == true: "cannot create an Edition with a closed Series"
-                SetData(id: setID).setPlayExistsInEdition(playID: playID) != true: "set play combination already exists in an edition"
-            }
-
-            self.id = AllDay.nextEditionID
-            self.seriesID = seriesID
-            self.setID = setID
-            self.playID = playID
-
-            // If an edition size is not set, it has unlimited minting potential
-            if maxMintSize == 0 {
-                self.maxMintSize = nil
-            } else {
-                self.maxMintSize = maxMintSize
-            }
-
-            self.tier = tier
-            self.numMinted = 0 as UInt64
-
-            AllDay.nextEditionID = AllDay.nextEditionID + 1 as UInt64
-            AllDay.setByID[setID]?.insertNewPlay(playID: playID)
-
-            emit EditionCreated(
-                id: self.id,
-                seriesID: self.seriesID,
-                setID: self.setID,
-                playID: self.playID,
-                maxMintSize: self.maxMintSize,
-                tier: self.tier,
-            )
-        }
-    }
-
-    // Get the publicly available data for an Edition
-    //
-    pub fun getEditionData(id: UInt64): EditionData {
-        pre {
-            AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
-        }
-
-        return AllDay.EditionData(id: id)
+        return AllDaySeasonal.EditionData(id: id)
     }
 
     //------------------------------------------------------------
@@ -275,7 +186,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
             serialNumber: UInt64
         ) {
             pre {
-                AllDay.editionByID[editionID] != nil: "no such editionID"
+                AllDaySeasonal.editionByID[editionID] != nil: "no such editionID"
                 EditionData(id: editionID).maxEditionMintSizeReached() != true: "max edition size already reached"
             }
 
@@ -299,7 +210,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
+        pub fun borrowMomentNFT(id: UInt64): &AllDaySeasonal.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
@@ -336,7 +247,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
         // and adds the ID to the id array
         //
         pub fun deposit(token: @NonFungibleToken.NFT) {
-            let token <- token as! @AllDay.NFT
+            let token <- token as! @AllDaySeasonal.NFT
             let id: UInt64 = token.id
 
             // add the new token to the dictionary which removes the old one
@@ -381,10 +292,10 @@ pub contract AllDaySeasonal: NonFungibleToken {
 
         // borrowMomentNFT gets a reference to an NFT in the collection
         //
-        pub fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
+        pub fun borrowMomentNFT(id: UInt64): &AllDaySeasonal.NFT? {
             if self.ownedNFTs[id] != nil {
                 if let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT? {
-                    return ref! as! &AllDay.NFT
+                    return ref! as! &AllDaySeasonal.NFT
                 }
                 return nil
             } else {
@@ -421,7 +332,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt64): @AllDay.NFT
+        pub fun mintNFT(editionID: UInt64): @AllDaySeasonal.NFT
     }
 
     // A resource that allows managing metadata and minting NFTs
@@ -430,23 +341,23 @@ pub contract AllDaySeasonal: NonFungibleToken {
 
         // Borrow an Edition
         //
-        pub fun borrowEdition(id: UInt64): &AllDay.Edition {
+        pub fun borrowEdition(id: UInt64): &AllDaySeasonal.Edition {
             pre {
-                AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
+                AllDaySeasonal.editionByID[id] != nil: "Cannot borrow edition, no such id"
             }
 
-            return (&AllDay.editionByID[id] as &AllDay.Edition?)!
+            return (&AllDaySeasonal.editionByID[id] as &AllDaySeasonal.Edition?)!
         }
 
         // Create a Edition 
         //
         pub fun createEdition(metadata: {String: String}): UInt64 {
             // Create and store the new edition
-            let edition <- create AllDay.Edition(
+            let edition <- create AllDaySeasonal.Edition(
                 metadata: metadata,
             )
             let editionID = edition.id
-            AllDay.editionByID[edition.id] <-! edition
+            AllDaySeasonal.editionByID[edition.id] <-! edition
 
             // Return the new ID for convenience
             return editionID
@@ -456,7 +367,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
         // Close an Edition
         //
         pub fun closeEdition(id: UInt64): UInt64 {
-            if let edition = &AllDay.editionByID[id] as &AllDay.Edition? {
+            if let edition = &AllDaySeasonal.editionByID[id] as &AllDaySeasonal.Edition? {
                 edition.close()
                 return edition.id
             }
@@ -466,10 +377,10 @@ pub contract AllDaySeasonal: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt64): @AllDay.NFT {
+        pub fun mintNFT(editionID: UInt64): @AllDaySeasonal.NFT {
             pre {
                 // Make sure the edition we are creating this NFT in exists
-                AllDay.editionByID.containsKey(editionID): "No such EditionID"
+                AllDaySeasonal.editionByID.containsKey(editionID): "No such EditionID"
             }
             return <- self.borrowEdition(id: editionID).mint()
         }
@@ -501,7 +412,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
         self.account.save(<-admin, to: self.AdminStoragePath)
         // Link capabilites to the admin constrained to the Minter
         // and Metadata interfaces
-        self.account.link<&AllDay.Admin{AllDay.NFTMinter}>(
+        self.account.link<&AllDaySeasonal.Admin{AllDaySeasonal.NFTMinter}>(
             self.MinterPrivatePath,
             target: self.AdminStoragePath
         )

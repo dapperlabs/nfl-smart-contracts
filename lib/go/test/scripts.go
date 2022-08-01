@@ -22,6 +22,18 @@ func accountIsSetup(
 	return result.ToGoValue().(bool)
 }
 
+func accountSeasonalIsSetup(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	address flow.Address,
+) bool {
+	script := loadAllDaySeasonalAccountIsSetupScript(contracts)
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.BytesToAddress(address.Bytes()))})
+
+	return result.ToGoValue().(bool)
+}
+
 func getSeriesData(
 	t *testing.T,
 	b *emulator.Blockchain,
@@ -56,6 +68,18 @@ func getPlayData(
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt64(id))})
 
 	return parsePlayData(result)
+}
+
+func getEditionData(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	id uint64,
+) EditionData {
+	script := loadAllDayReadEditionByIDScript(contracts)
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt64(id))})
+
+	return parseEditionData(result)
 }
 
 func getSeasonalEditionData(

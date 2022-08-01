@@ -58,16 +58,16 @@ func getPlayData(
 	return parsePlayData(result)
 }
 
-func getEditionData(
+func getSeasonalEditionData(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
 	id uint64,
-) EditionData {
+) SeasonalEditionData {
 	script := loadAllDayReadEditionByIDScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt64(id))})
 
-	return parseEditionData(result)
+	return parseSeasonalEditionData(result)
 }
 
 func getMomentNFTSupply(

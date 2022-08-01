@@ -188,6 +188,29 @@ func createEdition(
 	)
 }
 
+func createSeasonalEdition(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDaySeasonalReadEditionByIDScript(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(metadataDict(metadata))
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
 func closeEdition(
 	t *testing.T,
 	b *emulator.Blockchain,

@@ -52,7 +52,7 @@ func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
 	return nftAddress
 }
 
-func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
+func AllDaySeasonalDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	accountKeys := test.AccountKeyGenerator()
 
 	nftAddress := deployNFTContract(t, b)

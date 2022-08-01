@@ -43,10 +43,11 @@ const (
 	AllDayReadAllPlaysPath = AllDayScriptsRootPath + "/plays/read_all_plays.cdc"
 
 	// Editions
-	AllDayCreateEditionPath   = AllDayTransactionsRootPath + "/admin/editions/create_edition.cdc"
-	AllDayCloseEditionPath    = AllDayTransactionsRootPath + "/admin/editions/close_edition.cdc"
-	AllDayReadEditionByIDPath = AllDayScriptsRootPath + "/editions/read_edition_by_id.cdc"
-	AllDayReadAllEditionsPath = AllDayScriptsRootPath + "/edition/read_all_editions.cdc"
+	AllDayCreateEditionPath           = AllDayTransactionsRootPath + "/admin/editions/create_edition.cdc"
+	AllDayCloseEditionPath            = AllDayTransactionsRootPath + "/admin/editions/close_edition.cdc"
+	AllDayReadEditionByIDPath         = AllDayScriptsRootPath + "/editions/read_edition_by_id.cdc"
+	AllDaySeasonalReadEditionByIDPath = AllDayScriptsRootPath + "/editions/read_seasonal_edition_by_id.cdc"
+	AllDayReadAllEditionsPath         = AllDayScriptsRootPath + "/edition/read_all_editions.cdc"
 
 	// Moment NFTs
 	AllDayMintMomentNFTPath           = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
@@ -212,6 +213,13 @@ func loadAllDayCreateEditionTransaction(contracts Contracts) []byte {
 }
 
 func loadAllDayReadEditionByIDScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayReadEditionByIDPath),
+		contracts,
+	)
+}
+
+func loadAllDaySeasonalReadEditionByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayReadEditionByIDPath),
 		contracts,

@@ -66,6 +66,9 @@ pub contract AllDaySeasonal: NonFungibleToken {
     //
     pub var totalEditions: UInt64
 
+    pub var nextEditionID:      UInt64
+
+
     //------------------------------------------------------------
     // Internal contract state
     //------------------------------------------------------------
@@ -83,16 +86,21 @@ pub contract AllDaySeasonal: NonFungibleToken {
     //
     pub struct EditionData {
         pub let id: UInt64
+        pub var numMinted: UInt64
         pub let metadata: {String: String}
+        pub var active: Bool
 
         // initializer
         //
         init (id: UInt64) {
-            if let play = &AllDay.playByID[id] as &AllDay.Play? {
+            if let edition = &AllDaySeasonal.editionByID[id] as &AllDaySeasonal.Edition? {
             self.id = id
-            self.metadata = play.metadata
+            self.metadata = edition.metadata
+            self.numMinted = edition.numMinted
+            self.active = edition.active
+
             } else {
-                panic("play does not exist")
+                panic("edition does not exist")
             }
         }
     }
@@ -103,6 +111,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
         pub let id: UInt64
         // Contents writable if borrowed!
         // This is deliberate, as it allows admins to update the data.
+        pub var numMinted: UInt64
         pub let metadata: {String: String}
         pub var active: Bool
 
@@ -144,6 +153,9 @@ pub contract AllDaySeasonal: NonFungibleToken {
         init (metadata: {String: String}) {
             self.id = AllDaySeasonal.nextEditionID
             self.metadata = metadata
+            self.numMinted = 0 as UInt64
+            self.active = true
+
 
             AllDaySeasonal.nextEditionID = self.id + 1 as UInt64
             emit EditionCreated(id: self.id, metadata: self.metadata)
@@ -169,13 +181,11 @@ pub contract AllDaySeasonal: NonFungibleToken {
     pub resource NFT: NonFungibleToken.INFT {
         pub let id: UInt64
         pub let editionID: UInt64
-        pub let serialNumber: UInt64
-        pub let mintingDate: UFix64
 
         // Destructor
         //
         destroy() {
-            emit MomentNFTBurned(id: self.id)
+            emit Burned(id: self.id)
         }
 
         // NFT initializer
@@ -187,15 +197,13 @@ pub contract AllDaySeasonal: NonFungibleToken {
         ) {
             pre {
                 AllDaySeasonal.editionByID[editionID] != nil: "no such editionID"
-                EditionData(id: editionID).maxEditionMintSizeReached() != true: "max edition size already reached"
+                EditionData(id: editionID).active != true: "edition already closed"
             }
 
             self.id = id
             self.editionID = editionID
-            self.serialNumber = serialNumber
-            self.mintingDate = getCurrentBlock().timestamp
 
-            emit MomentNFTMinted(id: self.id, editionID: self.editionID, serialNumber: self.serialNumber)
+            emit Minted(id: self.id, editionID: self.editionID)
         }
     }
 
@@ -403,6 +411,8 @@ pub contract AllDaySeasonal: NonFungibleToken {
         self.totalSupply = 0
         self.totalEditions = 0
         self.nextEditionID = 1
+
+
 
         // Initialize the metadata lookup dictionaries
         self.editionByID <- {}

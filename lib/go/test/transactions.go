@@ -285,6 +285,31 @@ func mintMomentNFT(
 	)
 }
 
+func mintSeasonalNFT(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	recipientAddress flow.Address,
+	editionID uint64,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayMintSeasonalNFTTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
+	tx.AddArgument(cadence.NewUInt64(editionID))
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
 func transferMomentNFT(
 	t *testing.T,
 	b *emulator.Blockchain,

@@ -57,11 +57,16 @@ const (
 	AllDayReadAllEditionsPath         = AllDayScriptsRootPath + "/edition/read_all_editions.cdc"
 
 	// Moment NFTs
-	AllDayMintMomentNFTPath           = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
-	AllDayMintMomentNFTMultiPath      = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft_multi.cdc"
-	AllDayTransferNFTPath             = AllDayTransactionsRootPath + "/user/transfer_moment_nft.cdc"
-	AllDayReadMomentNFTSupplyPath     = AllDayScriptsRootPath + "/nfts/read_moment_nft_supply.cdc"
-	AllDayReadMomentNFTPropertiesPath = AllDayScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
+	AllDayMintMomentNFTPath   = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
+	AllDayMintSeasonalNFTPath = AllDayTransactionsRootPath + "/admin/nfts/mint_seasonal_nft.cdc"
+
+	AllDayMintMomentNFTMultiPath        = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft_multi.cdc"
+	AllDayTransferNFTPath               = AllDayTransactionsRootPath + "/user/transfer_moment_nft.cdc"
+	AllDayReadMomentNFTSupplyPath       = AllDayScriptsRootPath + "/nfts/read_moment_nft_supply.cdc"
+	AllDayReadSeasonalNFTSupplyPath     = AllDayScriptsRootPath + "/nfts/read_seasonal_nft_supply.cdc"
+	AllDayReadMomentNFTPropertiesPath   = AllDayScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
+	AllDayReadSeasonalNFTPropertiesPath = AllDayScriptsRootPath + "/nfts/read_seasonal_nft_properties.cdc"
+
 	AllDayReadCollectionNFTLengthPath = AllDayScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
 	AllDayReadCollectionNFTIDsPath    = AllDayScriptsRootPath + "/nfts/read_collection_nft_ids.cdc"
 )
@@ -297,6 +302,13 @@ func loadAllDayMintMomentNFTTransaction(contracts Contracts) []byte {
 	)
 }
 
+func loadAllDayMintSeasonalNFTTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayMintMomentNFTPath),
+		contracts,
+	)
+}
+
 func loadAllDayMintMomentNFTMultiTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayMintMomentNFTMultiPath),
@@ -314,6 +326,13 @@ func loadAllDayReadMomentNFTSupplyScript(contracts Contracts) []byte {
 func loadAllDayReadMomentNFTPropertiesScript(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayReadMomentNFTPropertiesPath),
+		contracts,
+	)
+}
+
+func loadAllDayReadSeasonalNFTPropertiesScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayReadSeasonalNFTPropertiesPath),
 		contracts,
 	)
 }

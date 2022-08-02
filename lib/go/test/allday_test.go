@@ -538,3 +538,43 @@ func testMintMomentNFT(
 		assert.Equal(t, previousSupply, newSupply)
 	}
 }
+
+func testMintSeasonalNFT(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	editionID uint64,
+	userAddress flow.Address,
+	shouldBeID uint64,
+	shouldRevert bool,
+) {
+	// Make sure the total supply of NFTs is tracked correctly
+	previousSupply := getSeasonalNFTSupply(t, b, contracts)
+
+	mintSeasonalNFT(
+		t,
+		b,
+		contracts,
+		userAddress,
+		editionID,
+		shouldRevert,
+	)
+
+	newSupply := getSeasonalNFTSupply(t, b, contracts)
+	if !shouldRevert {
+		assert.Equal(t, previousSupply+uint64(1), newSupply)
+
+		nftProperties := getSeasonalNFTProperties(
+			t,
+			b,
+			contracts,
+			userAddress,
+			shouldBeID,
+		)
+		assert.Equal(t, shouldBeID, nftProperties.ID)
+		assert.Equal(t, editionID, nftProperties.EditionID)
+		assert.Less(t, uint64(0), nftProperties.MintingDate)
+	} else {
+		assert.Equal(t, previousSupply, newSupply)
+	}
+}

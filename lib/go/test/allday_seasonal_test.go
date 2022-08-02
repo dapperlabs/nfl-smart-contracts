@@ -134,80 +134,46 @@ func TestSeasonalNFTs(t *testing.T) {
 
 	createTestSeasonalEditions(t, b, contracts)
 
-	t.Run("Should be able to mint a new MomentNFT from an edition that has a maxMintSize", func(t *testing.T) {
-		testMintMomentNFT(
+	t.Run("Should be able to mint a new NFT from an edition that has a maxMintSize", func(t *testing.T) {
+		testMintSeasonalNFT(
 			t,
 			b,
 			contracts,
 			uint64(1),
 			userAddress,
-			uint64(1),
 			uint64(1),
 			false,
 		)
 	})
 
 	t.Run("Should be able to mint a second new MomentNFT from an edition that has a maxmintSize", func(t *testing.T) {
-		testMintMomentNFT(
+		testMintSeasonalNFT(
 			t,
 			b,
 			contracts,
 			uint64(1),
 			userAddress,
 			uint64(2),
-			uint64(2),
 			false,
 		)
 	})
 
-	t.Run("Should be able to mint a new MomentNFT from an edition with no max mint size", func(t *testing.T) {
-		testMintMomentNFT(
-			t,
-			b,
-			contracts,
-			uint64(2),
-			userAddress,
-			uint64(3),
-			uint64(1),
-			false,
-		)
-	})
-
-	t.Run("Should be able to mint a second new MomentNFT from an edition with no max mint size", func(t *testing.T) {
-		testMintMomentNFT(
-			t,
-			b,
-			contracts,
-			uint64(2),
-			userAddress,
-			uint64(4),
-			uint64(2),
-			false,
-		)
-	})
-
-	t.Run("Should not be able to mint an edition that has reached max minting size", func(t *testing.T) {
-		testMintMomentNFT(
-			t,
-			b,
-			contracts,
-			uint64(1),
-			userAddress,
-			uint64(3),
-			uint64(3),
-			true,
-		)
-	})
+	closeSeasonalEdition(
+		t,
+		b,
+		contracts,
+		uint64(1),
+		false,
+	)
 
 	t.Run("Should not be able to mint an edition that is already closed", func(t *testing.T) {
-		testMintMomentNFT(
+		testMintSeasonalNFT(
 			t,
 			b,
 			contracts,
-			uint64(3),
+			uint64(1),
 			userAddress,
-			uint64(1),
-			uint64(1),
+			uint64(3),
 			true,
 		)
 	})

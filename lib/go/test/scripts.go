@@ -105,6 +105,17 @@ func getMomentNFTSupply(
 	return result.ToGoValue().(uint64)
 }
 
+func getSeasonalNFTSupply(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+) uint64 {
+	script := loadAllDayReadSeasonalNFTPropertiesScript(contracts)
+	result := executeScriptAndCheck(t, b, script, [][]byte{})
+
+	return result.ToGoValue().(uint64)
+}
+
 func getMomentNFTProperties(
 	t *testing.T,
 	b *emulator.Blockchain,
@@ -113,6 +124,22 @@ func getMomentNFTProperties(
 	nftID uint64,
 ) OurNFTData {
 	script := loadAllDayReadMomentNFTPropertiesScript(contracts)
+	result := executeScriptAndCheck(t, b, script, [][]byte{
+		jsoncdc.MustEncode(cadence.BytesToAddress(collectionAddress.Bytes())),
+		jsoncdc.MustEncode(cadence.UInt64(nftID)),
+	})
+
+	return parseNFTProperties(result)
+}
+
+func getSeasonalNFTProperties(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	collectionAddress flow.Address,
+	nftID uint64,
+) OurNFTData {
+	script := loadAllDayReadCollectionNFTLengthScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{
 		jsoncdc.MustEncode(cadence.BytesToAddress(collectionAddress.Bytes())),
 		jsoncdc.MustEncode(cadence.UInt64(nftID)),

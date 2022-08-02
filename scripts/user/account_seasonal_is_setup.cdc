@@ -7,7 +7,7 @@ pub fun main(address: Address): Bool {
     let account = getAccount(address)
     return account.getCapability<&{
             NonFungibleToken.CollectionPublic,
-            AllDaySeasonal.MomentNFTCollectionPublic
+            AllDaySeasonal.SeasonalNFTCollectionPublic
         }>(AllDaySeasonal.CollectionPublicPath)
         != nil
 }

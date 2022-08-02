@@ -15,7 +15,7 @@ transaction {
             signer.save(<-collection, to: AllDaySeasonal.CollectionStoragePath)
 
             // create a public capability for the collection
-            signer.link<&AllDaySeasonal.Collection{NonFungibleToken.CollectionPublic, AllDaySeasonal.MomentNFTCollectionPublic}>(
+            signer.link<&AllDaySeasonal.Collection{NonFungibleToken.CollectionPublic, AllDaySeasonal.SeasonalNFTCollectionPublic}>(
                 AllDaySeasonal.CollectionPublicPath,
                 target: AllDaySeasonal.CollectionStoragePath
             )

@@ -5,9 +5,10 @@ import (
 )
 
 type SeasonalEditionData struct {
-	ID       uint64
-	Metadata map[string]string
-	Active   bool
+	ID        uint64
+	NumMinted uint64
+	Active    bool
+	Metadata  map[string]string
 }
 
 type SeasonalNFTData struct {
@@ -27,8 +28,9 @@ func parseSeasonalEditionData(value cadence.Value) SeasonalEditionData {
 	fields := value.(cadence.Struct).Fields
 	return SeasonalEditionData{
 		fields[0].ToGoValue().(uint64),
-		cadenceStringDictToGo(fields[2].(cadence.Dictionary)),
-		true,
+		fields[1].ToGoValue().(uint64),
+		fields[2].ToGoValue().(bool),
+		cadenceStringDictToGo(fields[3].(cadence.Dictionary)),
 	}
 }
 

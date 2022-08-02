@@ -9,8 +9,9 @@ import (
 // Handle relative paths by making these regular expressions
 
 const (
-	nftAddressPlaceholder    = "\"[^\"]*NonFungibleToken.cdc\""
-	AllDayAddressPlaceholder = "\"[^\"]*AllDay.cdc\""
+	nftAddressPlaceholder            = "\"[^\"]*NonFungibleToken.cdc\""
+	AllDayAddressPlaceholder         = "\"[^\"]*AllDay.cdc\""
+	AllDaySeasonalAddressPlaceholder = "\"[^\"]*AllDaySeasonal.cdc\""
 )
 
 const (
@@ -46,8 +47,11 @@ const (
 	AllDayReadAllPlaysPath = AllDayScriptsRootPath + "/plays/read_all_plays.cdc"
 
 	// Editions
-	AllDayCreateEditionPath           = AllDayTransactionsRootPath + "/admin/editions/create_edition.cdc"
-	AllDayCloseEditionPath            = AllDayTransactionsRootPath + "/admin/editions/close_edition.cdc"
+	AllDayCreateEditionPath         = AllDayTransactionsRootPath + "/admin/editions/create_edition.cdc"
+	AllDaySeasonalCreateEditionPath = AllDayTransactionsRootPath + "/admin/editions/create_seasonal_edition.cdc"
+	AllDayCloseEditionPath          = AllDayTransactionsRootPath + "/admin/editions/close_edition.cdc"
+	AllDaySeasonalCloseEditionPath  = AllDayTransactionsRootPath + "/admin/editions/close_seasonal_edition.cdc"
+
 	AllDayReadEditionByIDPath         = AllDayScriptsRootPath + "/editions/read_edition_by_id.cdc"
 	AllDaySeasonalReadEditionByIDPath = AllDayScriptsRootPath + "/editions/read_seasonal_edition_by_id.cdc"
 	AllDayReadAllEditionsPath         = AllDayScriptsRootPath + "/edition/read_all_editions.cdc"
@@ -71,6 +75,9 @@ func replaceAddresses(code []byte, contracts Contracts) []byte {
 
 	AllDayRe := regexp.MustCompile(AllDayAddressPlaceholder)
 	code = AllDayRe.ReplaceAll(code, []byte("0x"+contracts.AllDayAddress.String()))
+
+	AllDaySeasonalRe := regexp.MustCompile(AllDaySeasonalAddressPlaceholder)
+	code = AllDaySeasonalRe.ReplaceAll(code, []byte("0x"+contracts.AllDayAddress.String()))
 
 	return code
 }
@@ -238,6 +245,13 @@ func loadAllDayCreateEditionTransaction(contracts Contracts) []byte {
 	)
 }
 
+func loadAllDaySeasonalCreateEditionTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDaySeasonalCreateEditionPath),
+		contracts,
+	)
+}
+
 func loadAllDayReadEditionByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayReadEditionByIDPath),
@@ -247,7 +261,7 @@ func loadAllDayReadEditionByIDScript(contracts Contracts) []byte {
 
 func loadAllDaySeasonalReadEditionByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayReadEditionByIDPath),
+		readFile(AllDaySeasonalReadEditionByIDPath),
 		contracts,
 	)
 }
@@ -255,6 +269,13 @@ func loadAllDaySeasonalReadEditionByIDScript(contracts Contracts) []byte {
 func loadAllDayCloseEditionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayCloseEditionPath),
+		contracts,
+	)
+}
+
+func loadAllDaySeasonalCloseEditionTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDaySeasonalCloseEditionPath),
 		contracts,
 	)
 }

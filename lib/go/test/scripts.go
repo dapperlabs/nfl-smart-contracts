@@ -88,7 +88,7 @@ func getSeasonalEditionData(
 	contracts Contracts,
 	id uint64,
 ) SeasonalEditionData {
-	script := loadAllDayReadEditionByIDScript(contracts)
+	script := loadAllDaySeasonalReadEditionByIDScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.UInt64(id))})
 
 	return parseSeasonalEditionData(result)

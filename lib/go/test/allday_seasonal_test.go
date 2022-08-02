@@ -42,7 +42,7 @@ func TestEdition(t *testing.T) {
 }
 
 func createTestSeasonalEditions(t *testing.T, b *emulator.Blockchain, contracts Contracts) {
-	t.Run("Should be able to create a new series", func(t *testing.T) {
+	t.Run("Should be able to create a new edition", func(t *testing.T) {
 		testCreateSeasonalEdition(
 			t,
 			b,
@@ -92,7 +92,7 @@ func testCreateSeasonalEdition(
 	)
 
 	if !shouldRevert {
-		series := getSeriesData(t, b, contracts, shouldBeID)
+		series := getSeasonalEditionData(t, b, contracts, shouldBeID)
 		assert.Equal(t, shouldBeID, series.ID)
 		assert.Equal(t, true, series.Active)
 	}
@@ -106,7 +106,7 @@ func testCloseSeasonalEdition(
 	shouldRevert bool,
 ) {
 	wasActive := getSeasonalEditionData(t, b, contracts, editionID).Active
-	closeEdition(
+	closeSeasonalEdition(
 		t,
 		b,
 		contracts,
@@ -130,7 +130,7 @@ func TestSeasonalNFTs(t *testing.T) {
 	b := newEmulator()
 	contracts := AllDaySeasonalDeployContracts(t, b)
 	userAddress, userSigner := createAccount(t, b)
-	setupAllDay(t, b, userAddress, userSigner, contracts)
+	setupAllDaySeasonal(t, b, userAddress, userSigner, contracts)
 
 	createTestSeasonalEditions(t, b, contracts)
 

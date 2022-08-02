@@ -87,8 +87,8 @@ pub contract AllDaySeasonal: NonFungibleToken {
     pub struct EditionData {
         pub let id: UInt64
         pub var numMinted: UInt64
-        pub let metadata: {String: String}
         pub var active: Bool
+        pub let metadata: {String: String}
 
         // initializer
         //
@@ -98,7 +98,6 @@ pub contract AllDaySeasonal: NonFungibleToken {
             self.metadata = edition.metadata
             self.numMinted = edition.numMinted
             self.active = edition.active
-
             } else {
                 panic("edition does not exist")
             }
@@ -115,7 +114,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
         pub let metadata: {String: String}
         pub var active: Bool
 
-        // Close this series
+        // Close this edition
         //
         pub fun close() {
             pre {
@@ -123,7 +122,6 @@ pub contract AllDaySeasonal: NonFungibleToken {
             }
 
             self.active = false
-
             emit EditionClosed(id: self.id)
         }
 
@@ -156,7 +154,6 @@ pub contract AllDaySeasonal: NonFungibleToken {
             self.numMinted = 0 as UInt64
             self.active = true
 
-
             AllDaySeasonal.nextEditionID = self.id + 1 as UInt64
             emit EditionCreated(id: self.id, metadata: self.metadata)
         }
@@ -176,7 +173,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
     // NFT
     //------------------------------------------------------------
 
-    // A Moment NFT
+    // A Seasonal NFT
     //
     pub resource NFT: NonFungibleToken.INFT {
         pub let id: UInt64
@@ -213,12 +210,12 @@ pub contract AllDaySeasonal: NonFungibleToken {
 
     // A public collection interface that allows Moment NFTs to be borrowed
     //
-    pub resource interface MomentNFTCollectionPublic {
+    pub resource interface SeasonalNFTCollectionPublic {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowMomentNFT(id: UInt64): &AllDaySeasonal.NFT? {
+        pub fun borrowSeasonalNFT(id: UInt64): &AllDaySeasonal.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
@@ -234,7 +231,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
         NonFungibleToken.Provider,
         NonFungibleToken.Receiver,
         NonFungibleToken.CollectionPublic,
-        MomentNFTCollectionPublic
+        SeasonalNFTCollectionPublic
     {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an UInt64 ID field
@@ -300,7 +297,7 @@ pub contract AllDaySeasonal: NonFungibleToken {
 
         // borrowMomentNFT gets a reference to an NFT in the collection
         //
-        pub fun borrowMomentNFT(id: UInt64): &AllDaySeasonal.NFT? {
+        pub fun borrowSeasonalNFT(id: UInt64): &AllDaySeasonal.NFT? {
             if self.ownedNFTs[id] != nil {
                 if let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT? {
                     return ref! as! &AllDaySeasonal.NFT
@@ -411,8 +408,6 @@ pub contract AllDaySeasonal: NonFungibleToken {
         self.totalSupply = 0
         self.totalEditions = 0
         self.nextEditionID = 1
-
-
 
         // Initialize the metadata lookup dictionaries
         self.editionByID <- {}

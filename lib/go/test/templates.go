@@ -10,6 +10,7 @@ import (
 
 const (
 	nftAddressPlaceholder    = "\"[^\"]*NonFungibleToken.cdc\""
+	viewsAddressPlaceholder  = "\"[^\"]*MetadataViews.cdc\""
 	AllDayAddressPlaceholder = "\"[^\"]*AllDay.cdc\""
 )
 
@@ -65,17 +66,23 @@ func replaceAddresses(code []byte, contracts Contracts) []byte {
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+contracts.NFTAddress.String()))
 
+	viewsRe := regexp.MustCompile(viewsAddressPlaceholder)
+	code = viewsRe.ReplaceAll(code, []byte("0x"+contracts.MetadataViewsAddress.String()))
+
 	AllDayRe := regexp.MustCompile(AllDayAddressPlaceholder)
 	code = AllDayRe.ReplaceAll(code, []byte("0x"+contracts.AllDayAddress.String()))
 
 	return code
 }
 
-func LoadAllDay(nftAddress flow.Address) []byte {
+func LoadAllDay(nftAddress flow.Address, metadataAddress flow.Address) []byte {
 	code := readFile(AllDayPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
+
+	viewsRe := regexp.MustCompile(viewsAddressPlaceholder)
+	code = viewsRe.ReplaceAll(code, []byte("0x"+metadataAddress.String()))
 
 	return code
 }

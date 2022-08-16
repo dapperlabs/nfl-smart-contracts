@@ -20,6 +20,7 @@ import (
 const (
 	flowTokenName         = "FlowToken"
 	nonFungibleTokenName  = "NonFungibleToken"
+	metadataViewsName     = "MetadataViews"
 	defaultAccountFunding = "1000.0"
 )
 
@@ -29,12 +30,13 @@ var (
 )
 
 type Contracts struct {
-	NFTAddress    flow.Address
-	AllDayAddress flow.Address
-	AllDaySigner  crypto.Signer
+	NFTAddress           flow.Address
+	MetadataViewsAddress flow.Address
+	AllDayAddress        flow.Address
+	AllDaySigner         crypto.Signer
 }
 
-func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
+func deployNFTContract(t *testing.T, b *emulator.Blockchain) (flow.Address, flow.Address) {
 	nftCode := nftcontracts.NonFungibleToken()
 	nftAddress, err := b.CreateAccount(nil,
 		[]sdktemplates.Contract{
@@ -46,19 +48,29 @@ func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
 	)
 	require.NoError(t, err)
 
+	metadataAddress, err := b.CreateAccount(nil,
+		[]sdktemplates.Contract{
+			{
+				Name:   metadataViewsName,
+				Source: string(nftcontracts.MetadataViews(ftAddress, nftAddress)),
+			},
+		},
+	)
+	require.NoError(t, err)
+
 	_, err = b.CommitBlock()
 	require.NoError(t, err)
 
-	return nftAddress
+	return nftAddress, metadataAddress
 }
 
 func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	accountKeys := test.AccountKeyGenerator()
 
-	nftAddress := deployNFTContract(t, b)
+	nftAddress, metadataAddress := deployNFTContract(t, b)
 
 	AllDayAccountKey, AllDaySigner := accountKeys.NewWithSigner()
-	AllDayCode := LoadAllDay(nftAddress)
+	AllDayCode := LoadAllDay(nftAddress, metadataAddress)
 
 	AllDayAddress, err := b.CreateAccount(
 		[]*flow.AccountKey{AllDayAccountKey},
@@ -93,6 +105,7 @@ func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 
 	return Contracts{
 		nftAddress,
+		metadataAddress,
 		AllDayAddress,
 		AllDaySigner,
 	}

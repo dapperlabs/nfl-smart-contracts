@@ -1,5 +1,6 @@
 import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
 import AllDay from "../../contracts/AllDay.cdc"
+import MetadataViews from "../../contracts/MetadataViews.cdc"
 
 // This transaction configures an account to hold AllDay NFTs.
 
@@ -15,7 +16,7 @@ transaction {
             signer.save(<-collection, to: AllDay.CollectionStoragePath)
 
             // create a public capability for the collection
-            signer.link<&AllDay.Collection{NonFungibleToken.CollectionPublic, AllDay.MomentNFTCollectionPublic}>(
+            signer.link<&AllDay.Collection{NonFungibleToken.CollectionPublic, AllDay.MomentNFTCollectionPublic, MetadataViews.ResolverCollection}>(
                 AllDay.CollectionPublicPath,
                 target: AllDay.CollectionStoragePath
             )

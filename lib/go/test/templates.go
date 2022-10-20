@@ -9,8 +9,11 @@ import (
 // Handle relative paths by making these regular expressions
 
 const (
-	nftAddressPlaceholder    = "\"[^\"]*NonFungibleToken.cdc\""
-	AllDayAddressPlaceholder = "\"[^\"]*AllDay.cdc\""
+	nftAddressPlaceholder     = "\"[^\"]*NonFungibleToken.cdc\""
+	ftAddressPlaceholder      = "\"[^\"]*FungibleToken.cdc\""
+	mvAddressPlaceholder      = "\"[^\"]*MetadataViews.cdc\""
+	AllDayAddressPlaceholder  = "\"[^\"]*AllDay.cdc\""
+	royaltyAddressPlaceholder = "0xALLDAYROYALTYADDRESS"
 )
 
 const (
@@ -56,26 +59,45 @@ const (
 	AllDayReadMomentNFTPropertiesPath = AllDayScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
 	AllDayReadCollectionNFTLengthPath = AllDayScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
 	AllDayReadCollectionNFTIDsPath    = AllDayScriptsRootPath + "/nfts/read_collection_nft_ids.cdc"
+	AllDayReadMomentNFTMetadataPath   = AllDayScriptsRootPath + "/nfts/read_moment_nft_metadata.cdc"
 )
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Accounts
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func replaceAddresses(code []byte, contracts Contracts) []byte {
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+contracts.NFTAddress.String()))
 
+	ftRe := regexp.MustCompile(ftAddressPlaceholder)
+	code = ftRe.ReplaceAll(code, []byte("0x"+ftAddress.String()))
+
 	AllDayRe := regexp.MustCompile(AllDayAddressPlaceholder)
 	code = AllDayRe.ReplaceAll(code, []byte("0x"+contracts.AllDayAddress.String()))
+
+	mvRe := regexp.MustCompile(mvAddressPlaceholder)
+	code = mvRe.ReplaceAll(code, []byte("0x"+contracts.MetadataViewsAddress.String()))
+
+	royaltyRe := regexp.MustCompile(royaltyAddressPlaceholder)
+	code = royaltyRe.ReplaceAll(code, []byte("0x"+contracts.RoyaltyAddress.String()))
 
 	return code
 }
 
-func LoadAllDay(nftAddress flow.Address) []byte {
+func LoadAllDay(nftAddress flow.Address, metaAddress flow.Address, royaltyAddress flow.Address) []byte {
 	code := readFile(AllDayPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
 	code = nftRe.ReplaceAll(code, []byte("0x"+nftAddress.String()))
+
+	ftRe := regexp.MustCompile(ftAddressPlaceholder)
+	code = ftRe.ReplaceAll(code, []byte("0x"+ftAddress.String()))
+
+	mvRe := regexp.MustCompile(mvAddressPlaceholder)
+	code = mvRe.ReplaceAll(code, []byte("0x"+metaAddress.String()))
+
+	royaltyRe := regexp.MustCompile(royaltyAddressPlaceholder)
+	code = royaltyRe.ReplaceAll(code, []byte("0x"+royaltyAddress.String()))
 
 	return code
 }
@@ -94,9 +116,9 @@ func loadAllDayAccountIsSetupScript(contracts Contracts) []byte {
 	)
 }
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Series
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func loadAllDayCreateSeriesTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayCreateSeriesPath),
@@ -139,9 +161,9 @@ func loadAllDayCloseSeriesTransaction(contracts Contracts) []byte {
 	)
 }
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Sets
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func loadAllDayCreateSetTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayCreateSetPath),
@@ -177,9 +199,9 @@ func loadAllDayReadAllSetNamesScript(contracts Contracts) []byte {
 	)
 }
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Plays
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func loadAllDayCreatePlayTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayCreatePlayPath),
@@ -201,9 +223,9 @@ func loadAllDayReadAllPlaysScript(contracts Contracts) []byte {
 	)
 }
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Editions
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func loadAllDayCreateEditionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayCreateEditionPath),
@@ -232,9 +254,9 @@ func loadAllDayReadAllEditionsScript(contracts Contracts) []byte {
 	)
 }
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Moment NFTs
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func loadAllDayMintMomentNFTTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayMintMomentNFTPath),
@@ -280,6 +302,13 @@ func loadAllDayReadCollectionNFTIDsScript(contracts Contracts) []byte {
 func loadAllDayTransferNFTTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayTransferNFTPath),
+		contracts,
+	)
+}
+
+func loadAllDayReadMomentNFTMetadataScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayReadMomentNFTMetadataPath),
 		contracts,
 	)
 }

@@ -585,38 +585,38 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 
 		//Validate Medias
 		mediasView := result[3]
-		editions := mediasView.Fields[0].(cadence.Array)
+		medias := mediasView.Fields[0].(cadence.Array)
 		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image?format=jpeg&width=512",
-			editions.Values[0].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "image/jpeg", editions.Values[0].(cadence.Struct).Fields[1].ToGoValue())
+			getMediaPath(medias.Values[0]))
+		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[0]))
 
 		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-details?format=jpeg&width=512",
-			editions.Values[1].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "image/jpeg", editions.Values[1].(cadence.Struct).Fields[1].ToGoValue())
+			getMediaPath(medias.Values[1]))
+		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[1]))
 
 		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-logo?format=jpeg&width=512",
-			editions.Values[2].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "image/jpeg", editions.Values[2].(cadence.Struct).Fields[1].ToGoValue())
+			getMediaPath(medias.Values[2]))
+		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[2]))
 
 		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-legal?format=jpeg&width=512",
-			editions.Values[3].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "image/jpeg", editions.Values[3].(cadence.Struct).Fields[1].ToGoValue())
+			getMediaPath(medias.Values[3]))
+		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[3]))
 
 		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-player?format=jpeg&width=512",
-			editions.Values[4].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "image/jpeg", editions.Values[4].(cadence.Struct).Fields[1].ToGoValue())
+			getMediaPath(medias.Values[4]))
+		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[4]))
 
 		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-scores?format=jpeg&width=512",
-			editions.Values[5].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "image/jpeg", editions.Values[5].(cadence.Struct).Fields[1].ToGoValue())
+			getMediaPath(medias.Values[5]))
+		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[5]))
 
 		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/video",
-			editions.Values[6].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "video/mp4", editions.Values[6].(cadence.Struct).Fields[1].ToGoValue())
+			getMediaPath(medias.Values[6]))
+		assert.Equal(t, "video/mp4", getMediaType(medias.Values[6]))
 
 		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/video-idle",
-			editions.Values[7].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "video/mp4", editions.Values[7].(cadence.Struct).Fields[1].ToGoValue())
+			getMediaPath(medias.Values[7]))
+		assert.Equal(t, "video/mp4", getMediaType(medias.Values[7]))
 
 		//Validate NFTCollectionDisplay
 		collectionDisplay := result[4]
@@ -624,12 +624,12 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 		assert.Equal(t, "Officially Licensed Digital Collectibles Featuring the NFL’s Best Highlights. Buy, Sell and Collect Your Favorite NFL Moments",
 			collectionDisplay.Fields[1].ToGoValue())
 		assert.Equal(t, "https://nflallday.com/", collectionDisplay.Fields[2].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "https://storage.googleapis.com/dl-nfl-assets-prod/static/images/flow-catalogue/NFLAD_SQUARE.png",
-			collectionDisplay.Fields[3].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "image/png", collectionDisplay.Fields[3].(cadence.Struct).Fields[1].ToGoValue())
-		assert.Equal(t, "https://storage.googleapis.com/dl-nfl-assets-prod/static/images/flow-catalogue/NFLAD_BANNER_1200x630.jpg",
-			collectionDisplay.Fields[4].(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue())
-		assert.Equal(t, "image/jpeg", collectionDisplay.Fields[4].(cadence.Struct).Fields[1].ToGoValue())
+		assert.Equal(t, "https://assets.nflallday.com/flow/catalogue/NFLAD_SQUARE.png",
+			getMediaPath(collectionDisplay.Fields[3]))
+		assert.Equal(t, "image/png", getMediaType(collectionDisplay.Fields[3]))
+		assert.Equal(t, "https://assets.nflallday.com/flow/catalogue/NFLAD_BANNER.png",
+			getMediaPath(collectionDisplay.Fields[4]))
+		assert.Equal(t, "image/png", getMediaType(collectionDisplay.Fields[4]))
 		socials := map[string]cadence.Struct{}
 		for _, kvPair := range collectionDisplay.Fields[5].(cadence.Dictionary).Pairs {
 			socials[kvPair.Key.ToGoValue().(string)] = kvPair.Value.(cadence.Struct)
@@ -662,4 +662,12 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 		assert.Equal(t, uint64(1), traitsMap["SerialNumber"])
 		assert.Equal(t, "Interception", traitsMap["PlayType"])
 	})
+}
+
+func getMediaPath(media interface{}) interface{} {
+	return media.(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue()
+}
+
+func getMediaType(media interface{}) interface{} {
+	return media.(cadence.Struct).Fields[1].ToGoValue()
 }

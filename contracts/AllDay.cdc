@@ -33,16 +33,6 @@ import MetadataViews from "./MetadataViews.cdc"
 // The AllDay NFTs and metadata contract
 //
 pub contract AllDay: NonFungibleToken {
-
-    //------------------------------------------------------------
-    // Deployment variables
-    //------------------------------------------------------------
-
-    // The address to which royalties should be deposited
-    pub fun RoyaltyAddress() : Address {
-        return 0xALLDAYROYALTYADDRESS
-    }
-
     //------------------------------------------------------------
     // Events
     //------------------------------------------------------------
@@ -657,7 +647,7 @@ pub contract AllDay: NonFungibleToken {
                     )
                 case Type<MetadataViews.Royalties>():
                     let royaltyReceiver: Capability<&{FungibleToken.Receiver}> =
-                        getAccount(AllDay.RoyaltyAddress()).getCapability<&AnyResource{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
+                        getAccount(0xALLDAYROYALTYADDRESS).getCapability<&AnyResource{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
                     return MetadataViews.Royalties(
                         royalties: [
                             MetadataViews.Royalty(
@@ -681,9 +671,9 @@ pub contract AllDay: NonFungibleToken {
             let edition: EditionData = AllDay.getEditionData(id: self.editionID)
             let play: PlayData = AllDay.getPlayData(id: edition.playID)
             let firstName: String = play.metadata["PlayerFirstName"] ?? ""
-            let lasttName: String = play.metadata["PlayerLastName"] ?? ""
+            let lastName: String = play.metadata["PlayerLastName"] ?? ""
             let playType: String = play.metadata["PlayType"] ?? ""
-            return firstName.concat(" ").concat(lasttName).concat(" ").concat(playType)
+            return firstName.concat(" ").concat(lastName).concat(" ").concat(playType)
         }
 
         pub fun getDescription(): String {

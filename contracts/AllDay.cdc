@@ -633,13 +633,13 @@ pub contract AllDay: NonFungibleToken {
                 case Type<MetadataViews.NFTCollectionDisplay>():
                     let bannerImage = MetadataViews.Media(
                         file: MetadataViews.HTTPFile(
-                            url: "https://storage.googleapis.com/dl-nfl-assets-prod/static/images/flow-catalogue/NFLAD_BANNER_1200x630.jpg"
+                            url: "https://assets.nflallday.com/flow/catalogue/NFLAD_BANNER.png"
                         ),
-                        mediaType: "image/jpeg"
+                        mediaType: "image/png"
                     )
                     let squareImage = MetadataViews.Media(
                         file: MetadataViews.HTTPFile(
-                            url: "https://storage.googleapis.com/dl-nfl-assets-prod/static/images/flow-catalogue/NFLAD_SQUARE.png"
+                            url: "https://assets.nflallday.com/flow/catalogue/NFLAD_SQUARE.png"
                         ),
                         mediaType: "image/png"
                     )

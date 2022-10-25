@@ -685,7 +685,7 @@ pub contract AllDay: NonFungibleToken {
         }
 
         pub fun assetPath(): String {
-            return "https://assets.nflallday.com/editions/".concat(self.editionID.toString()).concat("/media/")
+            return "https://media.nflallday.com/editions/".concat(self.editionID.toString()).concat("/media/")
         }
 
         pub fun getImage(imageType: String, format: String, width: Int): String {

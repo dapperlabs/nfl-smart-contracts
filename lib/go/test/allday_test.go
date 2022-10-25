@@ -569,7 +569,7 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 		displayView := result[0]
 		assert.Equal(t, "Apple Alpha Interception", displayView.Fields[0].ToGoValue())
 		assert.Equal(t, "Series One Set One moment with serial number 1", displayView.Fields[1].ToGoValue())
-		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image?format=jpeg&width=256",
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image?format=jpeg&width=256",
 			displayView.Fields[2].(cadence.Struct).Fields[0].ToGoValue())
 
 		//Validate Editions
@@ -586,35 +586,35 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 		//Validate Medias
 		mediasView := result[3]
 		medias := mediasView.Fields[0].(cadence.Array)
-		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image?format=jpeg&width=512",
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image?format=jpeg&width=512",
 			getMediaPath(medias.Values[0]))
 		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[0]))
 
-		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-details?format=jpeg&width=512",
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image-details?format=jpeg&width=512",
 			getMediaPath(medias.Values[1]))
 		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[1]))
 
-		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-logo?format=jpeg&width=512",
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image-logo?format=jpeg&width=512",
 			getMediaPath(medias.Values[2]))
 		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[2]))
 
-		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-legal?format=jpeg&width=512",
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image-legal?format=jpeg&width=512",
 			getMediaPath(medias.Values[3]))
 		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[3]))
 
-		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-player?format=jpeg&width=512",
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image-player?format=jpeg&width=512",
 			getMediaPath(medias.Values[4]))
 		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[4]))
 
-		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/image-scores?format=jpeg&width=512",
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image-scores?format=jpeg&width=512",
 			getMediaPath(medias.Values[5]))
 		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[5]))
 
-		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/video",
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/video",
 			getMediaPath(medias.Values[6]))
 		assert.Equal(t, "video/mp4", getMediaType(medias.Values[6]))
 
-		assert.Equal(t, "https://assets.nflallday.com/editions/1/media/video-idle",
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/video-idle",
 			getMediaPath(medias.Values[7]))
 		assert.Equal(t, "video/mp4", getMediaType(medias.Values[7]))
 

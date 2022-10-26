@@ -96,3 +96,23 @@ func getMomentNFTProperties(
 
 	return parseNFTProperties(result)
 }
+
+func getMomentNFTMetadata(t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	address flow.Address,
+	nftID uint64,
+	shouldRevert bool,
+) []cadence.Struct {
+	script := loadAllDayReadMomentNFTMetadataScript(contracts)
+	result := executeScriptAndCheck(t, b, script,
+		[][]byte{jsoncdc.MustEncode(cadence.BytesToAddress(address.Bytes())), jsoncdc.MustEncode(cadence.UInt64(nftID))})
+
+	cArray := result.(cadence.Array).Values
+	resultArray := make([]cadence.Struct, len(cArray))
+	for i, val := range cArray {
+		resultArray[i] = val.(cadence.Struct)
+	}
+
+	return resultArray
+}

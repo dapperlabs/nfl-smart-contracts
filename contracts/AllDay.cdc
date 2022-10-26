@@ -6,6 +6,8 @@
 
 
 import NonFungibleToken from "./NonFungibleToken.cdc"
+import FungibleToken from "./utility/FungibleToken.cdc"
+import MetadataViews from "./MetadataViews.cdc"
 
 /*
     AllDay is structured similarly to Genies and TopShot.
@@ -506,7 +508,7 @@ pub contract AllDay: NonFungibleToken {
 
     // A Moment NFT
     //
-    pub resource NFT: NonFungibleToken.INFT {
+    pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
         pub let id: UInt64
         pub let editionID: UInt64
         pub let serialNumber: UInt64
@@ -537,6 +539,196 @@ pub contract AllDay: NonFungibleToken {
 
             emit MomentNFTMinted(id: self.id, editionID: self.editionID, serialNumber: self.serialNumber)
         }
+
+        // All supported metadata views for the Moment including the Core NFT Views
+        //
+        pub fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>(),
+                Type<MetadataViews.Editions>(),
+                Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.Medias>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.NFTCollectionDisplay>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.Serial>(),
+                Type<MetadataViews.Traits>()
+            ]
+        }
+
+        pub fun resolveView(_ view: Type): AnyStruct? {
+            switch view {
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: self.getName(),
+                        description: self.getDescription(),
+                        thumbnail: MetadataViews.HTTPFile(url: self.getImage(imageType: "image", format: "jpeg", width: 256))
+                    )
+                case Type<MetadataViews.Editions>():
+                    let editionList: [MetadataViews.Edition] = [self.getEditionInfo()]
+                    return MetadataViews.Editions(
+                        editionList
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL("https://nflallday.com/moments/".concat(self.id.toString()))
+                case Type<MetadataViews.Medias>():
+                    return MetadataViews.Medias(
+                        items: [
+                            MetadataViews.Media(
+                                file: MetadataViews.HTTPFile(url: self.getImage(imageType: "image", format: "jpeg", width: 512)),
+                                mediaType: "image/jpeg"
+                            ),
+                            MetadataViews.Media(
+                                file: MetadataViews.HTTPFile(url: self.getImage(imageType: "image-details", format: "jpeg", width: 512)),
+                                mediaType: "image/jpeg"
+                            ),
+                            MetadataViews.Media(
+                                file: MetadataViews.HTTPFile(url: self.getImage(imageType: "image-logo", format: "jpeg", width: 512)),
+                                mediaType: "image/jpeg"
+                            ),
+                            MetadataViews.Media(
+                                file: MetadataViews.HTTPFile(url: self.getImage(imageType: "image-legal", format: "jpeg", width: 512)),
+                                mediaType: "image/jpeg"
+                            ),
+                            MetadataViews.Media(
+                                file: MetadataViews.HTTPFile(url: self.getImage(imageType: "image-player", format: "jpeg", width: 512)),
+                                mediaType: "image/jpeg"
+                            ),
+                            MetadataViews.Media(
+                                file: MetadataViews.HTTPFile(url: self.getImage(imageType: "image-scores", format: "jpeg", width: 512)),
+                                mediaType: "image/jpeg"
+                            ),
+                            MetadataViews.Media(
+                                file: MetadataViews.HTTPFile(url: self.getVideo(videoType: "video")),
+                                mediaType: "video/mp4"
+                            ),
+                            MetadataViews.Media(
+                                file: MetadataViews.HTTPFile(url: self.getVideo(videoType: "video-idle")),
+                                mediaType: "video/mp4"
+                            )
+                        ]
+                    )
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: /storage/AllDayNFTCollection,
+                        publicPath: /public/AllDayNFTCollection,
+                        providerPath: /private/AllDayNFTCollection,
+                        publicCollection: Type<&AllDay.Collection{AllDay.MomentNFTCollectionPublic}>(),
+                        publicLinkedType: Type<&AllDay.Collection{AllDay.MomentNFTCollectionPublic,NonFungibleToken.Receiver,NonFungibleToken.CollectionPublic,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&AllDay.Collection{NonFungibleToken.Provider,AllDay.MomentNFTCollectionPublic,NonFungibleToken.Receiver,NonFungibleToken.CollectionPublic,MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
+                            return <-AllDay.createEmptyCollection()
+                        })
+                    )
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    let bannerImage = MetadataViews.Media(
+                        file: MetadataViews.HTTPFile(
+                            url: "https://assets.nflallday.com/flow/catalogue/NFLAD_BANNER.png"
+                        ),
+                        mediaType: "image/png"
+                    )
+                    let squareImage = MetadataViews.Media(
+                        file: MetadataViews.HTTPFile(
+                            url: "https://assets.nflallday.com/flow/catalogue/NFLAD_SQUARE.png"
+                        ),
+                        mediaType: "image/png"
+                    )
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: "NFL All Day",
+                        description: "Officially Licensed Digital Collectibles Featuring the NFL’s Best Highlights. Buy, Sell and Collect Your Favorite NFL Moments",
+                        externalURL: MetadataViews.ExternalURL("https://nflallday.com/"),
+                        squareImage: squareImage,
+                        bannerImage: bannerImage,
+                        socials: {
+                            "instagram": MetadataViews.ExternalURL("https://www.instagram.com/nflallday/"),
+                            "twitter": MetadataViews.ExternalURL("https://twitter.com/NFLAllDay"),
+                            "discord": MetadataViews.ExternalURL("https://discord.com/invite/5K6qyTzj2k")
+                        }
+                    )
+                case Type<MetadataViews.Royalties>():
+                    let royaltyReceiver: Capability<&{FungibleToken.Receiver}> =
+                        getAccount(0xALLDAYROYALTYADDRESS).getCapability<&AnyResource{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
+                    return MetadataViews.Royalties(
+                        royalties: [
+                            MetadataViews.Royalty(
+                                receiver: royaltyReceiver,
+                                cut: 0.05,
+                                description: "NFL All Day marketplace royalty"
+                            )
+                        ]
+                    )
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(self.serialNumber)
+                case Type<MetadataViews.Traits>():
+                    let excludedNames: [String] = []
+                    let fullDictionary = self.getTraits()
+                    return MetadataViews.dictToTraits(dict: fullDictionary, excludedNames: excludedNames)
+            }
+            return nil
+        }
+
+        pub fun getName(): String {
+            let edition: EditionData = AllDay.getEditionData(id: self.editionID)
+            let play: PlayData = AllDay.getPlayData(id: edition.playID)
+            let firstName: String = play.metadata["playerFirstName"] ?? ""
+            let lastName: String = play.metadata["playerLastName"] ?? ""
+            let playType: String = play.metadata["playType"] ?? ""
+            return firstName.concat(" ").concat(lastName).concat(" ").concat(playType)
+        }
+
+        pub fun getDescription(): String {
+            let edition: EditionData = AllDay.getEditionData(id: self.editionID)
+            let series: SeriesData = AllDay.getSeriesData(id: edition.seriesID)
+            let set: SetData = AllDay.getSetData(id: edition.setID)
+            series.name
+            return series.name.concat(" ").concat(set.name).concat(" moment with serial number ").concat(self.serialNumber.toString())
+        }
+
+        pub fun assetPath(): String {
+            return "https://media.nflallday.com/editions/".concat(self.editionID.toString()).concat("/media/")
+        }
+
+        pub fun getImage(imageType: String, format: String, width: Int): String {
+            return self.assetPath().concat(imageType).concat("?format=").concat(format).concat("&width=").concat(width.toString())
+        }
+
+        pub fun getVideo(videoType: String): String {
+            return self.assetPath().concat(videoType)
+        }
+
+        pub fun getMomentURL(): String {
+            return "https://nflallday.com/moments/".concat(self.id.toString())
+        }
+
+         pub fun getEditionInfo() : MetadataViews.Edition {
+            let edition: EditionData = AllDay.getEditionData(id: self.editionID)
+            let set: SetData = AllDay.getSetData(id: edition.setID)
+            let name: String = set.name.concat(": #").concat(edition.playID.toString())
+
+            return MetadataViews.Edition(name: name, number: UInt64(self.serialNumber), max: edition.maxMintSize ?? nil)
+        }
+
+        pub fun getTraits() : {String: AnyStruct} {
+            let edition: EditionData = AllDay.getEditionData(id: self.editionID)
+            let play: PlayData = AllDay.getPlayData(id: edition.playID)
+            let series: SeriesData = AllDay.getSeriesData(id: edition.seriesID)
+            let set: SetData = AllDay.getSetData(id: edition.setID)
+
+            let traitDictionary: {String: AnyStruct} = {
+                "editionTier": edition.tier,
+                "seriesName": series.name,
+                "setName": set.name,
+                "serialNumber": self.serialNumber
+            }
+
+            for name in play.metadata.keys {
+                let value = play.metadata[name] ?? ""
+                if value != "" {
+                    traitDictionary.insert(key: name, value)
+                }
+            }
+            return traitDictionary
+        }
     }
 
     //------------------------------------------------------------
@@ -566,7 +758,8 @@ pub contract AllDay: NonFungibleToken {
         NonFungibleToken.Provider,
         NonFungibleToken.Receiver,
         NonFungibleToken.CollectionPublic,
-        MomentNFTCollectionPublic
+        MomentNFTCollectionPublic,
+        MetadataViews.ResolverCollection
     {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an UInt64 ID field
@@ -641,6 +834,12 @@ pub contract AllDay: NonFungibleToken {
             } else {
                 return nil
             }
+        }
+
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
+            let allDayNFT = nft as! &AllDay.NFT
+            return allDayNFT as &AnyResource{MetadataViews.Resolver}
         }
 
         // Collection destructor

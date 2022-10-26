@@ -20,6 +20,7 @@ import (
 const (
 	flowTokenName         = "FlowToken"
 	nonFungibleTokenName  = "NonFungibleToken"
+	metadataViewsName     = "MetadataViews"
 	defaultAccountFunding = "1000.0"
 )
 
@@ -29,9 +30,11 @@ var (
 )
 
 type Contracts struct {
-	NFTAddress    flow.Address
-	AllDayAddress flow.Address
-	AllDaySigner  crypto.Signer
+	NFTAddress           flow.Address
+	AllDayAddress        flow.Address
+	MetadataViewsAddress flow.Address
+	RoyaltyAddress       flow.Address
+	AllDaySigner         crypto.Signer
 }
 
 func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
@@ -52,13 +55,38 @@ func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
 	return nftAddress
 }
 
+func deployMetadataViewsContract(t *testing.T, b *emulator.Blockchain, nftAddress flow.Address) flow.Address {
+	metaViewCode := nftcontracts.MetadataViews(ftAddress, nftAddress)
+	metaViewAddress, err := b.CreateAccount(nil,
+		[]sdktemplates.Contract{
+			{
+				Name:   metadataViewsName,
+				Source: string(metaViewCode),
+			},
+		},
+	)
+	require.NoError(t, err)
+
+	_, err = b.CommitBlock()
+	require.NoError(t, err)
+
+	return metaViewAddress
+}
+
 func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	accountKeys := test.AccountKeyGenerator()
 
 	nftAddress := deployNFTContract(t, b)
+	mvAddress := deployMetadataViewsContract(t, b, nftAddress)
 
 	AllDayAccountKey, AllDaySigner := accountKeys.NewWithSigner()
-	AllDayCode := LoadAllDay(nftAddress)
+	royaltyAddress, err := b.CreateAccount(
+		[]*flow.AccountKey{AllDayAccountKey},
+		nil,
+	)
+	require.NoError(t, err)
+
+	AllDayCode := LoadAllDay(nftAddress, mvAddress, royaltyAddress)
 
 	AllDayAddress, err := b.CreateAccount(
 		[]*flow.AccountKey{AllDayAccountKey},
@@ -92,9 +120,11 @@ func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	require.NoError(t, err)
 
 	return Contracts{
-		nftAddress,
-		AllDayAddress,
-		AllDaySigner,
+		NFTAddress:           nftAddress,
+		AllDayAddress:        AllDayAddress,
+		MetadataViewsAddress: mvAddress,
+		RoyaltyAddress:       royaltyAddress,
+		AllDaySigner:         AllDaySigner,
 	}
 }
 

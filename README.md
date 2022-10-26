@@ -87,3 +87,8 @@ Moments are minted out of editions. You can think of Editions as a "cookie cutte
 
 **Transactions**
 - MintMomentNFT: Mints a moment out of an EditionID
+
+
+## NFT Metadata Standard
+The contract conforms to the Flow NFT Metadata standard and implements the Core NFT Views. See 
+[Flow NFT Catalog](https://www.flow-nft-catalog.com/) for details.

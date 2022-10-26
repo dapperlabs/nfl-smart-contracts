@@ -196,9 +196,9 @@ func TestPlays(t *testing.T) {
 func createTestPlays(t *testing.T, b *emulator.Blockchain, contracts Contracts) {
 	t.Run("Should be able to create a new play", func(t *testing.T) {
 		metadata := map[string]string{
-			"PlayerFirstName": "Apple",
-			"PlayerLastName":  "Alpha",
-			"PlayType":        "Interception",
+			"playerFirstName": "Apple",
+			"playerLastName":  "Alpha",
+			"playType":        "Interception",
 		}
 		testCreatePlay(
 			t,
@@ -213,9 +213,9 @@ func createTestPlays(t *testing.T, b *emulator.Blockchain, contracts Contracts) 
 
 	t.Run("Should be able to create a new play with an incrementing ID from the first", func(t *testing.T) {
 		metadata := map[string]string{
-			"PlayerFirstName": "Bear",
-			"PlayerLastName":  "Bravo",
-			"PlayType":        "Rush",
+			"playerFirstName": "Bear",
+			"playerLastName":  "Bravo",
+			"playType":        "Rush",
 		}
 		testCreatePlay(
 			t,
@@ -656,11 +656,11 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 		for _, trait := range traits.Values {
 			traitsMap[trait.(cadence.Struct).Fields[0].ToGoValue().(string)] = trait.(cadence.Struct).Fields[1].ToGoValue()
 		}
-		assert.Equal(t, "COMMON", traitsMap["EditionTier"])
-		assert.Equal(t, "Series One", traitsMap["SeriesName"])
-		assert.Equal(t, "Set One", traitsMap["SetName"])
-		assert.Equal(t, uint64(1), traitsMap["SerialNumber"])
-		assert.Equal(t, "Interception", traitsMap["PlayType"])
+		assert.Equal(t, "COMMON", traitsMap["editionTier"])
+		assert.Equal(t, "Series One", traitsMap["seriesName"])
+		assert.Equal(t, "Set One", traitsMap["setName"])
+		assert.Equal(t, uint64(1), traitsMap["serialNumber"])
+		assert.Equal(t, "Interception", traitsMap["playType"])
 	})
 }
 

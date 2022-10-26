@@ -670,9 +670,9 @@ pub contract AllDay: NonFungibleToken {
         pub fun getName(): String {
             let edition: EditionData = AllDay.getEditionData(id: self.editionID)
             let play: PlayData = AllDay.getPlayData(id: edition.playID)
-            let firstName: String = play.metadata["PlayerFirstName"] ?? ""
-            let lastName: String = play.metadata["PlayerLastName"] ?? ""
-            let playType: String = play.metadata["PlayType"] ?? ""
+            let firstName: String = play.metadata["playerFirstName"] ?? ""
+            let lastName: String = play.metadata["playerLastName"] ?? ""
+            let playType: String = play.metadata["playType"] ?? ""
             return firstName.concat(" ").concat(lastName).concat(" ").concat(playType)
         }
 
@@ -715,10 +715,10 @@ pub contract AllDay: NonFungibleToken {
             let set: SetData = AllDay.getSetData(id: edition.setID)
 
             let traitDictionary: {String: AnyStruct} = {
-                "EditionTier": edition.tier,
-                "SeriesName": series.name,
-                "SetName": set.name,
-                "SerialNumber": self.serialNumber
+                "editionTier": edition.tier,
+                "seriesName": series.name,
+                "setName": set.name,
+                "serialNumber": self.serialNumber
             }
 
             for name in play.metadata.keys {

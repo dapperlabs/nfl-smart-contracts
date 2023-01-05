@@ -981,13 +981,13 @@ pub contract AllDay: NonFungibleToken {
 
         // Update a play's description metadata
         //
-        pub fun updatePlayDescription(playID: UInt64, description: String): UInt64 {
+        pub fun updatePlayDescription(playID: UInt64, description: String): Bool {
             if let play = &AllDay.playByID[playID] as &AllDay.Play? {
                 play.updateDescription(description: description)
             } else {
                 panic("play does not exist")
             }
-            return playID
+            return true
         }
 
         // Create an Edition

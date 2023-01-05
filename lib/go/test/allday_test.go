@@ -199,6 +199,7 @@ func createTestPlays(t *testing.T, b *emulator.Blockchain, contracts Contracts) 
 			"playerFirstName": "Apple",
 			"playerLastName":  "Alpha",
 			"playType":        "Interception",
+			"description":     "Fabulous diving interception by AA",
 		}
 		testCreatePlay(
 			t,
@@ -568,7 +569,7 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 		//Validate Display
 		displayView := result[0]
 		assert.Equal(t, "Apple Alpha Interception", displayView.Fields[0].ToGoValue())
-		assert.Equal(t, "Series One Set One moment with serial number 1", displayView.Fields[1].ToGoValue())
+		assert.Equal(t, "Fabulous diving interception by AA", displayView.Fields[1].ToGoValue())
 		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image?format=jpeg&width=256",
 			displayView.Fields[2].(cadence.Struct).Fields[0].ToGoValue())
 
@@ -670,4 +671,35 @@ func getMediaPath(media interface{}) interface{} {
 
 func getMediaType(media interface{}) interface{} {
 	return media.(cadence.Struct).Fields[1].ToGoValue()
+}
+
+func TestUpdatePlayDescription(t *testing.T) {
+	b := newEmulator()
+	contracts := AllDayDeployContracts(t, b)
+	userAddress, userSigner := createAccount(t, b)
+	setupAllDay(t, b, userAddress, userSigner, contracts)
+	createTestEditions(t, b, contracts)
+	mintMomentNFT(t, b, contracts, userAddress /*editionID*/, 1 /*shouldRevert*/, false)
+
+	t.Run("Should be able to update play's description", func(t *testing.T) {
+		result := getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
+
+		//Validate Display
+		displayView := result[0]
+		assert.Equal(t, "Apple Alpha Interception", displayView.Fields[0].ToGoValue())
+		assert.Equal(t, "Fabulous diving interception by AA", displayView.Fields[1].ToGoValue())
+		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image?format=jpeg&width=256",
+			displayView.Fields[2].(cadence.Struct).Fields[0].ToGoValue())
+
+		//Update play description
+		newPlayDescription := "A new play description"
+		updatePlayDescription(t, b, contracts, 1 /*playID*/, newPlayDescription, false /*shouldRevert*/)
+
+		result = getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
+
+		//Validate Display has been updated
+		displayView = result[0]
+		assert.Equal(t, newPlayDescription, displayView.Fields[1].ToGoValue())
+
+	})
 }

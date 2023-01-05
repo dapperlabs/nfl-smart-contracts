@@ -350,6 +350,10 @@ pub contract AllDay: NonFungibleToken {
 
             emit PlayCreated(id: self.id, classification: self.classification, metadata: self.metadata)
         }
+
+        access(contract) fun updateDescription(description: String) {
+            self.metadata["description"] = description
+        }
     }
 
     // Get the publicly available data for a Play
@@ -678,9 +682,14 @@ pub contract AllDay: NonFungibleToken {
 
         pub fun getDescription(): String {
             let edition: EditionData = AllDay.getEditionData(id: self.editionID)
+            let play: PlayData = AllDay.getPlayData(id: edition.playID)
+            let description: String = play.metadata["description"] ?? ""
+            if description != "" {
+                return description
+            }
+
             let series: SeriesData = AllDay.getSeriesData(id: edition.seriesID)
             let set: SetData = AllDay.getSetData(id: edition.setID)
-            series.name
             return series.name.concat(" ").concat(set.name).concat(" moment with serial number ").concat(self.serialNumber.toString())
         }
 
@@ -967,6 +976,17 @@ pub contract AllDay: NonFungibleToken {
             AllDay.playByID[play.id] <-! play
 
             // Return the new ID for convenience
+            return playID
+        }
+
+        // Update a play's description metadata
+        //
+        pub fun updatePlayDescription(playID: UInt64, description: String): UInt64 {
+            if let play = &AllDay.playByID[playID] as &AllDay.Play? {
+                play.updateDescription(description: description)
+            } else {
+                panic("play does not exist")
+            }
             return playID
         }
 

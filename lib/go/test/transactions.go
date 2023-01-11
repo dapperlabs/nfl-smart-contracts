@@ -10,9 +10,9 @@ import (
 	"github.com/onflow/flow-go-sdk/crypto"
 )
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Setup
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func fundAccount(
 	t *testing.T,
 	b *emulator.Blockchain,
@@ -43,9 +43,9 @@ func fundAccount(
 	)
 }
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Series
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func createSeries(
 	t *testing.T,
 	b *emulator.Blockchain,
@@ -93,9 +93,9 @@ func closeSeries(
 	)
 }
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Sets
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func createSet(
 	t *testing.T,
 	b *emulator.Blockchain,
@@ -120,9 +120,9 @@ func createSet(
 	)
 }
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // Plays
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func createPlay(
 	t *testing.T,
 	b *emulator.Blockchain,
@@ -149,9 +149,35 @@ func createPlay(
 	)
 }
 
-//------------------------------------------------------------
+func updatePlayDescription(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	playID uint64,
+	description string,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayUpdatePlayDescriptionTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	descriptionString, _ := cadence.NewString(description)
+	tx.AddArgument(cadence.NewUInt64(playID))
+	tx.AddArgument(descriptionString)
+
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+// ------------------------------------------------------------
 // Editions
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func createEdition(
 	t *testing.T,
 	b *emulator.Blockchain,
@@ -211,9 +237,9 @@ func closeEdition(
 	)
 }
 
-//------------------------------------------------------------
+// ------------------------------------------------------------
 // MomentNFTs
-//------------------------------------------------------------
+// ------------------------------------------------------------
 func mintMomentNFT(
 	t *testing.T,
 	b *emulator.Blockchain,

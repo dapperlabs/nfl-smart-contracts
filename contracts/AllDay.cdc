@@ -354,6 +354,25 @@ pub contract AllDay: NonFungibleToken {
         access(contract) fun updateDescription(description: String) {
             self.metadata["description"] = description
         }
+
+        access(contract) fun updateDynamicMetadata(optTeamName: String?, optPlayerFirstName: String?,
+            optPlayerLastName: String?, optPlayerNumber: String?, optPlayerPosition: String?) {
+            if let teamName = optTeamName {
+                self.metadata["teamName"] = teamName
+            }
+            if let playerFirstName = optPlayerFirstName {
+                self.metadata["playerFirstName"] = playerFirstName
+            }
+            if let playerLastName = optPlayerLastName {
+                self.metadata["playerLastName"] = playerLastName
+            }
+            if let playerNumber = optPlayerNumber {
+                self.metadata["playerNumber"] = playerNumber
+            }
+            if let playerPosition = optPlayerPosition {
+                self.metadata["playerPosition"] = playerPosition
+            }
+        }
     }
 
     // Get the publicly available data for a Play
@@ -984,6 +1003,19 @@ pub contract AllDay: NonFungibleToken {
         pub fun updatePlayDescription(playID: UInt64, description: String): Bool {
             if let play = &AllDay.playByID[playID] as &AllDay.Play? {
                 play.updateDescription(description: description)
+            } else {
+                panic("play does not exist")
+            }
+            return true
+        }
+
+        // Update a dynamic moment/play's metadata
+        //
+        pub fun updateDynamicMetadata(playID: UInt64, optTeamName: String?, optPlayerFirstName: String?,
+            optPlayerLastName: String?, optPlayerNumber: String?, optPlayerPosition: String?): Bool {
+            if let play = &AllDay.playByID[playID] as &AllDay.Play? {
+                play.updateDynamicMetadata(optTeamName: optTeamName, optPlayerFirstName: optPlayerFirstName,
+                    optPlayerLastName: optPlayerLastName, optPlayerNumber: optPlayerNumber, optPlayerPosition: optPlayerPosition)
             } else {
                 panic("play does not exist")
             }

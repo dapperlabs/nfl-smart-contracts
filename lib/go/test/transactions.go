@@ -188,6 +188,49 @@ func updatePlayDescription(
 	)
 }
 
+func updatePlayDynamicMetadata(t *testing.T, b *emulator.Blockchain, contracts Contracts, playID uint64,
+	teamName *string, playerFirstName *string, playerLastName *string, playerNumber *string, playerPosition *string,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayUpdateDayUpdatePlayDynamicMetadataTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+
+	toOptionalString := func(val *string) cadence.Optional {
+		if val != nil {
+			cdcString, _ := cadence.NewString(*val)
+			return cadence.NewOptional(cdcString)
+		} else {
+			return cadence.NewOptional(nil)
+		}
+	}
+
+	optTeamName := toOptionalString(teamName)
+	optPlayerFirstName := toOptionalString(playerFirstName)
+	optPlayerLastName := toOptionalString(playerLastName)
+	optPlayerNumber := toOptionalString(playerNumber)
+	optPlayerPosition := toOptionalString(playerPosition)
+
+	tx.AddArgument(cadence.NewUInt64(playID))
+	tx.AddArgument(optTeamName)
+	tx.AddArgument(optPlayerFirstName)
+	tx.AddArgument(optPlayerLastName)
+	tx.AddArgument(optPlayerNumber)
+	tx.AddArgument(optPlayerPosition)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
 // ------------------------------------------------------------
 // Editions
 // ------------------------------------------------------------

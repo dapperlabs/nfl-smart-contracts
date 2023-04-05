@@ -695,11 +695,56 @@ func TestUpdatePlayDescription(t *testing.T) {
 		newPlayDescription := "A new play description"
 		updatePlayDescription(t, b, contracts, 1 /*playID*/, newPlayDescription, false /*shouldRevert*/)
 
-		result = getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
-
 		//Validate Display has been updated
+		result = getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
 		displayView = result[0]
 		assert.Equal(t, newPlayDescription, displayView.Fields[1].ToGoValue())
 
+	})
+}
+
+func TestUpdatePlayDynamicMetadata(t *testing.T) {
+	b := newEmulator()
+	contracts := AllDayDeployContracts(t, b)
+	userAddress, userSigner := createAccount(t, b)
+	setupAllDay(t, b, userAddress, userSigner, contracts)
+	createTestEditions(t, b, contracts)
+	mintMomentNFT(t, b, contracts, userAddress /*editionID*/, 1 /*shouldRevert*/, false)
+
+	t.Run("Should be able to update play's dynamic metadata", func(t *testing.T) {
+		//Validate initial Display
+		result := getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
+		displayView := result[0]
+		assert.Equal(t, "Apple Alpha Interception", displayView.Fields[0].ToGoValue())
+
+		//Update play metadata
+		teamName := "New Team"
+		var playerFirstName *string
+		playerLastName := "Charlie"
+		var playerNumber *string
+		var playerPosition *string
+		updatePlayDynamicMetadata(t, b, contracts, 1 /*playID*/, &teamName, playerFirstName, &playerLastName,
+			playerNumber, playerPosition, false /*shouldRevert*/)
+
+		//Validate Display has been updated
+		result = getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
+		displayView = result[0]
+		assert.Equal(t, "Apple Charlie Interception", displayView.Fields[0].ToGoValue())
+
+		//Validate Play metadata has been updated
+		traitsView := result[7]
+		traits := traitsView.Fields[0].(cadence.Array).Values
+		for _, trait := range traits {
+			ts := trait.(cadence.Struct)
+			if ts.Fields[0].ToGoValue() == "teamName" {
+				assert.Equal(t, teamName, ts.Fields[1].ToGoValue())
+			}
+			if ts.Fields[0].ToGoValue() == "playerFirstName" {
+				assert.Equal(t, "Apple", ts.Fields[1].ToGoValue())
+			}
+			if ts.Fields[0].ToGoValue() == "playerLastName" {
+				assert.Equal(t, playerLastName, ts.Fields[1].ToGoValue())
+			}
+		}
 	})
 }

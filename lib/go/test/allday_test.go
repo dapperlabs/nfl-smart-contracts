@@ -642,7 +642,7 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 		// Validate Royalties
 		royaltiesView := result[5]
 		royalty := royaltiesView.Fields[0].(cadence.Array).Values[0].(cadence.Struct)
-		assert.Equal(t, contracts.RoyaltyAddress, flow.HexToAddress(royalty.Fields[0].(cadence.Capability).Address.Hex()))
+		assert.Equal(t, contracts.RoyaltyAddress, flow.HexToAddress(royalty.Fields[0].(cadence.StorageCapability).Address.Hex()))
 		assert.Equal(t, uint64(0.05*fixedpoint.Fix64Factor), royalty.Fields[1].ToGoValue())
 		assert.Equal(t, "NFL All Day marketplace royalty", royalty.Fields[2].ToGoValue())
 

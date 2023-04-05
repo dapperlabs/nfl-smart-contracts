@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/onflow/cadence"
@@ -35,10 +36,12 @@ func fundAccount(
 	tx.AddArgument(cadence.NewAddress(receiverAddress))
 	tx.AddArgument(cadenceUFix64(amount))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address},
-		[]crypto.Signer{b.ServiceKey().Signer()},
+		[]crypto.Signer{signer},
 		false,
 	)
 }
@@ -62,10 +65,12 @@ func createSeries(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(nameString)
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -85,10 +90,12 @@ func closeSeries(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewUInt64(id))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -112,10 +119,12 @@ func createSet(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(nameString)
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -141,10 +150,12 @@ func createPlay(
 	tx.AddArgument(classificationString)
 	tx.AddArgument(metadataDict(metadata))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -167,10 +178,12 @@ func updatePlayDescription(
 	tx.AddArgument(cadence.NewUInt64(playID))
 	tx.AddArgument(descriptionString)
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -206,10 +219,12 @@ func createEdition(
 		tx.AddArgument(cadence.Optional{})
 	}
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -229,10 +244,12 @@ func closeEdition(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewUInt64(editionID))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -257,10 +274,12 @@ func mintMomentNFT(
 	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
 	tx.AddArgument(cadence.NewUInt64(editionID))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -284,10 +303,12 @@ func transferMomentNFT(
 	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
 	tx.AddArgument(cadence.NewUInt64(nftID))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, senderAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), senderSigner},
+		[]crypto.Signer{signer, senderSigner},
 		shouldRevert,
 	)
 }

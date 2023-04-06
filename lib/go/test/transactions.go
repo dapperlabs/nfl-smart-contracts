@@ -208,18 +208,12 @@ func updatePlayDynamicMetadata(t *testing.T, b *emulator.Blockchain, contracts C
 		}
 	}
 
-	optTeamName := toOptionalString(teamName)
-	optPlayerFirstName := toOptionalString(playerFirstName)
-	optPlayerLastName := toOptionalString(playerLastName)
-	optPlayerNumber := toOptionalString(playerNumber)
-	optPlayerPosition := toOptionalString(playerPosition)
-
 	tx.AddArgument(cadence.NewUInt64(playID))
-	tx.AddArgument(optTeamName)
-	tx.AddArgument(optPlayerFirstName)
-	tx.AddArgument(optPlayerLastName)
-	tx.AddArgument(optPlayerNumber)
-	tx.AddArgument(optPlayerPosition)
+	tx.AddArgument(toOptionalString(teamName))
+	tx.AddArgument(toOptionalString(playerFirstName))
+	tx.AddArgument(toOptionalString(playerLastName))
+	tx.AddArgument(toOptionalString(playerNumber))
+	tx.AddArgument(toOptionalString(playerPosition))
 
 	signer, err := b.ServiceKey().Signer()
 	require.NoError(t, err)

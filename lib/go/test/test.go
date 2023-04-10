@@ -1,7 +1,10 @@
 package test
 
 import (
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/onflow/cadence"
@@ -132,7 +135,8 @@ func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 
 // newEmulator returns a emulator object for testing
 func newEmulator() *emulator.Blockchain {
-	b, err := emulator.NewBlockchain()
+	logger := log.Output(zerolog.ConsoleWriter{Out: os.Stdout}).Level(zerolog.InfoLevel)
+	b, err := emulator.NewBlockchain(emulator.WithLogger(logger))
 	if err != nil {
 		panic(err)
 	}

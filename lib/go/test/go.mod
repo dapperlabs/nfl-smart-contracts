@@ -9,5 +9,6 @@ require (
 	github.com/onflow/flow-go v0.30.0 // indirect
 	github.com/onflow/flow-go-sdk v0.40.0
 	github.com/onflow/flow-nft/lib/go/contracts v1.0.0
+	github.com/rs/zerolog v1.29.0
 	github.com/stretchr/testify v1.8.2
 )

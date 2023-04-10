@@ -316,6 +316,12 @@ pub contract AllDay: NonFungibleToken {
         pub let id: UInt64
         pub let classification: String
         pub let metadata: {String: String}
+        pub var setPlayTierInEditions: {String: Bool}
+
+        // member function to check the setPlaysInEditions to see if this Set/Play combination already exists
+        pub fun setPlayTierExistsInEdition(setID: UInt64, tier: String): Bool {
+            return self.setPlayTierInEditions.containsKey(setID.toString().concat("-").concat(tier))
+        }
 
         // initializer
         //
@@ -324,6 +330,7 @@ pub contract AllDay: NonFungibleToken {
             self.id = id
             self.classification = play.classification
             self.metadata = play.metadata
+            self.setPlayTierInEditions = play.setPlayTierInEditions
             } else {
                 panic("play does not exist")
             }
@@ -338,6 +345,14 @@ pub contract AllDay: NonFungibleToken {
         // Contents writable if borrowed!
         // This is deliberate, as it allows admins to update the data.
         pub let metadata: {String: String}
+        // Store a dictionary of all the Edition Tier that have been associated with the Play
+        // This enforces only one unique Set+Plays+Tier combination can be used for an Edition
+        pub var setPlayTierInEditions: {String: Bool}
+
+        // member function to insert a new Play to the setPlaysInEditions dictionary
+        pub fun insertNewTier(setID: UInt64, tier: String) {
+            self.setPlayTierInEditions[setID.toString().concat("-").concat(tier)] = true
+        }
 
         // initializer
         //
@@ -345,6 +360,7 @@ pub contract AllDay: NonFungibleToken {
             self.id = AllDay.nextPlayID
             self.classification = classification
             self.metadata = metadata
+            self.setPlayTierInEditions = {}
 
             AllDay.nextPlayID = self.id + 1 as UInt64
 
@@ -483,7 +499,7 @@ pub contract AllDay: NonFungibleToken {
                 AllDay.setByID.containsKey(setID): "setID does not exist"
                 AllDay.playByID.containsKey(playID): "playID does not exist"
                 SeriesData(id: seriesID).active == true: "cannot create an Edition with a closed Series"
-                SetData(id: setID).setPlayExistsInEdition(playID: playID) != true: "set play combination already exists in an edition"
+                PlayData(id: playID).setPlayTierExistsInEdition(setID: setID, tier: tier) != true : "set play tier combination already exists in an edition"
             }
 
             self.id = AllDay.nextEditionID
@@ -503,6 +519,7 @@ pub contract AllDay: NonFungibleToken {
 
             AllDay.nextEditionID = AllDay.nextEditionID + 1 as UInt64
             AllDay.setByID[setID]?.insertNewPlay(playID: playID)
+            AllDay.playByID[playID]?.insertNewTier(setID: setID, tier: tier)
 
             emit EditionCreated(
                 id: self.id,

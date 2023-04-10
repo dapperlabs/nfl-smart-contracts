@@ -4,7 +4,6 @@
     Author: Sadie Freeman sadie.freeman@dapperlabs.com
 */
 
-
 import NonFungibleToken from "./NonFungibleToken.cdc"
 import FungibleToken from "./utility/FungibleToken.cdc"
 import MetadataViews from "./MetadataViews.cdc"
@@ -14,14 +13,14 @@ import MetadataViews from "./MetadataViews.cdc"
     Unlike TopShot, we use resources for all entities and manage access to their data
     by copying it to structs (this simplifies access control, in particular write access).
     We also encapsulate resource creation for the admin in member functions on the parent type.
-    
+
     There are 5 levels of entity:
     1. Series
     2. Sets
     3. Plays
     4. Editions
     4. Moment NFT (an NFT)
-    
+
     An Edition is created with a combination of a Series, Set, and Play
     Moment NFTs are minted out of Editions.
 
@@ -67,10 +66,10 @@ pub contract AllDay: NonFungibleToken {
     //
     // Emitted when a new edition has been created by an admin
     pub event EditionCreated(
-        id: UInt64, 
-        seriesID: UInt64, 
-        setID: UInt64, 
-        playID: UInt64, 
+        id: UInt64,
+        seriesID: UInt64,
+        setID: UInt64,
+        playID: UInt64,
         maxMintSize: UInt64?,
         tier: String,
     )
@@ -170,7 +169,7 @@ pub contract AllDay: NonFungibleToken {
             }
             self.id = AllDay.nextSeriesID
             self.name = name
-            self.active = true   
+            self.active = true
 
             // Cache the new series's name => ID
             AllDay.seriesIDByName[name] = self.id
@@ -418,7 +417,7 @@ pub contract AllDay: NonFungibleToken {
 
        // member function to check if max edition size has been reached
        pub fun maxEditionMintSizeReached(): Bool {
-            return self.numMinted == self.maxMintSize 
+            return self.numMinted == self.maxMintSize
         }
 
         // initializer
@@ -791,7 +790,7 @@ pub contract AllDay: NonFungibleToken {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
-                (result == nil) || (result?.id == id): 
+                (result == nil) || (result?.id == id):
                     "Cannot borrow Moment NFT reference: The ID of the returned reference is incorrect"
             }
         }
@@ -975,7 +974,7 @@ pub contract AllDay: NonFungibleToken {
             // Return the new ID for convenience
             return seriesID
         }
-        
+
         // Close a Series
         //
         pub fun closeSeries(id: UInt64): UInt64 {
@@ -1041,7 +1040,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Create an Edition
         //
-        pub fun createEdition(            
+        pub fun createEdition(
             seriesID: UInt64,
             setID: UInt64,
             playID: UInt64,

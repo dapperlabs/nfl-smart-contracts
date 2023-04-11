@@ -41,10 +41,11 @@ const (
 	AllDayReadAllSetNamesPath = AllDayScriptsRootPath + "/sets/read_all_set_names.cdc"
 
 	// Plays
-	AllDayCreatePlayPath            = AllDayTransactionsRootPath + "/admin/plays/create_play.cdc"
-	AllDayUpdatePlayDescriptionPath = AllDayTransactionsRootPath + "/admin/plays/update_play_description.cdc"
-	AllDayReadPlayByIDPath          = AllDayScriptsRootPath + "/plays/read_play_by_id.cdc"
-	AllDayReadAllPlaysPath          = AllDayScriptsRootPath + "/plays/read_all_plays.cdc"
+	AllDayCreatePlayPath                = AllDayTransactionsRootPath + "/admin/plays/create_play.cdc"
+	AllDayUpdatePlayDescriptionPath     = AllDayTransactionsRootPath + "/admin/plays/update_play_description.cdc"
+	AllDayUpdatePlayDynamicMetadataPath = AllDayTransactionsRootPath + "/admin/plays/update_play_dynamic_metadata.cdc"
+	AllDayReadPlayByIDPath              = AllDayScriptsRootPath + "/plays/read_play_by_id.cdc"
+	AllDayReadAllPlaysPath              = AllDayScriptsRootPath + "/plays/read_all_plays.cdc"
 
 	// Editions
 	AllDayCreateEditionPath   = AllDayTransactionsRootPath + "/admin/editions/create_edition.cdc"
@@ -213,6 +214,13 @@ func loadAllDayCreatePlayTransaction(contracts Contracts) []byte {
 func loadAllDayUpdatePlayDescriptionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayUpdatePlayDescriptionPath),
+		contracts,
+	)
+}
+
+func loadAllDayUpdateDayUpdatePlayDynamicMetadataTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayUpdatePlayDynamicMetadataPath),
 		contracts,
 	)
 }

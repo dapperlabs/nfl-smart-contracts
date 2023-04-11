@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/onflow/cadence"
@@ -35,10 +36,12 @@ func fundAccount(
 	tx.AddArgument(cadence.NewAddress(receiverAddress))
 	tx.AddArgument(cadenceUFix64(amount))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address},
-		[]crypto.Signer{b.ServiceKey().Signer()},
+		[]crypto.Signer{signer},
 		false,
 	)
 }
@@ -62,10 +65,12 @@ func createSeries(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(nameString)
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -85,10 +90,12 @@ func closeSeries(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewUInt64(id))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -112,10 +119,12 @@ func createSet(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(nameString)
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -141,10 +150,12 @@ func createPlay(
 	tx.AddArgument(classificationString)
 	tx.AddArgument(metadataDict(metadata))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -167,10 +178,49 @@ func updatePlayDescription(
 	tx.AddArgument(cadence.NewUInt64(playID))
 	tx.AddArgument(descriptionString)
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func updatePlayDynamicMetadata(t *testing.T, b *emulator.Blockchain, contracts Contracts, playID uint64,
+	teamName *string, playerFirstName *string, playerLastName *string, playerNumber *string, playerPosition *string,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayUpdateDayUpdatePlayDynamicMetadataTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+
+	toOptionalString := func(val *string) cadence.Optional {
+		if val != nil {
+			cdcString, _ := cadence.NewString(*val)
+			return cadence.NewOptional(cdcString)
+		} else {
+			return cadence.NewOptional(nil)
+		}
+	}
+
+	tx.AddArgument(cadence.NewUInt64(playID))
+	tx.AddArgument(toOptionalString(teamName))
+	tx.AddArgument(toOptionalString(playerFirstName))
+	tx.AddArgument(toOptionalString(playerLastName))
+	tx.AddArgument(toOptionalString(playerNumber))
+	tx.AddArgument(toOptionalString(playerPosition))
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -206,10 +256,12 @@ func createEdition(
 		tx.AddArgument(cadence.Optional{})
 	}
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -229,10 +281,12 @@ func closeEdition(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.NewUInt64(editionID))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -257,10 +311,12 @@ func mintMomentNFT(
 	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
 	tx.AddArgument(cadence.NewUInt64(editionID))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), contracts.AllDaySigner},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }
@@ -284,10 +340,12 @@ func transferMomentNFT(
 	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
 	tx.AddArgument(cadence.NewUInt64(nftID))
 
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, senderAddress},
-		[]crypto.Signer{b.ServiceKey().Signer(), senderSigner},
+		[]crypto.Signer{signer, senderSigner},
 		shouldRevert,
 	)
 }

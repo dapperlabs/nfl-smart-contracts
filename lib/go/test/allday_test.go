@@ -390,19 +390,16 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 		)
 	})
 
-	t.Run("Should not be able to create an Edition with a Set/Play combination that already exists", func(t *testing.T) {
-		testCreateEdition(
-			t,
-			b,
-			contracts,
-			1,
-			1,
-			2,
-			nil,
-			"COMMON",
-			5,
-			true,
-		)
+	t.Run("Should be able to create an Edition with a Set/Play combination that already exists but with a different tier", func(t *testing.T) {
+		//Mint LEGENDARY edition
+		testCreateEdition(t, b, contracts, 1 /*seriesID*/, 1 /*setID*/, 2 /*playID*/, nil,
+			"LEGENDARY" /*tier*/, 4 /*shouldBEID*/, false /*shouldRevert*/)
+	})
+
+	t.Run("Should NOT be able to mint new edition using the same set/play with new tier", func(t *testing.T) {
+		//Mint COMMON edition again, tx should revert
+		testCreateEdition(t, b, contracts, 1 /*seriesID*/, 1 /*setID*/, 2 /*playID*/, nil,
+			"COMMON" /*tier*/, 5 /*shouldBEID*/, true /*shouldRevert*/)
 	})
 
 	t.Run("Should be able to close and edition that has no max mint size", func(t *testing.T) {

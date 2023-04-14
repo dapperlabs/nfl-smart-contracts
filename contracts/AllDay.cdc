@@ -4,7 +4,6 @@
     Author: Sadie Freeman sadie.freeman@dapperlabs.com
 */
 
-
 import NonFungibleToken from "./NonFungibleToken.cdc"
 import FungibleToken from "./utility/FungibleToken.cdc"
 import MetadataViews from "./MetadataViews.cdc"
@@ -14,14 +13,14 @@ import MetadataViews from "./MetadataViews.cdc"
     Unlike TopShot, we use resources for all entities and manage access to their data
     by copying it to structs (this simplifies access control, in particular write access).
     We also encapsulate resource creation for the admin in member functions on the parent type.
-    
+
     There are 5 levels of entity:
     1. Series
     2. Sets
     3. Plays
     4. Editions
     4. Moment NFT (an NFT)
-    
+
     An Edition is created with a combination of a Series, Set, and Play
     Moment NFTs are minted out of Editions.
 
@@ -67,10 +66,10 @@ pub contract AllDay: NonFungibleToken {
     //
     // Emitted when a new edition has been created by an admin
     pub event EditionCreated(
-        id: UInt64, 
-        seriesID: UInt64, 
-        setID: UInt64, 
-        playID: UInt64, 
+        id: UInt64,
+        seriesID: UInt64,
+        setID: UInt64,
+        playID: UInt64,
         maxMintSize: UInt64?,
         tier: String,
     )
@@ -170,7 +169,7 @@ pub contract AllDay: NonFungibleToken {
             }
             self.id = AllDay.nextSeriesID
             self.name = name
-            self.active = true   
+            self.active = true
 
             // Cache the new series's name => ID
             AllDay.seriesIDByName[name] = self.id
@@ -402,7 +401,7 @@ pub contract AllDay: NonFungibleToken {
 
        // member function to check if max edition size has been reached
        pub fun maxEditionMintSizeReached(): Bool {
-            return self.numMinted == self.maxMintSize 
+            return self.numMinted == self.maxMintSize
         }
 
         // initializer
@@ -483,7 +482,7 @@ pub contract AllDay: NonFungibleToken {
                 AllDay.setByID.containsKey(setID): "setID does not exist"
                 AllDay.playByID.containsKey(playID): "playID does not exist"
                 SeriesData(id: seriesID).active == true: "cannot create an Edition with a closed Series"
-                SetData(id: setID).setPlayExistsInEdition(playID: playID) != true: "set play combination already exists in an edition"
+                AllDay.getPlayTierExistsInEdition(setID, playID, tier) == false: "set play tier combination already exists in an edition"
             }
 
             self.id = AllDay.nextEditionID
@@ -503,6 +502,7 @@ pub contract AllDay: NonFungibleToken {
 
             AllDay.nextEditionID = AllDay.nextEditionID + 1 as UInt64
             AllDay.setByID[setID]?.insertNewPlay(playID: playID)
+            AllDay.insertSetPlayTierMap(setID, playID, tier)
 
             emit EditionCreated(
                 id: self.id,
@@ -523,6 +523,37 @@ pub contract AllDay: NonFungibleToken {
         }
 
         return AllDay.EditionData(id: id)
+    }
+
+    //------------------------------------------------------------
+    // Internal functions for tracking Editions minted with Set + Play + Tier combinations
+    //------------------------------------------------------------
+
+    // Get storage path for SetPlayTierMap
+    //
+    priv fun getSetPlayTierMapStorage(): StoragePath {
+        return /storage/AllDayAdminSetPlayTierMap
+    }
+
+    // Get composite key used to read/write SetPlayTierMap
+    //
+    priv fun getSetPlayTierMapKey(_ setID: UInt64,_ playID: UInt64,_ tier: String): String {
+        return setID.toString().concat("-").concat(playID.toString()).concat("-").concat(tier)
+    }
+
+    // Check if the given set, play, tier has already been minted in an Edition
+    //
+    priv fun getPlayTierExistsInEdition(_ setID: UInt64, _ playID: UInt64, _ tier: String): Bool {
+        let setPlayTierMap = AllDay.account.borrow<&{String: Bool}>(from: AllDay.getSetPlayTierMapStorage())!
+        return setPlayTierMap.containsKey(AllDay.getSetPlayTierMapKey(setID, playID, tier))
+    }
+
+    // Insert new entry into SetPlayTierMap
+    //
+    priv fun insertSetPlayTierMap(_ setID: UInt64, _ playID: UInt64, _ tier: String) {
+        let setPlayTierMap = AllDay.account.load<{String: Bool}>(from: AllDay.getSetPlayTierMapStorage())!
+        setPlayTierMap.insert(key: AllDay.getSetPlayTierMapKey(setID, playID, tier), true)
+        AllDay.account.save(setPlayTierMap, to: /storage/AllDayAdminSetPlayTierMap)
     }
 
     //------------------------------------------------------------
@@ -774,7 +805,7 @@ pub contract AllDay: NonFungibleToken {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
-                (result == nil) || (result?.id == id): 
+                (result == nil) || (result?.id == id):
                     "Cannot borrow Moment NFT reference: The ID of the returned reference is incorrect"
             }
         }
@@ -958,7 +989,7 @@ pub contract AllDay: NonFungibleToken {
             // Return the new ID for convenience
             return seriesID
         }
-        
+
         // Close a Series
         //
         pub fun closeSeries(id: UInt64): UInt64 {
@@ -1024,7 +1055,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Create an Edition
         //
-        pub fun createEdition(            
+        pub fun createEdition(
             seriesID: UInt64,
             setID: UInt64,
             playID: UInt64,
@@ -1102,6 +1133,10 @@ pub contract AllDay: NonFungibleToken {
             self.MinterPrivatePath,
             target: self.AdminStoragePath
         )
+
+        //Initialize map to keep track of set+play+tier(edition) combinations that have been minted
+        let setPlayTierMap: {String: Bool} = {}
+        self.account.save(setPlayTierMap, to: AllDay.getSetPlayTierMapStorage())
 
         // Let the world know we are here
         emit ContractInitialized()

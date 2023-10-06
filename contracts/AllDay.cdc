@@ -72,6 +72,7 @@ pub contract AllDay: NonFungibleToken {
         playID: UInt64,
         maxMintSize: UInt64?,
         tier: String,
+        deserialized: Bool?,
     )
     // Emitted when an edition is either closed by an admin, or the max amount of moments have been minted
     pub event EditionClosed(id: UInt64)
@@ -398,6 +399,8 @@ pub contract AllDay: NonFungibleToken {
         pub var maxMintSize: UInt64?
         pub let tier: String
         pub var numMinted: UInt64
+        pub let deserialized: Bool?
+        pub let presetSerial: UInt64?
 
        // member function to check if max edition size has been reached
        pub fun maxEditionMintSizeReached(): Bool {
@@ -415,6 +418,8 @@ pub contract AllDay: NonFungibleToken {
             self.maxMintSize = edition.maxMintSize
             self.tier = edition.tier
             self.numMinted = edition.numMinted
+            self.deserialized = edition.deserialized
+            self.presetSerial = edition.presetSerial
            } else {
                panic("edition does not exist")
            }
@@ -433,6 +438,8 @@ pub contract AllDay: NonFungibleToken {
         pub var maxMintSize: UInt64?
         // Updates each time we mint a new moment for the Edition to keep a running total
         pub var numMinted: UInt64
+        pub let deserialized: Bool?
+        pub let presetSerial: UInt64?
 
         // Close this edition so that no more Moment NFTs can be minted in it
         //
@@ -454,11 +461,16 @@ pub contract AllDay: NonFungibleToken {
                 self.numMinted != self.maxMintSize: "max number of minted moments has been reached"
             }
 
+            var serial = self.numMinted + 1
+            if self.deserialized != nil {
+                serial = self.presetSerial!
+            } 
+
             // Create the Moment NFT, filled out with our information
             let momentNFT <- create NFT(
                 id: AllDay.totalSupply + 1,
                 editionID: self.id,
-                serialNumber: self.numMinted + 1
+                serialNumber: serial
             )
             AllDay.totalSupply = AllDay.totalSupply + 1
             // Keep a running total (you'll notice we used this as the serial number)
@@ -475,6 +487,8 @@ pub contract AllDay: NonFungibleToken {
             playID: UInt64,
             maxMintSize: UInt64?,
             tier: String,
+            deserialized: Bool?,
+            presetSerial: UInt64?
         ) {
             pre {
                 maxMintSize != 0: "max mint size is zero, must either be null or greater than 0"
@@ -483,6 +497,7 @@ pub contract AllDay: NonFungibleToken {
                 AllDay.playByID.containsKey(playID): "playID does not exist"
                 SeriesData(id: seriesID).active == true: "cannot create an Edition with a closed Series"
                 AllDay.getPlayTierExistsInEdition(setID, playID, tier) == false: "set play tier combination already exists in an edition"
+                deserialized != nil && presetSerial != nil || deserialized == nil && presetSerial == nil: "preset serial must be set if deserialized is true"
             }
 
             self.id = AllDay.nextEditionID
@@ -499,6 +514,8 @@ pub contract AllDay: NonFungibleToken {
 
             self.tier = tier
             self.numMinted = 0 as UInt64
+            self.deserialized = deserialized
+            self.presetSerial = presetSerial
 
             AllDay.nextEditionID = AllDay.nextEditionID + 1 as UInt64
             AllDay.setByID[setID]?.insertNewPlay(playID: playID)
@@ -511,6 +528,7 @@ pub contract AllDay: NonFungibleToken {
                 playID: self.playID,
                 maxMintSize: self.maxMintSize,
                 tier: self.tier,
+                deserialized: deserialized,
             )
         }
     }
@@ -1060,13 +1078,17 @@ pub contract AllDay: NonFungibleToken {
             setID: UInt64,
             playID: UInt64,
             maxMintSize: UInt64?,
-            tier: String): UInt64 {
+            tier: String,
+            deserialized: Bool?,
+            presetSerial: UInt64?): UInt64 {
             let edition <- create Edition(
                 seriesID: seriesID,
                 setID: setID,
                 playID: playID,
                 maxMintSize: maxMintSize,
                 tier: tier,
+                deserialized: deserialized,
+                presetSerial: presetSerial,
             )
             let editionID = edition.id
             AllDay.editionByID[edition.id] <-! edition

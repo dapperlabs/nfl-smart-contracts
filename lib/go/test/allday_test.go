@@ -1,9 +1,10 @@
 package test
 
 import (
+	"testing"
+
 	"github.com/onflow/cadence"
 	"github.com/onflow/cadence/fixedpoint"
-	"testing"
 
 	emulator "github.com/onflow/flow-emulator"
 	"github.com/onflow/flow-go-sdk"
@@ -274,6 +275,8 @@ func testCreateEdition(
 	playID uint64,
 	maxMintSize *uint64,
 	tier string,
+	deserialized *bool,
+	presetSerial *uint64,
 	shouldBeID uint64,
 	shouldRevert bool,
 ) {
@@ -286,6 +289,8 @@ func testCreateEdition(
 		playID,
 		maxMintSize,
 		tier,
+		deserialized,
+		presetSerial,
 		shouldRevert,
 	)
 
@@ -298,6 +303,12 @@ func testCreateEdition(
 		assert.Equal(t, tier, edition.Tier)
 		if maxMintSize != nil {
 			assert.Equal(t, &maxMintSize, &edition.MaxMintSize)
+		}
+		if deserialized != nil {
+			assert.Equal(t, &deserialized, &edition.Deserialized)
+		}
+		if presetSerial != nil {
+			assert.Equal(t, &presetSerial, &edition.PresetSerial)
 		}
 	}
 }
@@ -326,6 +337,8 @@ func testCloseEdition(
 
 func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contracts) {
 	var maxMintSize uint64 = 2
+	var deserialized bool = true
+	var presetSerial uint64 = 2023
 	createTestSeries(t, b, contracts)
 	createTestSets(t, b, contracts)
 	createTestPlays(t, b, contracts)
@@ -340,6 +353,8 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			1,
 			&maxMintSize,
 			"COMMON",
+			nil,
+			nil,
 			1,
 			false,
 		)
@@ -355,6 +370,8 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			1,
 			nil,
 			"COMMON",
+			nil,
+			nil,
 			2,
 			false,
 		)
@@ -370,6 +387,8 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			2,
 			nil,
 			"COMMON",
+			nil,
+			nil,
 			3,
 			false,
 		)
@@ -385,6 +404,8 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			1,
 			nil,
 			"COMMON",
+			nil,
+			nil,
 			4,
 			true,
 		)
@@ -393,13 +414,13 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 	t.Run("Should be able to create an Edition with a Set/Play combination that already exists but with a different tier", func(t *testing.T) {
 		//Mint LEGENDARY edition
 		testCreateEdition(t, b, contracts, 1 /*seriesID*/, 1 /*setID*/, 2 /*playID*/, nil,
-			"LEGENDARY" /*tier*/, 4 /*shouldBEID*/, false /*shouldRevert*/)
+			"LEGENDARY" /*tier*/, nil /*deserialized*/, nil /*presetSerial*/, 4 /*shouldBEID*/, false /*shouldRevert*/)
 	})
 
 	t.Run("Should NOT be able to mint new edition using the same set/play with new tier", func(t *testing.T) {
 		//Mint COMMON edition again, tx should revert
 		testCreateEdition(t, b, contracts, 1 /*seriesID*/, 1 /*setID*/, 2 /*playID*/, nil,
-			"COMMON" /*tier*/, 5 /*shouldBEID*/, true /*shouldRevert*/)
+			"COMMON" /*tier*/, nil /*deserialized*/, nil /*presetSerial*/, 5 /*shouldBEID*/, true /*shouldRevert*/)
 	})
 
 	t.Run("Should be able to close and edition that has no max mint size", func(t *testing.T) {
@@ -410,6 +431,23 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			3,
 			3,
 			false,
+		)
+	})
+
+	t.Run("Should be able to create a deserialized edition and set the serial number", func(t *testing.T) {
+		testCreateEdition(
+			t,
+			b,
+			contracts,
+			1,
+			1,
+			1,
+			nil,
+			"COMMON",
+			&deserialized,
+			&presetSerial,
+			5,
+			true,
 		)
 	})
 }

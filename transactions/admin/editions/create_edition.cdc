@@ -6,6 +6,8 @@ transaction(
     playID: UInt64,
     tier: String,
     maxMintSize: UInt64?,
+    deserialized: Bool?,
+    presetSerial: UInt64?,
    ) {
     // local variable for the admin reference
     let admin: &AllDay.Admin
@@ -23,6 +25,8 @@ transaction(
             playID: playID,
             maxMintSize: maxMintSize,
             tier: tier,
+            deserialized: deserialized,
+            presetSerial: presetSerial,
         )
 
         log("====================================")

@@ -1,8 +1,9 @@
 package test
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/onflow/cadence"
 	emulator "github.com/onflow/flow-emulator"
@@ -237,6 +238,8 @@ func createEdition(
 	playID uint64,
 	maxMintSize *uint64,
 	tier string,
+	deserialized *bool,
+	presetSerial *uint64,
 	shouldRevert bool,
 ) {
 	tierString, _ := cadence.NewString(tier)
@@ -256,6 +259,17 @@ func createEdition(
 		tx.AddArgument(cadence.Optional{})
 	}
 
+	if deserialized != nil {
+		tx.AddArgument(cadence.NewBool(*deserialized))
+	} else {
+		tx.AddArgument(cadence.Optional{})
+	}
+
+	if presetSerial != nil {
+		tx.AddArgument(cadence.NewUInt64(*presetSerial))
+	} else {
+		tx.AddArgument(cadence.Optional{})
+	}
 	signer, err := b.ServiceKey().Signer()
 	require.NoError(t, err)
 	signAndSubmit(

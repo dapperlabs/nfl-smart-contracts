@@ -19,12 +19,14 @@ type PlayData struct {
 	Metadata       map[string]string
 }
 type EditionData struct {
-	ID          uint64
-	SeriesID    uint64
-	SetID       uint64
-	PlayID      uint64
-	MaxMintSize *uint64
-	Tier        string
+	ID           uint64
+	SeriesID     uint64
+	SetID        uint64
+	PlayID       uint64
+	MaxMintSize  *uint64
+	Tier         string
+	Deserialized *bool
+	PresetSerial *uint64
 }
 type OurNFTData struct {
 	ID           uint64
@@ -74,6 +76,16 @@ func parseEditionData(value cadence.Value) EditionData {
 	if fields[4] != nil && fields[4].ToGoValue() != nil {
 		maxMintSize = fields[4].ToGoValue().(uint64)
 	}
+
+	var deserialized bool
+	if fields[7] != nil && fields[7].ToGoValue() != nil {
+		deserialized = fields[7].ToGoValue().(bool)
+	}
+
+	var presetSerial uint64
+	if fields[8] != nil && fields[8].ToGoValue() != nil {
+		presetSerial = fields[8].ToGoValue().(uint64)
+	}
 	return EditionData{
 		fields[0].ToGoValue().(uint64),
 		fields[1].ToGoValue().(uint64),
@@ -81,6 +93,8 @@ func parseEditionData(value cadence.Value) EditionData {
 		fields[3].ToGoValue().(uint64),
 		&maxMintSize,
 		fields[5].ToGoValue().(string),
+		&deserialized,
+		&presetSerial,
 	}
 }
 

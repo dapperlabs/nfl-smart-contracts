@@ -327,6 +327,50 @@ func mintMomentNFT(
 	)
 }
 
+func mintMomentNFTMulti(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	recipientAddress flow.Address,
+	editionIDs []uint64,
+	serialNumbers []*uint64,
+	shouldRevert bool,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayMintMomentNFTMultiTransaction(contracts)).
+		SetGasLimit(900).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
+	counts := []cadence.Value{}
+	cEditionIDs := []cadence.Value{}
+	for _, id := range editionIDs {
+		cEditionIDs = append(cEditionIDs, cadence.NewUInt64(id))
+		counts = append(counts, cadence.NewUInt64(1))
+	}
+	cSerialNumbers := []cadence.Value{}
+	for _, sn := range serialNumbers {
+		if sn != nil {
+			cSerialNumbers = append(cSerialNumbers, cadence.NewOptional(cadence.NewUInt64(*sn)))
+		} else {
+			cSerialNumbers = append(cSerialNumbers, cadence.NewOptional(nil))
+		}
+	}
+	tx.AddArgument(cadence.NewArray(cEditionIDs))
+	tx.AddArgument(cadence.NewArray(counts))
+	tx.AddArgument(cadence.NewArray(cSerialNumbers))
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
 func transferMomentNFT(
 	t *testing.T,
 	b *emulator.Blockchain,

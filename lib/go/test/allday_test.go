@@ -754,6 +754,30 @@ func TestUpdatePlayDynamicMetadata(t *testing.T) {
 	})
 }
 
+func TestMintMomentMulti(t *testing.T) {
+	b := newEmulator()
+	contracts := AllDayDeployContracts(t, b)
+	userAddress, userSigner := createAccount(t, b)
+	setupAllDay(t, b, userAddress, userSigner, contracts)
+	createTestEditions(t, b, contracts)
+	// edition 1 has a maxSize while edition 2 does not
+	editions := []uint64{1, 2}
+	serialNumbers := []*uint64{nil, uint64Ptr(2023)}
+
+	mintMomentNFTMulti(t, b, contracts, userAddress /*editionID*/, editions, serialNumbers /*shouldRevert*/, false)
+
+	t.Run("Should have a serial number of 1", func(t *testing.T) {
+		nft := getMomentNFTProperties(t, b, contracts, userAddress, 1)
+		assert.Equal(t, uint64(1), nft.EditionID)
+		assert.Equal(t, uint64(1), nft.SerialNumber)
+	})
+	t.Run("Should have a serial number of 2023", func(t *testing.T) {
+		nft := getMomentNFTProperties(t, b, contracts, userAddress, 2)
+		assert.Equal(t, uint64(2), nft.EditionID)
+		assert.Equal(t, uint64(2023), nft.SerialNumber)
+	})
+}
+
 func uint64Ptr(i uint64) *uint64 {
 	return &i
 }

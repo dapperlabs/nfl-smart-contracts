@@ -300,6 +300,7 @@ func mintMomentNFT(
 	contracts Contracts,
 	recipientAddress flow.Address,
 	editionID uint64,
+	serialNumber *uint64,
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
@@ -310,6 +311,11 @@ func mintMomentNFT(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.BytesToAddress(recipientAddress.Bytes()))
 	tx.AddArgument(cadence.NewUInt64(editionID))
+	sNumber := cadence.NewOptional(nil)
+	if serialNumber != nil {
+		sNumber = cadence.NewOptional(cadence.NewUInt64(*serialNumber))
+	}
+	tx.AddArgument(sNumber)
 
 	signer, err := b.ServiceKey().Signer()
 	require.NoError(t, err)

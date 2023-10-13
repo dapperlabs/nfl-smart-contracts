@@ -1,7 +1,7 @@
 import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
 import AllDay from "../../../contracts/AllDay.cdc"
 
-transaction(recipientAddress: Address, editionIDs: [UInt64], counts: [UInt64]) {
+transaction(recipientAddress: Address, editionIDs: [UInt64], counts: [UInt64], serialNumbers: [UInt64?]) {
     
     // local variable for storing the minter reference
     let minter: &{AllDay.NFTMinter}
@@ -25,6 +25,7 @@ transaction(recipientAddress: Address, editionIDs: [UInt64], counts: [UInt64]) {
 
     pre {
         editionIDs.length == counts.length: "must pass arrays of same length"
+        editionIDs.length == serialNumbers.length: "must pass arrays of same length"
     }
 
     execute {
@@ -33,7 +34,7 @@ transaction(recipientAddress: Address, editionIDs: [UInt64], counts: [UInt64]) {
             var remaining = counts[i]
             while remaining > 0 {
                 // mint the NFT and deposit it to the recipient's collection
-                self.recipient.deposit(token: <- self.minter.mintNFT(editionID: editionIDs[i]))
+                self.recipient.deposit(token: <- self.minter.mintNFT(editionID: editionIDs[i], serialNumber: serialNumbers[i]))
                 remaining = remaining - 1
             }
             i = i + 1

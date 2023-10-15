@@ -449,19 +449,24 @@ pub contract AllDay: NonFungibleToken {
         // Mint a Moment NFT in this edition, with the given minting mintingDate.
         // Note that this will panic if the max mint size has already been reached.
         //
-        pub fun mint(): @AllDay.NFT {
+        pub fun mint(serialNumber: UInt64?): @AllDay.NFT {
             pre {
                 self.numMinted != self.maxMintSize: "max number of minted moments has been reached"
+            }
+
+            var serial = self.numMinted + 1 as UInt64
+            if(self.maxMintSize == nil) {
+                serial = serialNumber!
             }
 
             // Create the Moment NFT, filled out with our information
             let momentNFT <- create NFT(
                 id: AllDay.totalSupply + 1,
                 editionID: self.id,
-                serialNumber: self.numMinted + 1
+                serialNumber: serial
             )
             AllDay.totalSupply = AllDay.totalSupply + 1
-            // Keep a running total (you'll notice we used this as the serial number)
+            // Keep a running total (you'll notice we used this as the serial number for closed editions)
             self.numMinted = self.numMinted + 1 as UInt64
 
             return <- momentNFT
@@ -930,7 +935,7 @@ pub contract AllDay: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt64): @AllDay.NFT
+        pub fun mintNFT(editionID: UInt64, serialNumber: UInt64?): @AllDay.NFT
     }
 
     // A resource that allows managing metadata and minting NFTs
@@ -1087,12 +1092,12 @@ pub contract AllDay: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt64): @AllDay.NFT {
+        pub fun mintNFT(editionID: UInt64, serialNumber: UInt64?): @AllDay.NFT {
             pre {
                 // Make sure the edition we are creating this NFT in exists
                 AllDay.editionByID.containsKey(editionID): "No such EditionID"
             }
-            return <- self.borrowEdition(id: editionID).mint()
+            return <- self.borrowEdition(id: editionID).mint(serialNumber: serialNumber)
         }
     }
 

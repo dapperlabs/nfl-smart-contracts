@@ -1,7 +1,7 @@
 import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
 import AllDay from "../../../contracts/AllDay.cdc"
 
-transaction(recipientAddress: Address, editionID: UInt64) {
+transaction(recipientAddress: Address, editionID: UInt64, serialNumber: UInt64?) {
     
     // local variable for storing the minter reference
     let minter: &{AllDay.NFTMinter}
@@ -24,7 +24,7 @@ transaction(recipientAddress: Address, editionID: UInt64) {
 
     execute {
         // mint the NFT and deposit it to the recipient's collection
-        let momentNFT <- self.minter.mintNFT(editionID: editionID)
+        let momentNFT <- self.minter.mintNFT(editionID: editionID, serialNumber: serialNumber)
         self.recipient.deposit(token: <- (momentNFT as @NonFungibleToken.NFT))
     }
 }

@@ -431,6 +431,7 @@ func TestMomentNFTs(t *testing.T) {
 			b,
 			contracts,
 			uint64(1),
+			nil,
 			userAddress,
 			uint64(1),
 			uint64(1),
@@ -444,6 +445,7 @@ func TestMomentNFTs(t *testing.T) {
 			b,
 			contracts,
 			uint64(1),
+			nil,
 			userAddress,
 			uint64(2),
 			uint64(2),
@@ -457,9 +459,10 @@ func TestMomentNFTs(t *testing.T) {
 			b,
 			contracts,
 			uint64(2),
+			uint64Ptr(2023),
 			userAddress,
 			uint64(3),
-			uint64(1),
+			uint64(2023),
 			false,
 		)
 	})
@@ -470,9 +473,10 @@ func TestMomentNFTs(t *testing.T) {
 			b,
 			contracts,
 			uint64(2),
+			uint64Ptr(2023),
 			userAddress,
 			uint64(4),
-			uint64(2),
+			uint64(2023),
 			false,
 		)
 	})
@@ -483,6 +487,7 @@ func TestMomentNFTs(t *testing.T) {
 			b,
 			contracts,
 			uint64(1),
+			nil,
 			userAddress,
 			uint64(3),
 			uint64(3),
@@ -496,6 +501,7 @@ func TestMomentNFTs(t *testing.T) {
 			b,
 			contracts,
 			uint64(3),
+			nil,
 			userAddress,
 			uint64(1),
 			uint64(1),
@@ -509,6 +515,7 @@ func testMintMomentNFT(
 	b *emulator.Blockchain,
 	contracts Contracts,
 	editionID uint64,
+	serialNumber *uint64,
 	userAddress flow.Address,
 	shouldBeID uint64,
 	shouldBeSerialNumber uint64,
@@ -523,6 +530,7 @@ func testMintMomentNFT(
 		contracts,
 		userAddress,
 		editionID,
+		serialNumber,
 		shouldRevert,
 	)
 
@@ -558,7 +566,7 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 	userAddress, userSigner := createAccount(t, b)
 	setupAllDay(t, b, userAddress, userSigner, contracts)
 	createTestEditions(t, b, contracts)
-	mintMomentNFT(t, b, contracts, userAddress /*editionID*/, 1 /*shouldRevert*/, false)
+	mintMomentNFT(t, b, contracts, userAddress /*editionID*/, 1, nil /*shouldRevert*/, false)
 
 	t.Run("Should be able to get moment's metadata", func(t *testing.T) {
 		result := getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
@@ -676,7 +684,7 @@ func TestUpdatePlayDescription(t *testing.T) {
 	userAddress, userSigner := createAccount(t, b)
 	setupAllDay(t, b, userAddress, userSigner, contracts)
 	createTestEditions(t, b, contracts)
-	mintMomentNFT(t, b, contracts, userAddress /*editionID*/, 1 /*shouldRevert*/, false)
+	mintMomentNFT(t, b, contracts, userAddress /*editionID*/, 1, nil /*shouldRevert*/, false)
 
 	t.Run("Should be able to update play's description", func(t *testing.T) {
 		result := getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
@@ -706,7 +714,7 @@ func TestUpdatePlayDynamicMetadata(t *testing.T) {
 	userAddress, userSigner := createAccount(t, b)
 	setupAllDay(t, b, userAddress, userSigner, contracts)
 	createTestEditions(t, b, contracts)
-	mintMomentNFT(t, b, contracts, userAddress /*editionID*/, 1 /*shouldRevert*/, false)
+	mintMomentNFT(t, b, contracts, userAddress /*editionID*/, 1, nil /*shouldRevert*/, false)
 
 	t.Run("Should be able to update play's dynamic metadata", func(t *testing.T) {
 		//Validate initial Display
@@ -744,4 +752,32 @@ func TestUpdatePlayDynamicMetadata(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestMintMomentMulti(t *testing.T) {
+	b := newEmulator()
+	contracts := AllDayDeployContracts(t, b)
+	userAddress, userSigner := createAccount(t, b)
+	setupAllDay(t, b, userAddress, userSigner, contracts)
+	createTestEditions(t, b, contracts)
+	// edition 1 has a maxSize while edition 2 does not
+	editions := []uint64{1, 2}
+	serialNumbers := []*uint64{nil, uint64Ptr(2023)}
+
+	mintMomentNFTMulti(t, b, contracts, userAddress /*editionID*/, editions, serialNumbers /*shouldRevert*/, false)
+
+	t.Run("Should have a serial number of 1", func(t *testing.T) {
+		nft := getMomentNFTProperties(t, b, contracts, userAddress, 1)
+		assert.Equal(t, uint64(1), nft.EditionID)
+		assert.Equal(t, uint64(1), nft.SerialNumber)
+	})
+	t.Run("Should have a serial number of 2023", func(t *testing.T) {
+		nft := getMomentNFTProperties(t, b, contracts, userAddress, 2)
+		assert.Equal(t, uint64(2), nft.EditionID)
+		assert.Equal(t, uint64(2023), nft.SerialNumber)
+	})
+}
+
+func uint64Ptr(i uint64) *uint64 {
+	return &i
 }

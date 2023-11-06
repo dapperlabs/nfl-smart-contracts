@@ -273,7 +273,7 @@ func setupAllDay(
 	contracts Contracts,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadAllDaySetupAccountTransaction(contracts)).
+		SetScript(loadEscrowSetupAccountTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -287,19 +287,6 @@ func setupAllDay(
 		[]crypto.Signer{signer, userSigner},
 		false,
 	)
-}
-
-func setupAccount(
-	t *testing.T,
-	b *emulator.Blockchain,
-	address flow.Address,
-	signer crypto.Signer,
-	contracts Contracts,
-) (sdk.Address, crypto.Signer) {
-	setupAllDay(t, b, address, signer, contracts)
-	fundAccount(t, b, address, defaultAccountFunding)
-
-	return address, signer
 }
 
 func metadataDict(dict map[string]string) cadence.Dictionary {

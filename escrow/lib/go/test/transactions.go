@@ -58,37 +58,12 @@ func createSeries(
 ) {
 	nameString, _ := cadence.NewString(name)
 	tx := flow.NewTransaction().
-		SetScript(loadAllDayCreateSeriesTransaction(contracts)).
+		SetScript(loadEscrowCreateSeriesTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(nameString)
-
-	signer, err := b.ServiceKey().Signer()
-	require.NoError(t, err)
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{signer, contracts.AllDaySigner},
-		shouldRevert,
-	)
-}
-
-func closeSeries(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	id uint64,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadAllDayCloseSeriesTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.AllDayAddress)
-	tx.AddArgument(cadence.NewUInt64(id))
 
 	signer, err := b.ServiceKey().Signer()
 	require.NoError(t, err)
@@ -112,7 +87,7 @@ func createSet(
 ) {
 	nameString, _ := cadence.NewString(name)
 	tx := flow.NewTransaction().
-		SetScript(loadAllDayCreateSetTransaction(contracts)).
+		SetScript(loadEscrowCreateSetTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -142,78 +117,13 @@ func createPlay(
 ) {
 	classificationString, _ := cadence.NewString(classification)
 	tx := flow.NewTransaction().
-		SetScript(loadAllDayCreatePlayTransaction(contracts)).
+		SetScript(loadEscrowCreatePlayTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(classificationString)
 	tx.AddArgument(metadataDict(metadata))
-
-	signer, err := b.ServiceKey().Signer()
-	require.NoError(t, err)
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{signer, contracts.AllDaySigner},
-		shouldRevert,
-	)
-}
-
-func updatePlayDescription(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	playID uint64,
-	description string,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadAllDayUpdatePlayDescriptionTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.AllDayAddress)
-	descriptionString, _ := cadence.NewString(description)
-	tx.AddArgument(cadence.NewUInt64(playID))
-	tx.AddArgument(descriptionString)
-
-	signer, err := b.ServiceKey().Signer()
-	require.NoError(t, err)
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{signer, contracts.AllDaySigner},
-		shouldRevert,
-	)
-}
-
-func updatePlayDynamicMetadata(t *testing.T, b *emulator.Blockchain, contracts Contracts, playID uint64,
-	teamName *string, playerFirstName *string, playerLastName *string, playerNumber *string, playerPosition *string,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadAllDayUpdateDayUpdatePlayDynamicMetadataTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.AllDayAddress)
-
-	toOptionalString := func(val *string) cadence.Optional {
-		if val != nil {
-			cdcString, _ := cadence.NewString(*val)
-			return cadence.NewOptional(cdcString)
-		} else {
-			return cadence.NewOptional(nil)
-		}
-	}
-
-	tx.AddArgument(cadence.NewUInt64(playID))
-	tx.AddArgument(toOptionalString(teamName))
-	tx.AddArgument(toOptionalString(playerFirstName))
-	tx.AddArgument(toOptionalString(playerLastName))
-	tx.AddArgument(toOptionalString(playerNumber))
-	tx.AddArgument(toOptionalString(playerPosition))
 
 	signer, err := b.ServiceKey().Signer()
 	require.NoError(t, err)
@@ -241,7 +151,7 @@ func createEdition(
 ) {
 	tierString, _ := cadence.NewString(tier)
 	tx := flow.NewTransaction().
-		SetScript(loadAllDayCreateEditionTransaction(contracts)).
+		SetScript(loadEscrowCreateEditionTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -266,31 +176,6 @@ func createEdition(
 	)
 }
 
-func closeEdition(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	editionID uint64,
-	shouldRevert bool,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadAllDayCloseEditionTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.AllDayAddress)
-	tx.AddArgument(cadence.NewUInt64(editionID))
-
-	signer, err := b.ServiceKey().Signer()
-	require.NoError(t, err)
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{signer, contracts.AllDaySigner},
-		shouldRevert,
-	)
-}
-
 // ------------------------------------------------------------
 // Leaderboards
 // ------------------------------------------------------------
@@ -301,7 +186,31 @@ func createLeaderboard(
 	leaderboardName string,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadAllDayCreateLeaderboardTransaction(contracts)).
+		SetScript(loadEscrowCreateLeaderboardTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.String(leaderboardName))
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		false,
+	)
+}
+
+func getLeaderboard(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	leaderboardName string,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadEscrowGetLeaderboardTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -330,7 +239,7 @@ func escrowMomentNFT(
 	momentNftFlowID uint64,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadAllDayEscrowMomentNFTTransaction(contracts)).
+		SetScript(loadEscrowMomentNFTTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
@@ -338,7 +247,6 @@ func escrowMomentNFT(
 		AddAuthorizer(contracts.AllDayAddress)
 	tx.AddArgument(cadence.String("leaderboardBurn-1"))
 	tx.AddArgument(cadence.NewUInt64(momentNftFlowID))
-	tx.AddArgument(cadence.String("AllDay.235235235235235.NFT"))
 
 	signer, err := b.ServiceKey().Signer()
 	require.NoError(t, err)
@@ -360,7 +268,7 @@ func mintMomentNFT(
 	shouldRevert bool,
 ) {
 	tx := flow.NewTransaction().
-		SetScript(loadAllDayMintMomentNFTTransaction(contracts)).
+		SetScript(loadEscrowMintMomentNFTTransaction(contracts)).
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).

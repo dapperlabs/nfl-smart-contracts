@@ -526,6 +526,15 @@ func TestEscrow(t *testing.T) {
 			uint64(1),
 		)
 	})
+
+	t.Run("Should get the leaderboard by name and return NFTs", func(t *testing.T) {
+		testGetLeaderboard(
+			t,
+			b,
+			contracts,
+			"leaderboardBurn-1",
+		)
+	})
 }
 
 func testCreateLeaderboard(
@@ -557,6 +566,20 @@ func testEscrowMomentNFT(
 		userSigner,
 		userAddress,
 		momentNftFlowID,
+	)
+}
+
+func testGetLeaderboard(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	leaderboardName string,
+) {
+	getLeaderboard(
+		t,
+		b,
+		contracts,
+		leaderboardName,
 	)
 }
 

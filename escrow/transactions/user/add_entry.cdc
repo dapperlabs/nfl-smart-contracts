@@ -2,7 +2,7 @@ import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
 import AllDay from "../../../contracts/AllDay.cdc"
 import Escrow from "../../../contracts/AllDay.cdc"
 
-transaction(leaderboardName: String, nftID: UInt64, nftType: String) {
+transaction(leaderboardName: String, nftID: UInt64) {
     let nftVault: @NonFungibleToken.NFT
     let escrowRef: &Escrow.Admin
     let withdrawAddress: Address
@@ -32,8 +32,7 @@ transaction(leaderboardName: String, nftID: UInt64, nftType: String) {
         leaderboard.addEntry(
             nft: <-self.nftVault,
             ownerAddress: self.withdrawAddress,
-            leaderboardName: leaderboardName,
-            typeName: nftType
+            leaderboardName: leaderboardName
         )
     }
 }

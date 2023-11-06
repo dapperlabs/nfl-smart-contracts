@@ -20,54 +20,43 @@ const (
 const (
 	EscrowPath                 = "../../../contracts/Escrow.cdc"
 	AllDayPath                 = "../../../contracts/AllDay.cdc"
-	AllDayTransactionsRootPath = "../../../transactions"
-	AllDayScriptsRootPath      = "../../../scripts"
+	EscrowTransactionsRootPath = "../../../transactions"
+	EscrowScriptsRootPath      = "../../../scripts"
 
 	// Accounts
-	AllDaySetupAccountPath   = AllDayTransactionsRootPath + "/user/setup_AllDay_account.cdc"
-	AllDayAccountIsSetupPath = AllDayScriptsRootPath + "/user/account_is_setup.cdc"
+	EscrowSetupAccountPath   = EscrowTransactionsRootPath + "/user/setup_AllDay_account.cdc"
+	EscrowAccountIsSetupPath = EscrowScriptsRootPath + "/user/account_is_setup.cdc"
 
 	// Series
-	AllDayCreateSeriesPath       = AllDayTransactionsRootPath + "/admin/series/create_series.cdc"
-	AllDayCloseSeriesPath        = AllDayTransactionsRootPath + "/admin/series/close_series.cdc"
-	AllDayReadAllSeriesPath      = AllDayScriptsRootPath + "/series/read_all_series.cdc"
-	AllDayReadSeriesByIDPath     = AllDayScriptsRootPath + "/series/read_series_by_id.cdc"
-	AllDayReadSeriesByNamePath   = AllDayScriptsRootPath + "/series/read_series_by_name.cdc"
-	AllDayReadAllSeriesNamesPath = AllDayScriptsRootPath + "/series/read_all_series_names.cdc"
+	EscrowCreateSeriesPath   = EscrowTransactionsRootPath + "/admin/series/create_series.cdc"
+	EscrowCloseSeriesPath    = EscrowTransactionsRootPath + "/admin/series/close_series.cdc"
+	EscrowReadSeriesByIDPath = EscrowScriptsRootPath + "/series/read_series_by_id.cdc"
 
 	// Sets
-	AllDayCreateSetPath       = AllDayTransactionsRootPath + "/admin/sets/create_set.cdc"
-	AllDayReadAllSetsPath     = AllDayScriptsRootPath + "/sets/read_all_sets.cdc"
-	AllDayReadSetByIDPath     = AllDayScriptsRootPath + "/sets/read_set_by_id.cdc"
-	AllDayReadSetsByNamePath  = AllDayScriptsRootPath + "/sets/read_sets_by_name.cdc"
-	AllDayReadAllSetNamesPath = AllDayScriptsRootPath + "/sets/read_all_set_names.cdc"
+	EscrowCreateSetPath   = EscrowTransactionsRootPath + "/admin/sets/create_set.cdc"
+	EscrowReadSetByIDPath = EscrowScriptsRootPath + "/sets/read_set_by_id.cdc"
 
 	// Plays
-	AllDayCreatePlayPath                = AllDayTransactionsRootPath + "/admin/plays/create_play.cdc"
-	AllDayUpdatePlayDescriptionPath     = AllDayTransactionsRootPath + "/admin/plays/update_play_description.cdc"
-	AllDayUpdatePlayDynamicMetadataPath = AllDayTransactionsRootPath + "/admin/plays/update_play_dynamic_metadata.cdc"
-	AllDayReadPlayByIDPath              = AllDayScriptsRootPath + "/plays/read_play_by_id.cdc"
-	AllDayReadAllPlaysPath              = AllDayScriptsRootPath + "/plays/read_all_plays.cdc"
+	EscrowCreatePlayPath                = EscrowTransactionsRootPath + "/admin/plays/create_play.cdc"
+	EscrowUpdatePlayDescriptionPath     = EscrowTransactionsRootPath + "/admin/plays/update_play_description.cdc"
+	EscrowUpdatePlayDynamicMetadataPath = EscrowTransactionsRootPath + "/admin/plays/update_play_dynamic_metadata.cdc"
+	EscrowReadPlayByIDPath              = EscrowScriptsRootPath + "/plays/read_play_by_id.cdc"
 
 	// Editions
-	AllDayCreateEditionPath   = AllDayTransactionsRootPath + "/admin/editions/create_edition.cdc"
-	AllDayCloseEditionPath    = AllDayTransactionsRootPath + "/admin/editions/close_edition.cdc"
-	AllDayReadEditionByIDPath = AllDayScriptsRootPath + "/editions/read_edition_by_id.cdc"
-	AllDayReadAllEditionsPath = AllDayScriptsRootPath + "/edition/read_all_editions.cdc"
+	EscrowCreateEditionPath   = EscrowTransactionsRootPath + "/admin/editions/create_edition.cdc"
+	EscrowReadEditionByIDPath = EscrowScriptsRootPath + "/editions/read_edition_by_id.cdc"
 
 	// Leaderboards
-	AllDayCreateLeaderboardPath = AllDayTransactionsRootPath + "/admin/leaderboards/create_leaderboard.cdc"
+	EscrowCreateLeaderboardPath = EscrowTransactionsRootPath + "/admin/leaderboards/create_leaderboard.cdc"
+	EscrowGetLeaderboardPath    = EscrowTransactionsRootPath + "/admin/leaderboards/get_leaderboard.cdc"
 
 	// Moment NFTs
-	AllDayEscrowMomentNFTPath         = AllDayTransactionsRootPath + "/user/add_entry.cdc"
-	AllDayMintMomentNFTPath           = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
-	AllDayMintMomentNFTMultiPath      = AllDayTransactionsRootPath + "/admin/nfts/mint_moment_nfts_multi.cdc"
-	AllDayTransferNFTPath             = AllDayTransactionsRootPath + "/user/transfer_moment_nft.cdc"
-	AllDayReadMomentNFTSupplyPath     = AllDayScriptsRootPath + "/nfts/read_moment_nft_supply.cdc"
-	AllDayReadMomentNFTPropertiesPath = AllDayScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
-	AllDayReadCollectionNFTLengthPath = AllDayScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
-	AllDayReadCollectionNFTIDsPath    = AllDayScriptsRootPath + "/nfts/read_collection_nft_ids.cdc"
-	AllDayReadMomentNFTMetadataPath   = AllDayScriptsRootPath + "/nfts/read_moment_nft_metadata.cdc"
+	EscrowMintMomentNFTPath           = EscrowTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
+	EscrowReadMomentNFTSupplyPath     = EscrowScriptsRootPath + "/nfts/read_moment_nft_supply.cdc"
+	EscrowReadMomentNFTPropertiesPath = EscrowScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
+
+	// Escrow
+	EscrowMomentNFTPath = EscrowTransactionsRootPath + "/user/add_entry.cdc"
 )
 
 // ------------------------------------------------------------
@@ -122,16 +111,16 @@ func LoadEscrow(nftAddress flow.Address) []byte {
 	return code
 }
 
-func loadAllDaySetupAccountTransaction(contracts Contracts) []byte {
+func loadEscrowSetupAccountTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDaySetupAccountPath),
+		readFile(EscrowSetupAccountPath),
 		contracts,
 	)
 }
 
-func loadAllDayAccountIsSetupScript(contracts Contracts) []byte {
+func loadEscrowAccountIsSetupScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayAccountIsSetupPath),
+		readFile(EscrowAccountIsSetupPath),
 		contracts,
 	)
 }
@@ -139,44 +128,16 @@ func loadAllDayAccountIsSetupScript(contracts Contracts) []byte {
 // ------------------------------------------------------------
 // Series
 // ------------------------------------------------------------
-func loadAllDayCreateSeriesTransaction(contracts Contracts) []byte {
+func loadEscrowCreateSeriesTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayCreateSeriesPath),
+		readFile(EscrowCreateSeriesPath),
 		contracts,
 	)
 }
 
-func loadAllDayReadSeriesByIDScript(contracts Contracts) []byte {
+func loadEscrowReadSeriesByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayReadSeriesByIDPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadSeriesByNameScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadSeriesByNamePath),
-		contracts,
-	)
-}
-
-func loadAllDayReadAllSeriesScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadAllSeriesPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadAllSeriesNamesScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadAllSeriesNamesPath),
-		contracts,
-	)
-}
-
-func loadAllDayCloseSeriesTransaction(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayCloseSeriesPath),
+		readFile(EscrowReadSeriesByIDPath),
 		contracts,
 	)
 }
@@ -184,37 +145,16 @@ func loadAllDayCloseSeriesTransaction(contracts Contracts) []byte {
 // ------------------------------------------------------------
 // Sets
 // ------------------------------------------------------------
-func loadAllDayCreateSetTransaction(contracts Contracts) []byte {
+func loadEscrowCreateSetTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayCreateSetPath),
+		readFile(EscrowCreateSetPath),
 		contracts,
 	)
 }
 
-func loadAllDayReadSetByIDScript(contracts Contracts) []byte {
+func loadEscrowReadSetByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayReadSetByIDPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadAllSetsScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadAllSetsPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadSetsByNameScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadSetsByNamePath),
-		contracts,
-	)
-}
-
-func loadAllDayReadAllSetNamesScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadAllSetNamesPath),
+		readFile(EscrowReadSetByIDPath),
 		contracts,
 	)
 }
@@ -222,37 +162,16 @@ func loadAllDayReadAllSetNamesScript(contracts Contracts) []byte {
 // ------------------------------------------------------------
 // Plays
 // ------------------------------------------------------------
-func loadAllDayCreatePlayTransaction(contracts Contracts) []byte {
+func loadEscrowCreatePlayTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayCreatePlayPath),
+		readFile(EscrowCreatePlayPath),
 		contracts,
 	)
 }
 
-func loadAllDayUpdatePlayDescriptionTransaction(contracts Contracts) []byte {
+func loadEscrowReadPlayByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayUpdatePlayDescriptionPath),
-		contracts,
-	)
-}
-
-func loadAllDayUpdateDayUpdatePlayDynamicMetadataTransaction(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayUpdatePlayDynamicMetadataPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadPlayByIDScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadPlayByIDPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadAllPlaysScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadAllPlaysPath),
+		readFile(EscrowReadPlayByIDPath),
 		contracts,
 	)
 }
@@ -260,30 +179,16 @@ func loadAllDayReadAllPlaysScript(contracts Contracts) []byte {
 // ------------------------------------------------------------
 // Editions
 // ------------------------------------------------------------
-func loadAllDayCreateEditionTransaction(contracts Contracts) []byte {
+func loadEscrowCreateEditionTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayCreateEditionPath),
+		readFile(EscrowCreateEditionPath),
 		contracts,
 	)
 }
 
-func loadAllDayReadEditionByIDScript(contracts Contracts) []byte {
+func loadEscrowReadEditionByIDScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayReadEditionByIDPath),
-		contracts,
-	)
-}
-
-func loadAllDayCloseEditionTransaction(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayCloseEditionPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadAllEditionsScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadAllEditionsPath),
+		readFile(EscrowReadEditionByIDPath),
 		contracts,
 	)
 }
@@ -291,72 +196,50 @@ func loadAllDayReadAllEditionsScript(contracts Contracts) []byte {
 // ------------------------------------------------------------
 // Moment NFTs
 // ------------------------------------------------------------
-func loadAllDayMintMomentNFTTransaction(contracts Contracts) []byte {
+func loadEscrowMintMomentNFTTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayMintMomentNFTPath),
+		readFile(EscrowMintMomentNFTPath),
 		contracts,
 	)
 }
 
-func loadAllDayEscrowMomentNFTTransaction(contracts Contracts) []byte {
+func loadEscrowReadMomentNFTSupplyScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayEscrowMomentNFTPath),
+		readFile(EscrowReadMomentNFTSupplyPath),
 		contracts,
 	)
 }
 
-func loadAllDayCreateLeaderboardTransaction(contracts Contracts) []byte {
+func loadEscrowReadMomentNFTPropertiesScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayCreateLeaderboardPath),
+		readFile(EscrowReadMomentNFTPropertiesPath),
 		contracts,
 	)
 }
 
-func loadAllDayMintMomentNFTMultiTransaction(contracts Contracts) []byte {
+// ------------------------------------------------------------
+// Escrow
+// ------------------------------------------------------------
+func loadEscrowMomentNFTTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayMintMomentNFTMultiPath),
+		readFile(EscrowMomentNFTPath),
 		contracts,
 	)
 }
 
-func loadAllDayReadMomentNFTSupplyScript(contracts Contracts) []byte {
+// ------------------------------------------------------------
+// Leaderboards
+// ------------------------------------------------------------
+func loadEscrowCreateLeaderboardTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayReadMomentNFTSupplyPath),
+		readFile(EscrowCreateLeaderboardPath),
 		contracts,
 	)
 }
 
-func loadAllDayReadMomentNFTPropertiesScript(contracts Contracts) []byte {
+func loadEscrowGetLeaderboardTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(AllDayReadMomentNFTPropertiesPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadCollectionNFTLengthScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadCollectionNFTLengthPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadCollectionNFTIDsScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadCollectionNFTIDsPath),
-		contracts,
-	)
-}
-
-func loadAllDayTransferNFTTransaction(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayTransferNFTPath),
-		contracts,
-	)
-}
-
-func loadAllDayReadMomentNFTMetadataScript(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(AllDayReadMomentNFTMetadataPath),
+		readFile(EscrowGetLeaderboardPath),
 		contracts,
 	)
 }

@@ -16,36 +16,36 @@ pub contract Escrow {
 
     // Named Paths
     pub let AdminStoragePath: StoragePath
+    pub let AdminPublicPath: PublicPath
 
     // An interface containing the public functions for adding entries to a leaderboard.
     pub resource interface ILeaderboard {
-        pub fun addEntry(nft: @NonFungibleToken.NFT, ownerAddress: Address, leaderboardName: String, typeName: String)
+        pub fun addEntry(nft: @NonFungibleToken.NFT, ownerAddress: Address, leaderboardName: String)
     }
 
     // The resource representing a leaderboard.
     pub resource Leaderboard: ILeaderboard {
-        pub var entries: @{String: {String: LeaderboardEntry}}
+        pub var entries: @{UInt64: LeaderboardEntry}
         pub let name: String
+        pub let nftType: Type
 
         // Adds an NFT entry to the leaderboard.
-        pub fun addEntry(nft: @NonFungibleToken.NFT, ownerAddress: Address, leaderboardName: String, typeName: String) {
+        pub fun addEntry(nft: @NonFungibleToken.NFT, ownerAddress: Address, leaderboardName: String) {
             let nftID = nft.id
 
-            let entry <- create LeaderboardEntry(typeName: typeName, nftID: nftID, ownerAddress: ownerAddress, nft: <-nft)
-
-            if self.entries[self.name] == nil {
-                self.entries[self.name] <-! {}
-            }
-            let leaderboardDict <- self.entries.remove(key: self.name) ?? panic("Expected leaderboard dictionary")
-
-            let typeAndId = typeName.concat("-").concat(nftID.toString())
-            if leaderboardDict[typeAndId] != nil {
+            // Check if the entry already exists
+            if self.entries[nftID] != nil {
                 panic("Entry already exists for this NFT ID in the leaderboard")
             }
 
-            leaderboardDict[typeAndId] <-! entry
+            // Create the entry and add it to the entries map
+            let entry <- create LeaderboardEntry(
+                nftID: nftID,
+                ownerAddress: ownerAddress,
+                nft: <-nft
+            )
 
-            self.entries[self.name] <-! leaderboardDict
+            self.entries[nftID] <-! entry
 
             emit NFTDeposited(leaderboardName: leaderboardName, nftID: nftID, owner: ownerAddress)
         }
@@ -55,16 +55,15 @@ pub contract Escrow {
             destroy self.entries
         }
 
-        init(name: String) {
+        init(name: String, nftType: Type) {
             self.name = name
-            self.entries <- {}
-            self.entries[self.name] <-! {}
+            self.nftType = nftType
+            self.entries <- {} as @{UInt64: LeaderboardEntry}
         }
     }
 
     // The resource representing an NFT entry in a leaderboard.
     pub resource LeaderboardEntry {
-        pub let typeName: String
         pub let nftID: UInt64
         pub let ownerAddress: Address
         pub let nft: @NonFungibleToken.NFT
@@ -74,8 +73,7 @@ pub contract Escrow {
             destroy self.nft
         }
 
-        init(typeName: String, nftID: UInt64, ownerAddress: Address, nft: @NonFungibleToken.NFT) {
-            self.typeName = typeName
+        init(nftID: UInt64, ownerAddress: Address, nft: @NonFungibleToken.NFT) {
             self.nftID = nftID
             self.ownerAddress = ownerAddress
             self.nft <- nft
@@ -93,9 +91,9 @@ pub contract Escrow {
         pub var leaderboards: @{String: Leaderboard}
 
         // Creates a new leaderboard and stores it.
-        pub fun createLeaderboard(name: String) {
+        pub fun createLeaderboard(name: String, nftType: Type) {
             // Create a new Leaderboard resource.
-            let newLeaderboard <- create Leaderboard(name: name)
+            let newLeaderboard <- create Leaderboard(name: name, nftType: nftType)
 
             // Store the leaderboard for future access.
             self.leaderboards[name] <-! newLeaderboard
@@ -123,6 +121,8 @@ pub contract Escrow {
         self.AdminStoragePath = /storage/EscrowAdmin
         let admin <- create Admin()
         self.account.save(<-admin, to: self.AdminStoragePath)
+
+        self.AdminPublicPath = /public/AdminPublic
 
         self.account.link<&Admin{IAdmin}>(/public/AdminPublic, target: self.AdminStoragePath)
     }

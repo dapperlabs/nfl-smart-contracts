@@ -39,6 +39,10 @@ pub contract Escrow {
 
         // Adds an NFT entry to the leaderboard.
         pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
+            pre {
+                 nft.isInstance(self.nftType): "NFT cannot be used for this leaderboard!"
+            }
+
             let nftID = nft.id
 
             // Check if the entry already exists
@@ -133,6 +137,10 @@ pub contract Escrow {
 
         // Creates a new leaderboard and stores it.
         pub fun createLeaderboard(name: String, nftType: Type) {
+            if self.leaderboards[name] != nil {
+                panic("Leaderboard already exists with this name")
+            }
+
             // Create a new Leaderboard resource.
             let newLeaderboard <- create Leaderboard(name: name, nftType: nftType)
 
@@ -179,12 +187,6 @@ pub contract Escrow {
 
         self.AdminPublicPath = /public/AdminPublic
 
-        self.account.link<&Admin{IAdmin}>(/public/AdminPublic, target: self.AdminStoragePath)
-    }
-
-    // Provides access to the Admin resource.
-    access(self) fun getAdmin(): &Admin {
-        return self.account.borrow<&Admin>(from: self.AdminStoragePath)
-        ?? panic("Could not borrow reference to the Admin resource")
+        self.account.link<&Admin{IAdmin}>(self.AdminPublicPath, target: self.AdminStoragePath)
     }
 }

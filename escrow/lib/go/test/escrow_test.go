@@ -524,12 +524,11 @@ func TestEscrow(t *testing.T) {
 	})
 
 	t.Run("Should get the leaderboard by name to confirm it exists", func(t *testing.T) {
-		testGetLeaderboard(
-			t,
-			b,
-			contracts,
-			"leaderboardBurn-1",
-		)
+		// Get leaderboard data from the contract.
+		leaderboard, _ := getLeaderboardData(t, b, contracts, "leaderboardBurn-1")
+		assert.Equal(t, "\"leaderboardBurn-1\"", leaderboard.Name)
+		assert.Equal(t, "Type<A.e03daebed8ca0615.AllDay.NFT>()", leaderboard.NftType)
+		assert.Equal(t, uint64(0), leaderboard.EntriesLength)
 	})
 
 	t.Run("Should be able to escrow moment to leaderboard", func(t *testing.T) {
@@ -543,9 +542,10 @@ func TestEscrow(t *testing.T) {
 		)
 	})
 
-	t.Run("Should check that the entries length on Leaderboard is 1", func(t *testing.T) {
-		count := getEscrowNFTLengthInLeaderboard(t, b, contracts, "leaderboardBurn-1")
-		assert.Equal(t, big.NewInt(1), count)
+	t.Run("Should get the leaderboard by name to confirm entries", func(t *testing.T) {
+		// Get leaderboard data from the contract.
+		leaderboard, _ := getLeaderboardData(t, b, contracts, "leaderboardBurn-1")
+		assert.Equal(t, uint64(1), leaderboard.EntriesLength)
 	})
 
 	t.Run("Should confirm that 0 MomentNFTs exists within users collection due to escrow", func(t *testing.T) {
@@ -570,9 +570,10 @@ func TestEscrow(t *testing.T) {
 		assert.Equal(t, big.NewInt(1), count)
 	})
 
-	t.Run("Should check that the entries length on Leaderboard is 0", func(t *testing.T) {
-		count := getEscrowNFTLengthInLeaderboard(t, b, contracts, "leaderboardBurn-1")
-		assert.Equal(t, big.NewInt(0), count)
+	t.Run("Should get the leaderboard by name to confirm entries", func(t *testing.T) {
+		// Get leaderboard data from the contract.
+		leaderboard, _ := getLeaderboardData(t, b, contracts, "leaderboardBurn-1")
+		assert.Equal(t, uint64(0), leaderboard.EntriesLength)
 	})
 
 	t.Run("Should escrow the moment again", func(t *testing.T) {
@@ -592,9 +593,10 @@ func TestEscrow(t *testing.T) {
 		assert.Equal(t, big.NewInt(0), count)
 	})
 
-	t.Run("Should check that the entries length on Leaderboard is 1", func(t *testing.T) {
-		count := getEscrowNFTLengthInLeaderboard(t, b, contracts, "leaderboardBurn-1")
-		assert.Equal(t, big.NewInt(1), count)
+	t.Run("Should get the leaderboard by name to confirm entries", func(t *testing.T) {
+		// Get leaderboard data from the contract.
+		leaderboard, _ := getLeaderboardData(t, b, contracts, "leaderboardBurn-1")
+		assert.Equal(t, uint64(1), leaderboard.EntriesLength)
 	})
 
 	t.Run("Should burn the moment in leaderboards", func(t *testing.T) {
@@ -607,9 +609,10 @@ func TestEscrow(t *testing.T) {
 		)
 	})
 
-	t.Run("Should check that the entries length on Leaderboard is 1", func(t *testing.T) {
-		count := getEscrowNFTLengthInLeaderboard(t, b, contracts, "leaderboardBurn-1")
-		assert.Equal(t, big.NewInt(0), count)
+	t.Run("Should get the leaderboard by name to confirm entries", func(t *testing.T) {
+		// Get leaderboard data from the contract.
+		leaderboard, _ := getLeaderboardData(t, b, contracts, "leaderboardBurn-1")
+		assert.Equal(t, uint64(0), leaderboard.EntriesLength)
 	})
 
 	t.Run("Should check that the MomentNFT is not in the users collection", func(t *testing.T) {
@@ -680,20 +683,6 @@ func testEscrowMomentNFT(
 		userSigner,
 		userAddress,
 		momentNftFlowID,
-	)
-}
-
-func testGetLeaderboard(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	leaderboardName string,
-) {
-	getLeaderboard(
-		t,
-		b,
-		contracts,
-		leaderboardName,
 	)
 }
 

@@ -205,43 +205,19 @@ func createLeaderboard(
 	)
 }
 
-func getLeaderboard(
+func getLeaderboardData(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
 	leaderboardName string,
-) {
-	tx := flow.NewTransaction().
-		SetScript(loadEscrowGetLeaderboardTransaction(contracts)).
-		SetGasLimit(100).
-		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
-		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(contracts.AllDayAddress)
-	tx.AddArgument(cadence.String(leaderboardName))
-
-	signer, err := b.ServiceKey().Signer()
-	require.NoError(t, err)
-	signAndSubmit(
-		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
-		[]crypto.Signer{signer, contracts.AllDaySigner},
-		false,
-	)
-}
-
-func getEscrowNFTLengthInLeaderboard(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	leaderboardName string,
-) *big.Int {
-	script := loadEscrowReadNFTLengthInLeaderboardScript(contracts)
+) (LeaderboardInfo, error) {
+	script := loadEscrowLeaderboardInfoScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{
 		jsoncdc.MustEncode(cadence.String(leaderboardName)),
 		jsoncdc.MustEncode(cadence.BytesToAddress(contracts.AllDayAddress.Bytes())),
 	})
 
-	return result.ToGoValue().(*big.Int)
+	return parseLeaderboardInfo(result)
 }
 
 // ------------------------------------------------------------

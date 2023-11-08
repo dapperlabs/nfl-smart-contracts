@@ -29,7 +29,6 @@ const (
 
 	// Series
 	EscrowCreateSeriesPath   = EscrowTransactionsRootPath + "/admin/series/create_series.cdc"
-	EscrowCloseSeriesPath    = EscrowTransactionsRootPath + "/admin/series/close_series.cdc"
 	EscrowReadSeriesByIDPath = EscrowScriptsRootPath + "/series/read_series_by_id.cdc"
 
 	// Sets
@@ -37,10 +36,8 @@ const (
 	EscrowReadSetByIDPath = EscrowScriptsRootPath + "/sets/read_set_by_id.cdc"
 
 	// Plays
-	EscrowCreatePlayPath                = EscrowTransactionsRootPath + "/admin/plays/create_play.cdc"
-	EscrowUpdatePlayDescriptionPath     = EscrowTransactionsRootPath + "/admin/plays/update_play_description.cdc"
-	EscrowUpdatePlayDynamicMetadataPath = EscrowTransactionsRootPath + "/admin/plays/update_play_dynamic_metadata.cdc"
-	EscrowReadPlayByIDPath              = EscrowScriptsRootPath + "/plays/read_play_by_id.cdc"
+	EscrowCreatePlayPath   = EscrowTransactionsRootPath + "/admin/plays/create_play.cdc"
+	EscrowReadPlayByIDPath = EscrowScriptsRootPath + "/plays/read_play_by_id.cdc"
 
 	// Editions
 	EscrowCreateEditionPath   = EscrowTransactionsRootPath + "/admin/editions/create_edition.cdc"
@@ -48,7 +45,6 @@ const (
 
 	// Leaderboards
 	EscrowCreateLeaderboardPath = EscrowTransactionsRootPath + "/admin/leaderboards/create_leaderboard.cdc"
-	EscrowGetLeaderboardPath    = EscrowTransactionsRootPath + "/admin/leaderboards/get_leaderboard.cdc"
 
 	// Moment NFTs
 	EscrowMintMomentNFTPath           = EscrowTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
@@ -57,10 +53,10 @@ const (
 	EscrowReadCollectionLengthPath    = EscrowScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
 
 	// Escrow
-	EscrowMomentNFTPath                  = EscrowTransactionsRootPath + "/user/add_entry.cdc"
-	EscrowWithdrawMomentNFTPath          = EscrowTransactionsRootPath + "/admin/leaderboards/withdraw_entry.cdc"
-	EscrowBurnNFTPath                    = EscrowTransactionsRootPath + "/admin/leaderboards/burn_nft.cdc"
-	EscrowReadNFTLengthInLeaderboardPath = EscrowScriptsRootPath + "/leaderboards/read_entries_length.cdc"
+	EscrowMomentNFTPath           = EscrowTransactionsRootPath + "/user/add_entry.cdc"
+	EscrowWithdrawMomentNFTPath   = EscrowTransactionsRootPath + "/admin/leaderboards/withdraw_entry.cdc"
+	EscrowBurnNFTPath             = EscrowTransactionsRootPath + "/admin/leaderboards/burn_nft.cdc"
+	EscrowReadLeaderboardInfoPath = EscrowScriptsRootPath + "/leaderboards/read_leaderboard_info.cdc"
 )
 
 // ------------------------------------------------------------
@@ -238,9 +234,9 @@ func loadEscrowMomentNFTTransaction(contracts Contracts) []byte {
 	)
 }
 
-func loadEscrowReadNFTLengthInLeaderboardScript(contracts Contracts) []byte {
+func loadEscrowLeaderboardInfoScript(contracts Contracts) []byte {
 	return replaceAddresses(
-		readFile(EscrowReadNFTLengthInLeaderboardPath),
+		readFile(EscrowReadLeaderboardInfoPath),
 		contracts,
 	)
 }
@@ -265,13 +261,6 @@ func loadEscrowBurnNFTTransaction(contracts Contracts) []byte {
 func loadEscrowCreateLeaderboardTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(EscrowCreateLeaderboardPath),
-		contracts,
-	)
-}
-
-func loadEscrowGetLeaderboardTransaction(contracts Contracts) []byte {
-	return replaceAddresses(
-		readFile(EscrowGetLeaderboardPath),
 		contracts,
 	)
 }

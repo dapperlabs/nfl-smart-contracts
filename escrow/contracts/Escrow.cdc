@@ -11,28 +11,36 @@ import NonFungibleToken from "./NonFungibleToken.cdc"
 
 pub contract Escrow {
     // Event emitted when a new leaderboard is created.
-    pub event LeaderboardCreated(name: String)
+    pub event LeaderboardCreated(name: String, nftType: Type)
 
     // Event emitted when an NFT is deposited to a leaderboard.
-    pub event NFTDeposited(leaderboardName: String, nftID: UInt64, owner: Address)
+    pub event EntryDeposited(leaderboardName: String, nftID: UInt64, owner: Address)
 
     // Event emitted when an NFT is withdrawn from a leaderboard.
-    pub event NFTWithdrawn(leaderboardName: String, nftID: UInt64, owner: Address)
+    pub event EntryWithdrawn(leaderboardName: String, nftID: UInt64, owner: Address)
 
     // Event emitted when an NFT is burned from a leaderboard.
     pub event EntryBurned(leaderboardName: String, nftID: UInt64)
 
     // Named Paths
-    pub let AdminStoragePath: StoragePath
-    pub let AdminPublicPath: PublicPath
+    pub let CollectionStoragePath: StoragePath
+    pub let CollectionPublicPath: PublicPath
+    pub let CollectionPrivatePath: PrivatePath
 
-    // An interface containing the public functions for adding entries to a leaderboard.
-    pub resource interface ILeaderboardPublic {
-        pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>)
+    pub struct LeaderboardInfo {
+        pub let name: String
+        pub let nftType: Type
+        pub let entriesLength: Int
+
+        init(name: String, nftType: Type, entriesLength: Int) {
+            self.name = name
+            self.nftType = nftType
+            self.entriesLength = entriesLength
+        }
     }
 
     // The resource representing a leaderboard.
-    pub resource Leaderboard: ILeaderboardPublic {
+    pub resource Leaderboard {
         pub var entries: @{UInt64: LeaderboardEntry}
         pub let name: String
         pub let nftType: Type
@@ -60,7 +68,7 @@ pub contract Escrow {
 
             self.entries[nftID] <-! entry
 
-            emit NFTDeposited(leaderboardName: leaderboardName, nftID: nftID, owner: depositCap.address)
+            emit EntryDeposited(leaderboardName: leaderboardName, nftID: nftID, owner: depositCap.address)
         }
 
         pub fun getEntriesLength(): Int {
@@ -70,7 +78,7 @@ pub contract Escrow {
         access(contract) fun withdraw(nftID: UInt64) {
             let entry <- self.entries.remove(key: nftID)!
             entry.withdraw()
-            emit NFTWithdrawn(leaderboardName: self.name, nftID: nftID, owner: entry.ownerAddress)
+            emit EntryWithdrawn(leaderboardName: self.name, nftID: nftID, owner: entry.ownerAddress)
             destroy entry
         }
 
@@ -125,13 +133,19 @@ pub contract Escrow {
         }
     }
 
-    // An interface containing the Admin function that gets leaderboards by name.
-    pub resource interface IAdmin {
-        pub fun getLeaderboard(name: String): &Leaderboard?
+    // An interface containing the Collection function that gets leaderboards by name.
+    pub resource interface ICollectionPublic {
+        pub fun getLeaderboard(name: String): LeaderboardInfo?
     }
 
-    // The resource representing an admin.
-    pub resource Admin: IAdmin {
+    pub resource interface ICollectionPrivate {
+        pub fun createLeaderboard(name: String, nftType: Type)
+        pub fun withdraw(leaderboardName: String, nftID: UInt64)
+        pub fun burn(leaderboardName: String, nftID: UInt64)
+    }
+
+    // The resource representing a collection.
+    pub resource Collection: ICollectionPublic, ICollectionPrivate {
         // A dictionary holding leaderboards.
         pub var leaderboards: @{String: Leaderboard}
 
@@ -141,19 +155,35 @@ pub contract Escrow {
                 panic("Leaderboard already exists with this name")
             }
 
-            // Create a new Leaderboard resource.
+            // Create a new leaderboard resource.
             let newLeaderboard <- create Leaderboard(name: name, nftType: nftType)
 
             // Store the leaderboard for future access.
             self.leaderboards[name] <-! newLeaderboard
 
             // Emit the event.
-            emit LeaderboardCreated(name: name)
+            emit LeaderboardCreated(name: name, nftType: nftType)
         }
 
-        // Returns a reference to the leaderboard with the given name.
-        pub fun getLeaderboard(name: String): &Leaderboard? {
-            return &self.leaderboards[name] as &Leaderboard?
+        // Returns leaderboard info with the given name.
+        pub fun getLeaderboard(name: String): LeaderboardInfo? {
+            let leaderboard = &self.leaderboards[name] as &Leaderboard?
+            if leaderboard == nil {
+                return nil
+            }
+
+            return LeaderboardInfo(
+                name: leaderboard!.name,
+                nftType: leaderboard!.nftType,
+                entriesLength: leaderboard!.getEntriesLength()
+            )
+        }
+
+        // Call addEntry.
+        pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
+            let leaderboard <- self.leaderboards.remove(key: leaderboardName)!
+            leaderboard.addEntry(nft: <-nft, leaderboardName: leaderboardName, depositCap: depositCap)
+            self.leaderboards[leaderboardName] <-! leaderboard
         }
 
         // Calls withdraw.
@@ -170,7 +200,7 @@ pub contract Escrow {
             self.leaderboards[leaderboardName] <-! leaderboard
         }
 
-        // Destructor for Admin resource.
+        // Destructor for Collection resource.
         destroy() {
             destroy self.leaderboards
         }
@@ -181,12 +211,13 @@ pub contract Escrow {
     }
 
     init() {
-        self.AdminStoragePath = /storage/EscrowAdmin
-        let admin <- create Admin()
-        self.account.save(<-admin, to: self.AdminStoragePath)
+        self.CollectionStoragePath = /storage/EscrowAdmin
+        self.CollectionPrivatePath = /private/EscrowAdmin
 
-        self.AdminPublicPath = /public/AdminPublic
-
-        self.account.link<&Admin{IAdmin}>(self.AdminPublicPath, target: self.AdminStoragePath)
+        let collection <- create Collection()
+        self.account.save(<-collection, to: self.CollectionStoragePath)
+        self.account.link<&Collection{ICollectionPrivate}>(self.CollectionPrivatePath, target: self.CollectionStoragePath)
+        self.CollectionPublicPath = /public/CollectionPublic
+        self.account.link<&Collection{ICollectionPublic}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
     }
 }

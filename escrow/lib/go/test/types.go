@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"github.com/onflow/cadence"
 )
 
@@ -32,6 +33,11 @@ type OurNFTData struct {
 	SerialNumber uint64
 	// A UFix64 in uint64 form
 	MintingDate uint64
+}
+type LeaderboardInfo struct {
+	Name          string
+	NftType       string
+	EntriesLength uint64
 }
 
 func cadenceStringDictToGo(cadenceDict cadence.Dictionary) map[string]string {
@@ -92,4 +98,40 @@ func parseNFTProperties(value cadence.Value) OurNFTData {
 		array[2].ToGoValue().(uint64),
 		array[3].ToGoValue().(uint64),
 	}
+}
+
+func parseLeaderboardInfo(value cadence.Value) (LeaderboardInfo, error) {
+	optionalVal, ok := value.(cadence.Optional)
+	if !ok {
+		return LeaderboardInfo{}, fmt.Errorf("expected value to be of type cadence.Optional, got %T", value)
+	}
+
+	if optionalVal.Value == nil {
+		return LeaderboardInfo{}, fmt.Errorf("optional value is nil")
+	}
+
+	structVal, ok := optionalVal.Value.(cadence.Struct)
+	if !ok {
+		return LeaderboardInfo{}, fmt.Errorf("inner value of the optional is not a Struct, got %T", optionalVal.Value)
+	}
+
+	fields := structVal.Fields
+	if len(fields) < 3 {
+		return LeaderboardInfo{}, fmt.Errorf("struct does not contain enough fields")
+	}
+
+	name, ok := fields[0].(cadence.String)
+	if !ok {
+		return LeaderboardInfo{}, fmt.Errorf("field 0 is not a String")
+	}
+
+	nftType := fields[1]
+
+	entriesLength := fields[2].(cadence.Int).Value.Uint64()
+
+	return LeaderboardInfo{
+		Name:          name.String(),
+		NftType:       nftType.String(),
+		EntriesLength: entriesLength,
+	}, nil
 }

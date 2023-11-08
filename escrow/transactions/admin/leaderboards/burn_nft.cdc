@@ -4,12 +4,12 @@ import AllDay from "../../../contracts/AllDay.cdc"
 // This transaction takes the leaderboardName and nftID and burns the NFT.
 transaction(leaderboardName: String, nftID: UInt64) {
     prepare(signer: AuthAccount) {
-        // Get a reference to the Admin resource in storage.
-        let adminRef = signer.borrow<&Escrow.Admin>(from: Escrow.AdminStoragePath)
-            ?? panic("Could not borrow reference to the Admin resource")
+        // Get a reference to the Collection resource in storage.
+        let collectionRef = signer.borrow<&Escrow.Collection>(from: Escrow.CollectionStoragePath)
+            ?? panic("Could not borrow reference to the Collection resource")
 
         // Call withdraw function.
-        adminRef.burn(leaderboardName: leaderboardName, nftID: nftID)
+        collectionRef.burn(leaderboardName: leaderboardName, nftID: nftID)
     }
 
     execute {

@@ -20,19 +20,19 @@ pub contract Escrow {
     pub event NFTWithdrawn(leaderboardName: String, nftID: UInt64, owner: Address)
 
     // Event emitted when an NFT is burned from a leaderboard.
-    pub event NFTBurned(leaderboardName: String, nftID: UInt64)
+    pub event EntryBurned(leaderboardName: String, nftID: UInt64)
 
     // Named Paths
     pub let AdminStoragePath: StoragePath
     pub let AdminPublicPath: PublicPath
 
     // An interface containing the public functions for adding entries to a leaderboard.
-    pub resource interface ILeaderboard {
+    pub resource interface ILeaderboardPublic {
         pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>)
     }
 
     // The resource representing a leaderboard.
-    pub resource Leaderboard: ILeaderboard {
+    pub resource Leaderboard: ILeaderboardPublic {
         pub var entries: @{UInt64: LeaderboardEntry}
         pub let name: String
         pub let nftType: Type
@@ -76,7 +76,7 @@ pub contract Escrow {
 
         access(contract) fun burn(nftID: UInt64) {
             let entry <- self.entries.remove(key: nftID)!
-            emit NFTBurned(leaderboardName: self.name, nftID: nftID)
+            emit EntryBurned(leaderboardName: self.name, nftID: nftID)
             destroy entry
         }
 

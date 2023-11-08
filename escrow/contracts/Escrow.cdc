@@ -2,17 +2,25 @@
     Escrow Contract for managing NFTs in a Leaderboard Context.
     Holds NFTs in Escrow account awaiting transfer or burn.
 
-    Authors: Corey Humeston corey.humeston@dapperlabs.com
+    Authors:
+        Corey Humeston: corey.humeston@dapperlabs.com
+        Deewai Abdullahi: innocent.abdullahi@dapperlabs.com
 */
 
 import NonFungibleToken from "./NonFungibleToken.cdc"
 
 pub contract Escrow {
-    // Event emitted when a new leaderboard is created
+    // Event emitted when a new leaderboard is created.
     pub event LeaderboardCreated(name: String)
 
-    // Event emitted when an NFT is deposited to a leaderboard
+    // Event emitted when an NFT is deposited to a leaderboard.
     pub event NFTDeposited(leaderboardName: String, nftID: UInt64, owner: Address)
+
+    // Event emitted when an NFT is withdrawn from a leaderboard.
+    pub event NFTWithdrawn(leaderboardName: String, nftID: UInt64, owner: Address)
+
+    // Event emitted when an NFT is burned from a leaderboard.
+    pub event NFTBurned(leaderboardName: String, nftID: UInt64)
 
     // Named Paths
     pub let AdminStoragePath: StoragePath
@@ -20,7 +28,7 @@ pub contract Escrow {
 
     // An interface containing the public functions for adding entries to a leaderboard.
     pub resource interface ILeaderboard {
-        pub fun addEntry(nft: @NonFungibleToken.NFT, ownerAddress: Address, leaderboardName: String)
+        pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>)
     }
 
     // The resource representing a leaderboard.
@@ -30,7 +38,7 @@ pub contract Escrow {
         pub let nftType: Type
 
         // Adds an NFT entry to the leaderboard.
-        pub fun addEntry(nft: @NonFungibleToken.NFT, ownerAddress: Address, leaderboardName: String) {
+        pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
             let nftID = nft.id
 
             // Check if the entry already exists
@@ -41,13 +49,31 @@ pub contract Escrow {
             // Create the entry and add it to the entries map
             let entry <- create LeaderboardEntry(
                 nftID: nftID,
-                ownerAddress: ownerAddress,
-                nft: <-nft
+                ownerAddress: depositCap.address,
+                nft: <-nft,
+                depositCap: depositCap
             )
 
             self.entries[nftID] <-! entry
 
-            emit NFTDeposited(leaderboardName: leaderboardName, nftID: nftID, owner: ownerAddress)
+            emit NFTDeposited(leaderboardName: leaderboardName, nftID: nftID, owner: depositCap.address)
+        }
+
+        pub fun getEntriesLength(): Int {
+            return self.entries.keys.length
+        }
+
+        access(contract) fun withdraw(nftID: UInt64) {
+            let entry <- self.entries.remove(key: nftID)!
+            entry.withdraw()
+            emit NFTWithdrawn(leaderboardName: self.name, nftID: nftID, owner: entry.ownerAddress)
+            destroy entry
+        }
+
+        access(contract) fun burn(nftID: UInt64) {
+            let entry <- self.entries.remove(key: nftID)!
+            emit NFTBurned(leaderboardName: self.name, nftID: nftID)
+            destroy entry
         }
 
         // Destructor for Leaderboard resource.
@@ -58,7 +84,7 @@ pub contract Escrow {
         init(name: String, nftType: Type) {
             self.name = name
             self.nftType = nftType
-            self.entries <- {} as @{UInt64: LeaderboardEntry}
+            self.entries <- {}
         }
     }
 
@@ -66,17 +92,32 @@ pub contract Escrow {
     pub resource LeaderboardEntry {
         pub let nftID: UInt64
         pub let ownerAddress: Address
-        pub let nft: @NonFungibleToken.NFT
+        pub let nft: @{UInt64: NonFungibleToken.NFT}
+        pub let depositCapability: Capability<&{NonFungibleToken.CollectionPublic}>
+
+        pub fun withdraw() {
+            if self.depositCapability.check() {
+                let receiver = self.depositCapability.borrow()
+                    as &{NonFungibleToken.CollectionPublic}?
+                    ?? panic("Could not borrow the NFT receiver from the capability")
+
+                let nft <- self.nft.remove(key: self.nftID)!
+                receiver!.deposit(token: <- nft)
+            } else {
+                panic("Deposit capability is not valid")
+            }
+        }
 
         // Destroys the NFT.
         destroy() {
             destroy self.nft
         }
 
-        init(nftID: UInt64, ownerAddress: Address, nft: @NonFungibleToken.NFT) {
+        init(nftID: UInt64, ownerAddress: Address, nft: @NonFungibleToken.NFT, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
             self.nftID = nftID
             self.ownerAddress = ownerAddress
-            self.nft <- nft
+            self.nft <- {nftID: <-nft}
+            self.depositCapability = depositCap
         }
     }
 
@@ -105,6 +146,20 @@ pub contract Escrow {
         // Returns a reference to the leaderboard with the given name.
         pub fun getLeaderboard(name: String): &Leaderboard? {
             return &self.leaderboards[name] as &Leaderboard?
+        }
+
+        // Calls withdraw.
+        pub fun withdraw(leaderboardName: String, nftID: UInt64) {
+            let leaderboard <- self.leaderboards.remove(key: leaderboardName)!
+            leaderboard.withdraw(nftID: nftID)
+            self.leaderboards[leaderboardName] <-! leaderboard
+        }
+
+        // Calls burn.
+        pub fun burn(leaderboardName: String, nftID: UInt64) {
+            let leaderboard <- self.leaderboards.remove(key: leaderboardName)!
+            leaderboard.burn(nftID: nftID)
+            self.leaderboards[leaderboardName] <-! leaderboard
         }
 
         // Destructor for Admin resource.

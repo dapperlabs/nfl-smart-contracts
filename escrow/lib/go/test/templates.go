@@ -54,9 +54,13 @@ const (
 	EscrowMintMomentNFTPath           = EscrowTransactionsRootPath + "/admin/nfts/mint_moment_nft.cdc"
 	EscrowReadMomentNFTSupplyPath     = EscrowScriptsRootPath + "/nfts/read_moment_nft_supply.cdc"
 	EscrowReadMomentNFTPropertiesPath = EscrowScriptsRootPath + "/nfts/read_moment_nft_properties.cdc"
+	EscrowReadCollectionLengthPath    = EscrowScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
 
 	// Escrow
-	EscrowMomentNFTPath = EscrowTransactionsRootPath + "/user/add_entry.cdc"
+	EscrowMomentNFTPath                  = EscrowTransactionsRootPath + "/user/add_entry.cdc"
+	EscrowWithdrawMomentNFTPath          = EscrowTransactionsRootPath + "/admin/leaderboards/withdraw_entry.cdc"
+	EscrowBurnNFTPath                    = EscrowTransactionsRootPath + "/admin/leaderboards/burn_nft.cdc"
+	EscrowReadNFTLengthInLeaderboardPath = EscrowScriptsRootPath + "/leaderboards/read_entries_length.cdc"
 )
 
 // ------------------------------------------------------------
@@ -203,6 +207,13 @@ func loadEscrowMintMomentNFTTransaction(contracts Contracts) []byte {
 	)
 }
 
+func loadEscrowReadCollectionLengthScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(EscrowReadCollectionLengthPath),
+		contracts,
+	)
+}
+
 func loadEscrowReadMomentNFTSupplyScript(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(EscrowReadMomentNFTSupplyPath),
@@ -223,6 +234,27 @@ func loadEscrowReadMomentNFTPropertiesScript(contracts Contracts) []byte {
 func loadEscrowMomentNFTTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(EscrowMomentNFTPath),
+		contracts,
+	)
+}
+
+func loadEscrowReadNFTLengthInLeaderboardScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(EscrowReadNFTLengthInLeaderboardPath),
+		contracts,
+	)
+}
+
+func loadEscrowWithdrawMomentNFT(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(EscrowWithdrawMomentNFTPath),
+		contracts,
+	)
+}
+
+func loadEscrowBurnNFTTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(EscrowBurnNFTPath),
 		contracts,
 	)
 }

@@ -1,7 +1,9 @@
 package test
 
 import (
+	jsoncdc "github.com/onflow/cadence/encoding/json"
 	"github.com/stretchr/testify/require"
+	"math/big"
 	"testing"
 
 	"github.com/onflow/cadence"
@@ -227,6 +229,21 @@ func getLeaderboard(
 	)
 }
 
+func getEscrowNFTLengthInLeaderboard(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	leaderboardName string,
+) *big.Int {
+	script := loadEscrowReadNFTLengthInLeaderboardScript(contracts)
+	result := executeScriptAndCheck(t, b, script, [][]byte{
+		jsoncdc.MustEncode(cadence.String(leaderboardName)),
+		jsoncdc.MustEncode(cadence.BytesToAddress(contracts.AllDayAddress.Bytes())),
+	})
+
+	return result.ToGoValue().(*big.Int)
+}
+
 // ------------------------------------------------------------
 // MomentNFTs
 // ------------------------------------------------------------
@@ -256,6 +273,18 @@ func escrowMomentNFT(
 		[]crypto.Signer{signer, userSigner, contracts.AllDaySigner},
 		false,
 	)
+}
+
+func getMomentNFTLengthInAccount(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	address flow.Address,
+) *big.Int {
+	script := loadEscrowReadCollectionLengthScript(contracts)
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.BytesToAddress(address.Bytes()))})
+
+	return result.ToGoValue().(*big.Int)
 }
 
 func mintMomentNFT(
@@ -288,5 +317,60 @@ func mintMomentNFT(
 		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
 		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
+	)
+}
+
+// ------------------------------------------------------------
+// Escrow
+// ------------------------------------------------------------
+func withdrawMomentNFT(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	leaderboardName string,
+	momentNftFlowID uint64,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadEscrowWithdrawMomentNFT(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.String(leaderboardName))
+	tx.AddArgument(cadence.NewUInt64(momentNftFlowID))
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		false,
+	)
+}
+
+func burnMomentNFT(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	leaderboardName string,
+	momentNftFlowID uint64,
+) {
+	tx := flow.NewTransaction().
+		SetScript(loadEscrowBurnNFTTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(cadence.String(leaderboardName))
+	tx.AddArgument(cadence.NewUInt64(momentNftFlowID))
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		false,
 	)
 }

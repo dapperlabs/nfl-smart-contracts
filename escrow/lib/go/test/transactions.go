@@ -213,9 +213,7 @@ func getLeaderboardData(
 ) (LeaderboardInfo, error) {
 	script := loadEscrowLeaderboardInfoScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{
-		jsoncdc.MustEncode(cadence.String(leaderboardName)),
-		jsoncdc.MustEncode(cadence.BytesToAddress(contracts.AllDayAddress.Bytes())),
-	})
+		jsoncdc.MustEncode(cadence.String(leaderboardName))})
 
 	return parseLeaderboardInfo(result)
 }

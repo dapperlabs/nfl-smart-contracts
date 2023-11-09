@@ -44,6 +44,7 @@ pub contract Escrow {
         pub var entries: @{UInt64: LeaderboardEntry}
         pub let name: String
         pub let nftType: Type
+        pub var entriesLength: Int
 
         // Adds an NFT entry to the leaderboard.
         pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
@@ -55,7 +56,7 @@ pub contract Escrow {
 
             // Check if the entry already exists
             if self.entries[nftID] != nil {
-                panic("Entry already exists for this NFT ID in the leaderboard")
+                panic("Entry already exists for this NFT in the leaderboard")
             }
 
             // Create the entry and add it to the entries map
@@ -68,23 +69,30 @@ pub contract Escrow {
 
             self.entries[nftID] <-! entry
 
-            emit EntryDeposited(leaderboardName: leaderboardName, nftID: nftID, owner: depositCap.address)
-        }
+            // Increment entries length.
+            self.entriesLength = self.entriesLength + 1
 
-        pub fun getEntriesLength(): Int {
-            return self.entries.keys.length
+            emit EntryDeposited(leaderboardName: leaderboardName, nftID: nftID, owner: depositCap.address)
         }
 
         access(contract) fun withdraw(nftID: UInt64) {
             let entry <- self.entries.remove(key: nftID)!
             entry.withdraw()
             emit EntryWithdrawn(leaderboardName: self.name, nftID: nftID, owner: entry.ownerAddress)
+
+            // Decrement entries length.
+            self.entriesLength = self.entriesLength - 1
+
             destroy entry
         }
 
         access(contract) fun burn(nftID: UInt64) {
             let entry <- self.entries.remove(key: nftID)!
             emit EntryBurned(leaderboardName: self.name, nftID: nftID)
+
+            // Decrement entries length.
+            self.entriesLength = self.entriesLength - 1
+
             destroy entry
         }
 
@@ -97,6 +105,7 @@ pub contract Escrow {
             self.name = name
             self.nftType = nftType
             self.entries <- {}
+            self.entriesLength = 0
         }
     }
 
@@ -175,7 +184,7 @@ pub contract Escrow {
             return LeaderboardInfo(
                 name: leaderboard!.name,
                 nftType: leaderboard!.nftType,
-                entriesLength: leaderboard!.getEntriesLength()
+                entriesLength: leaderboard!.entriesLength
             )
         }
 

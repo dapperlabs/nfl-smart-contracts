@@ -75,6 +75,7 @@ pub contract Escrow {
             emit EntryDeposited(leaderboardName: leaderboardName, nftID: nftID, owner: depositCap.address)
         }
 
+        // Withdraws an NFT entry from the leaderboard.
         access(contract) fun withdraw(nftID: UInt64) {
             let entry <- self.entries.remove(key: nftID)!
             entry.withdraw()
@@ -86,6 +87,7 @@ pub contract Escrow {
             destroy entry
         }
 
+        // Burns an NFT entry from the leaderboard.
         access(contract) fun burn(nftID: UInt64) {
             let entry <- self.entries.remove(key: nftID)!
             emit EntryBurned(leaderboardName: self.name, nftID: nftID)

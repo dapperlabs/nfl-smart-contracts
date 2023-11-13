@@ -45,6 +45,7 @@ pub contract Escrow {
         pub let name: String
         pub let nftType: Type
         pub var entriesLength: Int
+        pub var metadata: {String: AnyStruct}
 
         // Adds an NFT entry to the leaderboard.
         pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
@@ -108,6 +109,7 @@ pub contract Escrow {
             self.nftType = nftType
             self.entries <- {}
             self.entriesLength = 0
+            self.metadata = {}
         }
     }
 
@@ -117,6 +119,7 @@ pub contract Escrow {
         pub let ownerAddress: Address
         pub let nft: @{UInt64: NonFungibleToken.NFT}
         pub let depositCapability: Capability<&{NonFungibleToken.CollectionPublic}>
+        pub var metadata: {String: AnyStruct}
 
         pub fun withdraw() {
             if self.depositCapability.check() {
@@ -141,6 +144,7 @@ pub contract Escrow {
             self.ownerAddress = ownerAddress
             self.nft <- {nftID: <-nft}
             self.depositCapability = depositCap
+            self.metadata = {}
         }
     }
 

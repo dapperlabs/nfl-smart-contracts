@@ -145,6 +145,7 @@ pub contract Escrow {
     // An interface containing the Collection function that gets leaderboards by name.
     pub resource interface ICollectionPublic {
         pub fun getLeaderboard(name: String): LeaderboardInfo?
+        pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>)
     }
 
     pub resource interface ICollectionPrivate {

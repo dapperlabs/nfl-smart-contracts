@@ -4,10 +4,10 @@ import Escrow from "../../../contracts/AllDay.cdc"
 
 transaction(leaderboardName: String, nftID: UInt64) {
     let nft: @NonFungibleToken.NFT
-    let escrowRef: &Escrow.Collection
     let receiver: Capability<&{NonFungibleToken.CollectionPublic}>
+    let collectionPublic: &Escrow.Collection{Escrow.ICollectionPublic}
 
-    prepare(signer: AuthAccount, admin: AuthAccount) {
+    prepare(signer: AuthAccount) {
         // Borrow a reference to the user's NFT collection as a Provider
         let collectionRef = signer.borrow<&{NonFungibleToken.Provider}>(
             from: AllDay.CollectionStoragePath
@@ -19,14 +19,17 @@ transaction(leaderboardName: String, nftID: UInt64) {
         // Withdraw the NFT from the user's collection
         self.nft <- collectionRef.withdraw(withdrawID: nftID)
 
-        // Borrow a reference to the Escrow Collection resource from the collection account
-        self.escrowRef = admin.borrow<&Escrow.Collection>(from: Escrow.CollectionStoragePath)
-            ?? panic("Could not borrow Escrow Collection private reference")
+        // Get the public leaderboard collection
+        let escrowAccount = getAccount("../../contracts/AllDay.cdc")
+        self.collectionPublic = escrowAccount
+            .getCapability<&Escrow.Collection{Escrow.ICollectionPublic}>(Escrow.CollectionPublicPath)
+            .borrow()
+            ?? panic("Could not borrow a reference to the public leaderboard collection")
     }
 
     execute {
         // Add the NFT entry to the leaderboard
-        self.escrowRef.addEntry(
+        self.collectionPublic.addEntry(
             nft: <-self.nft,
             leaderboardName: leaderboardName,
             depositCap: self.receiver

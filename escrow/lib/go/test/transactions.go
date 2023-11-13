@@ -234,8 +234,7 @@ func escrowMomentNFT(
 		SetGasLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
-		AddAuthorizer(ownerAddress).
-		AddAuthorizer(contracts.AllDayAddress)
+		AddAuthorizer(ownerAddress)
 	tx.AddArgument(cadence.String("leaderboardBurn-1"))
 	tx.AddArgument(cadence.NewUInt64(momentNftFlowID))
 
@@ -243,8 +242,8 @@ func escrowMomentNFT(
 	require.NoError(t, err)
 	signAndSubmit(
 		t, b, tx,
-		[]flow.Address{b.ServiceKey().Address, ownerAddress, contracts.AllDayAddress},
-		[]crypto.Signer{signer, userSigner, contracts.AllDaySigner},
+		[]flow.Address{b.ServiceKey().Address, ownerAddress},
+		[]crypto.Signer{signer, userSigner},
 		false,
 	)
 }

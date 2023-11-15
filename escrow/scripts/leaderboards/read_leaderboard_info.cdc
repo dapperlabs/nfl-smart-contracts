@@ -9,5 +9,5 @@ pub fun main(leaderboardName: String): Escrow.LeaderboardInfo? {
         .borrow()
         ?? panic("Could not borrow a reference to the public leaderboard collection")
 
-    return collectionPublic.getLeaderboard(name: leaderboardName)
+    return collectionPublic.getLeaderboardInfo(name: leaderboardName)
 }

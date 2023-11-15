@@ -48,9 +48,9 @@ pub contract Escrow {
         pub var metadata: {String: AnyStruct}
 
         // Adds an NFT entry to the leaderboard.
-        pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
+        pub fun addEntryToLeaderboard(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
             pre {
-                 nft.isInstance(self.nftType): "NFT cannot be used for this leaderboard!"
+                 nft.isInstance(self.nftType): "This NFT cannot be used for leaderboard. NFT is not of the correct type."
             }
 
             let nftID = nft.id
@@ -150,8 +150,8 @@ pub contract Escrow {
 
     // An interface containing the Collection function that gets leaderboards by name.
     pub resource interface ICollectionPublic {
-        pub fun getLeaderboard(name: String): LeaderboardInfo?
-        pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>)
+        pub fun getLeaderboardInfo(name: String): LeaderboardInfo?
+        pub fun addEntryToLeaderboard(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>)
     }
 
     pub resource interface ICollectionPrivate {
@@ -163,7 +163,7 @@ pub contract Escrow {
     // The resource representing a collection.
     pub resource Collection: ICollectionPublic, ICollectionPrivate {
         // A dictionary holding leaderboards.
-        pub var leaderboards: @{String: Leaderboard}
+        access(self) var leaderboards: @{String: Leaderboard}
 
         // Creates a new leaderboard and stores it.
         pub fun createLeaderboard(name: String, nftType: Type) {
@@ -182,7 +182,7 @@ pub contract Escrow {
         }
 
         // Returns leaderboard info with the given name.
-        pub fun getLeaderboard(name: String): LeaderboardInfo? {
+        pub fun getLeaderboardInfo(name: String): LeaderboardInfo? {
             let leaderboard = &self.leaderboards[name] as &Leaderboard?
             if leaderboard == nil {
                 return nil
@@ -196,24 +196,33 @@ pub contract Escrow {
         }
 
         // Call addEntry.
-        pub fun addEntry(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
-            let leaderboard <- self.leaderboards.remove(key: leaderboardName)!
-            leaderboard.addEntry(nft: <-nft, leaderboardName: leaderboardName, depositCap: depositCap)
-            self.leaderboards[leaderboardName] <-! leaderboard
+        pub fun addEntryToLeaderboard(nft: @NonFungibleToken.NFT, leaderboardName: String, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>) {
+            let leaderboard = &self.leaderboards[leaderboardName] as &Leaderboard?
+            if leaderboard == nil {
+                panic("Leaderboard does not exist with this name")
+            }
+
+            leaderboard!.addEntryToLeaderboard(nft: <-nft, leaderboardName: leaderboardName, depositCap: depositCap)
         }
 
         // Calls withdraw.
         pub fun withdraw(leaderboardName: String, nftID: UInt64) {
-            let leaderboard <- self.leaderboards.remove(key: leaderboardName)!
-            leaderboard.withdraw(nftID: nftID)
-            self.leaderboards[leaderboardName] <-! leaderboard
+            let leaderboard = &self.leaderboards[leaderboardName] as &Leaderboard?
+            if leaderboard == nil {
+                panic("Leaderboard does not exist with this name")
+            }
+
+            leaderboard!.withdraw(nftID: nftID)
         }
 
         // Calls burn.
         pub fun burn(leaderboardName: String, nftID: UInt64) {
-            let leaderboard <- self.leaderboards.remove(key: leaderboardName)!
-            leaderboard.burn(nftID: nftID)
-            self.leaderboards[leaderboardName] <-! leaderboard
+            let leaderboard = &self.leaderboards[leaderboardName] as &Leaderboard?
+            if leaderboard == nil {
+                panic("Leaderboard does not exist with this name")
+            }
+
+            leaderboard!.burn(nftID: nftID)
         }
 
         // Destructor for Collection resource.
@@ -227,13 +236,13 @@ pub contract Escrow {
     }
 
     init() {
-        self.CollectionStoragePath = /storage/EscrowAdmin
-        self.CollectionPrivatePath = /private/EscrowAdmin
+        self.CollectionStoragePath = /storage/EscrowLeaderboardCollection
+        self.CollectionPrivatePath = /private/EscrowLeaderboardCollectionAccess
+        self.CollectionPublicPath = /public/EscrowLeaderboardCollectionInfo
 
         let collection <- create Collection()
         self.account.save(<-collection, to: self.CollectionStoragePath)
         self.account.link<&Collection{ICollectionPrivate}>(self.CollectionPrivatePath, target: self.CollectionStoragePath)
-        self.CollectionPublicPath = /public/CollectionPublic
         self.account.link<&Collection{ICollectionPublic}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
     }
 }

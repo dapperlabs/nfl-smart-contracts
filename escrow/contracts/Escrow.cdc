@@ -16,8 +16,8 @@ pub contract Escrow {
     // Event emitted when an NFT is deposited to a leaderboard.
     pub event EntryDeposited(leaderboardName: String, nftID: UInt64, owner: Address)
 
-    // Event emitted when an NFT is withdrawn from a leaderboard.
-    pub event EntryWithdrawn(leaderboardName: String, nftID: UInt64, owner: Address)
+    // Event emitted when an NFT is returned to the original collection from a leaderboard.
+    pub event EntryReturnedToCollection(leaderboardName: String, nftID: UInt64, owner: Address)
 
     // Event emitted when an NFT is burned from a leaderboard.
     pub event EntryBurned(leaderboardName: String, nftID: UInt64)
@@ -77,10 +77,10 @@ pub contract Escrow {
         }
 
         // Withdraws an NFT entry from the leaderboard.
-        access(contract) fun withdraw(nftID: UInt64) {
+        access(contract) fun returnNftToCollection(nftID: UInt64) {
             let entry <- self.entries.remove(key: nftID)!
-            entry.withdraw()
-            emit EntryWithdrawn(leaderboardName: self.name, nftID: nftID, owner: entry.ownerAddress)
+            entry.returnNftToCollection()
+            emit EntryReturnedToCollection(leaderboardName: self.name, nftID: nftID, owner: entry.ownerAddress)
 
             // Decrement entries length.
             self.entriesLength = self.entriesLength - 1
@@ -121,7 +121,7 @@ pub contract Escrow {
         pub let depositCapability: Capability<&{NonFungibleToken.CollectionPublic}>
         pub var metadata: {String: AnyStruct}
 
-        pub fun withdraw() {
+        pub fun returnNftToCollection() {
             if self.depositCapability.check() {
                 let receiver = self.depositCapability.borrow()
                     as &{NonFungibleToken.CollectionPublic}?
@@ -156,7 +156,7 @@ pub contract Escrow {
 
     pub resource interface ICollectionPrivate {
         pub fun createLeaderboard(name: String, nftType: Type)
-        pub fun withdraw(leaderboardName: String, nftID: UInt64)
+        pub fun returnNftToCollection(leaderboardName: String, nftID: UInt64)
         pub fun burn(leaderboardName: String, nftID: UInt64)
     }
 
@@ -205,14 +205,14 @@ pub contract Escrow {
             leaderboard!.addEntryToLeaderboard(nft: <-nft, leaderboardName: leaderboardName, depositCap: depositCap)
         }
 
-        // Calls withdraw.
-        pub fun withdraw(leaderboardName: String, nftID: UInt64) {
+        // Calls returnNftToCollection.
+        pub fun returnNftToCollection(leaderboardName: String, nftID: UInt64) {
             let leaderboard = &self.leaderboards[leaderboardName] as &Leaderboard?
             if leaderboard == nil {
                 panic("Leaderboard does not exist with this name")
             }
 
-            leaderboard!.withdraw(nftID: nftID)
+            leaderboard!.returnNftToCollection(nftID: nftID)
         }
 
         // Calls burn.

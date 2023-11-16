@@ -8,8 +8,8 @@ transaction(leaderboardName: String, nftID: UInt64) {
         let collectionRef = signer.borrow<&Escrow.Collection>(from: Escrow.CollectionStoragePath)
             ?? panic("Could not borrow reference to the Collection resource")
 
-        // Call withdraw function.
-        collectionRef.withdraw(leaderboardName: leaderboardName, nftID: nftID)
+        // Call returnNftToCollection function.
+        collectionRef.returnNftToCollection(leaderboardName: leaderboardName, nftID: nftID)
     }
 
     execute {

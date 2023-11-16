@@ -16,13 +16,13 @@ Add an NFT to a specific leaderboard.
 - **Emits:**
     - `EntryDeposited` event on successful addition.
 
-### WithdrawEntry
-Withdraw an NFT from a specific leaderboard.
+### ReturnNftToCollection
+Return an NFT from a specific leaderboard to the original collection.
 - **Parameters:**
-    - `leaderboardName`: The name of the leaderboard to withdraw the NFT from.
-    - `nftId`: The unique identifier of the NFT to withdraw. 
+    - `leaderboardName`: The name of the leaderboard to return the NFT from.
+    - `nftId`: The unique identifier of the NFT to return. 
 - **Emits:**
-    - `EntryWithdrawn` event on successful withdrawal.
+    - `EntryReturnedToCollection` event on successful return to collection.
 
 ### BurnEntry
 Burn an NFT from a specific leaderboard.
@@ -45,7 +45,7 @@ Create a new leaderboard for NFTs.
 A structure that holds information about a leaderboard, including its name, the type of NFT it accepts, and the number of entries it contains.
 
 ### Leaderboard
-A resource that represents a leaderboard, allowing for the addition of NFT entries, withdrawal, and burning of NFTs. It maintains a mapping of the NFT entries and emits relevant events for each action taken.
+A resource that represents a leaderboard, allowing for the addition of NFT entries, returning NFTs to original collections, and burning of NFTs. It maintains a mapping of the NFT entries and emits relevant events for each action taken.
 
 ### LeaderboardEntry
 A resource that represents an individual NFT entry within a leaderboard. It holds the NFT, the owner's address, and a capability for depositing the NFT back to the owner if needed.
@@ -59,7 +59,7 @@ A resource that implements ICollectionPublic and ICollectionPrivate, managing th
 A resource interface that outlines public functions available for interacting with leaderboards, such as getting leaderboard information.
 
 ### ICollectionPrivate
-A resource interface that provides private functions for leaderboard management, including the creation of leaderboards and the ability to withdraw or burn NFTs.
+A resource interface that provides private functions for leaderboard management, including the creation of leaderboards and the ability to return or burn NFTs.
 
 # Contract Events
 The contract emits events to signal actions taken within the system, providing transparency and a way for users to track changes. These events include:
@@ -68,8 +68,8 @@ The contract emits events to signal actions taken within the system, providing t
 Emitted when a new leaderboard is created, including the leaderboard name and the type of NFT it accepts.
 ### EntryDeposited: 
 Emitted when an NFT is deposited into a leaderboard, indicating the leaderboard's name, the NFT's ID, and the owner's address.
-### EntryWithdrawn: 
-Emitted when an NFT is withdrawn from a leaderboard, with details of the leaderboard name, NFT ID, and owner's address.
+### EntryReturnedToCollection: 
+Emitted when an NFT is returned to original collection from a leaderboard, with details of the leaderboard name, NFT ID, and owner's address.
 ### EntryBurned: 
 Emitted when an NFT associated with a leaderboard is burned.
 

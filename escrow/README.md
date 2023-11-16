@@ -16,7 +16,7 @@ Add an NFT to a specific leaderboard.
 - **Emits:**
     - `EntryDeposited` event on successful addition.
 
-### ReturnNftToCollection
+### TransferNftToCollection
 Return an NFT from a specific leaderboard to the original collection.
 - **Parameters:**
     - `leaderboardName`: The name of the leaderboard to return the NFT from.

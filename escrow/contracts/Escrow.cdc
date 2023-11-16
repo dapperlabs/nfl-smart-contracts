@@ -77,9 +77,9 @@ pub contract Escrow {
         }
 
         // Withdraws an NFT entry from the leaderboard.
-        access(contract) fun returnNftToCollection(nftID: UInt64) {
+        access(contract) fun transferNftToCollection(nftID: UInt64) {
             let entry <- self.entries.remove(key: nftID)!
-            entry.returnNftToCollection()
+            entry.transferNftToCollection()
             emit EntryReturnedToCollection(leaderboardName: self.name, nftID: nftID, owner: entry.ownerAddress)
 
             // Decrement entries length.
@@ -121,7 +121,7 @@ pub contract Escrow {
         pub let depositCapability: Capability<&{NonFungibleToken.CollectionPublic}>
         pub var metadata: {String: AnyStruct}
 
-        pub fun returnNftToCollection() {
+        pub fun transferNftToCollection() {
             if self.depositCapability.check() {
                 let receiver = self.depositCapability.borrow()
                     as &{NonFungibleToken.CollectionPublic}?
@@ -156,7 +156,7 @@ pub contract Escrow {
 
     pub resource interface ICollectionPrivate {
         pub fun createLeaderboard(name: String, nftType: Type)
-        pub fun returnNftToCollection(leaderboardName: String, nftID: UInt64)
+        pub fun transferNftToCollection(leaderboardName: String, nftID: UInt64)
         pub fun burn(leaderboardName: String, nftID: UInt64)
     }
 
@@ -205,14 +205,14 @@ pub contract Escrow {
             leaderboard!.addEntryToLeaderboard(nft: <-nft, leaderboardName: leaderboardName, depositCap: depositCap)
         }
 
-        // Calls returnNftToCollection.
-        pub fun returnNftToCollection(leaderboardName: String, nftID: UInt64) {
+        // Calls transferNftToCollection.
+        pub fun transferNftToCollection(leaderboardName: String, nftID: UInt64) {
             let leaderboard = &self.leaderboards[leaderboardName] as &Leaderboard?
             if leaderboard == nil {
                 panic("Leaderboard does not exist with this name")
             }
 
-            leaderboard!.returnNftToCollection(nftID: nftID)
+            leaderboard!.transferNftToCollection(nftID: nftID)
         }
 
         // Calls burn.

@@ -1,24 +1,23 @@
-import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
-import AllDay from "../../contracts/AllDay.cdc"
-import MetadataViews from "../../contracts/MetadataViews.cdc"
+import NonFungibleToken from "NonFungibleToken"
+import AllDay from "AllDay"
+import MetadataViews from "MetadataViews"
 
-pub struct NFT {
-    pub let name: String
-    pub let description: String
-    pub let thumbnail: String
-    pub let owner: Address
-    pub let type: String
-    pub let externalURL: String
-    pub let storagePath: String
-    pub let publicPath: String
-    pub let privatePath: String
-    pub let collectionName: String
-    pub let collectionDescription: String
-    pub let collectionSquareImage: String
-    pub let collectionBannerImage: String
-    pub let royaltyReceiversCount: UInt32
-    pub let traitsCount: UInt32
-    pub let videoURL: String
+access(all) struct NFT {
+    access(all) let name: String
+    access(all) let description: String
+    access(all) let thumbnail: String
+    access(all) let owner: Address
+    access(all) let type: String
+    access(all) let externalURL: String
+    access(all) let storagePath: String
+    access(all) let publicPath: String
+    access(all) let collectionName: String
+    access(all) let collectionDescription: String
+    access(all) let collectionSquareImage: String
+    access(all) let collectionBannerImage: String
+    access(all) let royaltyReceiversCount: UInt32
+    access(all) let traitsCount: UInt32
+    access(all) let videoURL: String
 
     init(
             name: String,
@@ -46,7 +45,6 @@ pub struct NFT {
         self.externalURL = externalURL
         self.storagePath = storagePath
         self.publicPath = publicPath
-        self.privatePath = privatePath
         self.collectionName = collectionName
         self.collectionDescription = collectionDescription
         self.collectionSquareImage = collectionSquareImage
@@ -57,11 +55,10 @@ pub struct NFT {
     }
 }
 
-pub fun main(address: Address, id: UInt64): [AnyStruct] {
+access(all) fun main(address: Address, id: UInt64): [AnyStruct] {
     let account = getAccount(address)
 
-    let collectionRef = account.getCapability(AllDay.CollectionPublicPath)
-            .borrow<&{AllDay.MomentNFTCollectionPublic}>()
+    let collectionRef = getAccount(address).capabilities.borrow<&AllDay.Collection>(AllDay.CollectionPublicPath)
             ?? panic("Could not borrow capability from public collection")
 
     let nft = collectionRef.borrowMomentNFT(id: id)

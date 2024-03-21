@@ -1,8 +1,8 @@
-import AllDay from "../../contracts/AllDay.cdc"
+import AllDay from "AllDay"
 
 // This script returns an Edition for an id number, if it exists.
 
-pub fun main(editionID: UInt64): AllDay.EditionData {
+access(all) fun main(editionID: UInt64): AllDay.EditionData {
     return AllDay.getEditionData(id: editionID)
 }
 

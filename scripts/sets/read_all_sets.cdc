@@ -1,9 +1,9 @@
-import AllDay from "../../contracts/AllDay.cdc"
+import AllDay from "AllDay"
 
 // This script returns all the Set structs.
 // This will eventually be *long*.
 
-pub fun main(): [AllDay.SetData] {
+access(all) fun main(): [AllDay.SetData] {
     let sets: [AllDay.SetData] = []
     var id: UInt64 = 1
     // Note < , as nextSetID has not yet been used

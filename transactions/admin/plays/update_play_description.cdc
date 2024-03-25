@@ -1,12 +1,12 @@
-import AllDay from "../../contracts/AllDay.cdc"
+import AllDay from "AllDay"
 
 transaction(playID: UInt64, description: String) {
     // local variable for the admin reference
     let admin: &AllDay.Admin
 
-    prepare(signer: AuthAccount) {
+    prepare(signer: auth(BorrowValue) &Account) {
         // borrow a reference to the Admin resource
-        self.admin = signer.borrow<&AllDay.Admin>(from: AllDay.AdminStoragePath)
+        self.admin = signer.storage.borrow<&AllDay.Admin>(from: AllDay.AdminStoragePath)
             ?? panic("Could not borrow a reference to the AllDay Admin capability")
     }
 

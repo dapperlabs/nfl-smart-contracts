@@ -4,9 +4,10 @@
     Author: Sadie Freeman sadie.freeman@dapperlabs.com
 */
 
-import NonFungibleToken from "./NonFungibleToken.cdc"
-import FungibleToken from "./utility/FungibleToken.cdc"
-import MetadataViews from "./MetadataViews.cdc"
+import NonFungibleToken from "NonFungibleToken"
+import FungibleToken from "FungibleToken"
+import MetadataViews from "MetadataViews"
+import ViewResolver from "ViewResolver"
 
 /*
     AllDay is structured similarly to Genies and TopShot.
@@ -31,41 +32,42 @@ import MetadataViews from "./MetadataViews.cdc"
 
 // The AllDay NFTs and metadata contract
 //
-pub contract AllDay: NonFungibleToken {
+access(all) contract AllDay: NonFungibleToken {
+    access(all) entitlement NFTMinter
     //------------------------------------------------------------
     // Events
     //------------------------------------------------------------
 
     // Contract Events
     //
-    pub event ContractInitialized()
+    access(all) event ContractInitialized()
 
     // NFT Collection Events
     //
-    pub event Withdraw(id: UInt64, from: Address?)
-    pub event Deposit(id: UInt64, to: Address?)
+    access(all) event Withdraw(id: UInt64, from: Address?)
+    access(all) event Deposit(id: UInt64, to: Address?)
 
     // Series Events
     //
     // Emitted when a new series has been created by an admin
-    pub event SeriesCreated(id: UInt64, name: String)
+    access(all) event SeriesCreated(id: UInt64, name: String)
     // Emitted when a series is closed by an admin
-    pub event SeriesClosed(id: UInt64)
+    access(all) event SeriesClosed(id: UInt64)
 
     // Set Events
     //
     // Emitted when a new set has been created by an admin
-    pub event SetCreated(id: UInt64, name: String)
+    access(all) event SetCreated(id: UInt64, name: String)
 
     // Play Events
     //
     // Emitted when a new play has been created by an admin
-    pub event PlayCreated(id: UInt64, classification: String, metadata: {String: String})
+    access(all) event PlayCreated(id: UInt64, classification: String, metadata: {String: String})
 
     // Edition Events
     //
     // Emitted when a new edition has been created by an admin
-    pub event EditionCreated(
+    access(all) event EditionCreated(
         id: UInt64,
         seriesID: UInt64,
         setID: UInt64,
@@ -74,12 +76,12 @@ pub contract AllDay: NonFungibleToken {
         tier: String,
     )
     // Emitted when an edition is either closed by an admin, or the max amount of moments have been minted
-    pub event EditionClosed(id: UInt64)
+    access(all) event EditionClosed(id: UInt64)
 
     // NFT Events
     //
-    pub event MomentNFTMinted(id: UInt64, editionID: UInt64, serialNumber: UInt64)
-    pub event MomentNFTBurned(id: UInt64)
+    access(all) event MomentNFTMinted(id: UInt64, editionID: UInt64, serialNumber: UInt64)
+    access(all) event MomentNFTBurned(id: UInt64)
 
     //------------------------------------------------------------
     // Named values
@@ -87,10 +89,10 @@ pub contract AllDay: NonFungibleToken {
 
     // Named Paths
     //
-    pub let CollectionStoragePath:  StoragePath
-    pub let CollectionPublicPath:   PublicPath
-    pub let AdminStoragePath:       StoragePath
-    pub let MinterPrivatePath:      PrivatePath
+    access(all) let CollectionStoragePath:  StoragePath
+    access(all) let CollectionPublicPath:   PublicPath
+    access(all) let AdminStoragePath:       StoragePath
+    access(all) let MinterPrivatePath:      PrivatePath
 
     //------------------------------------------------------------
     // Publicly readable contract state
@@ -98,11 +100,11 @@ pub contract AllDay: NonFungibleToken {
 
     // Entity Counts
     //
-    pub var totalSupply:        UInt64
-    pub var nextSeriesID:       UInt64
-    pub var nextSetID:          UInt64
-    pub var nextPlayID:         UInt64
-    pub var nextEditionID:      UInt64
+    access(all) var totalSupply:        UInt64
+    access(all) var nextSeriesID:       UInt64
+    access(all) var nextSetID:          UInt64
+    access(all) var nextPlayID:         UInt64
+    access(all) var nextEditionID:      UInt64
 
     //------------------------------------------------------------
     // Internal contract state
@@ -124,14 +126,14 @@ pub contract AllDay: NonFungibleToken {
 
     // A public struct to access Series data
     //
-    pub struct SeriesData {
-        pub let id: UInt64
-        pub let name: String
-        pub let active: Bool
+    access(all) struct SeriesData {
+        access(all) let id: UInt64
+        access(all) let name: String
+        access(all) let active: Bool
 
         // initializer
         //
-        init (id: UInt64) {
+        view init (id: UInt64) {
             if let series = &AllDay.seriesByID[id] as &AllDay.Series? {
                 self.id = series.id
                 self.name = series.name
@@ -144,14 +146,14 @@ pub contract AllDay: NonFungibleToken {
 
     // A top-level Series with a unique ID and name
     //
-    pub resource Series {
-        pub let id: UInt64
-        pub let name: String
-        pub var active: Bool
+    access(all) resource Series {
+        access(all) let id: UInt64
+        access(all) let name: String
+        access(all) var active: Bool
 
         // Close this series
         //
-        pub fun close() {
+        access(all) fun close() {
             pre {
                 self.active == true: "not active"
             }
@@ -182,7 +184,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for a Series by id
     //
-    pub fun getSeriesData(id: UInt64): AllDay.SeriesData {
+    access(all) view fun getSeriesData(id: UInt64): AllDay.SeriesData {
         pre {
             AllDay.seriesByID[id] != nil: "Cannot borrow series, no such id"
         }
@@ -192,7 +194,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for a Series by name
     //
-    pub fun getSeriesDataByName(name: String): AllDay.SeriesData {
+    access(all) view fun getSeriesDataByName(name: String): AllDay.SeriesData {
         pre {
             AllDay.seriesIDByName[name] != nil: "Cannot borrow series, no such name"
         }
@@ -204,13 +206,13 @@ pub contract AllDay: NonFungibleToken {
 
     // Get all series names (this will be *long*)
     //
-    pub fun getAllSeriesNames(): [String] {
+    access(all) view fun getAllSeriesNames(): [String] {
         return AllDay.seriesIDByName.keys
     }
 
     // Get series id for name
     //
-    pub fun getSeriesIDByName(name: String): UInt64? {
+    access(all) view fun getSeriesIDByName(name: String): UInt64? {
         return AllDay.seriesIDByName[name]
     }
 
@@ -220,19 +222,19 @@ pub contract AllDay: NonFungibleToken {
 
     // A public struct to access Set data
     //
-    pub struct SetData {
-        pub let id: UInt64
-        pub let name: String
-        pub var setPlaysInEditions: {UInt64: Bool}
+    access(all) struct SetData {
+        access(all) let id: UInt64
+        access(all) let name: String
+        access(all) var setPlaysInEditions: &{UInt64: Bool}
 
         // member function to check the setPlaysInEditions to see if this Set/Play combination already exists
-        pub fun setPlayExistsInEdition(playID: UInt64): Bool {
+        access(all) view fun setPlayExistsInEdition(playID: UInt64): Bool {
            return self.setPlaysInEditions.containsKey(playID)
         }
 
         // initializer
         //
-        init (id: UInt64) {
+        view init (id: UInt64) {
             if let set = &AllDay.setByID[id] as &AllDay.Set? {
             self.id = id
             self.name = set.name
@@ -245,15 +247,15 @@ pub contract AllDay: NonFungibleToken {
 
     // A top level Set with a unique ID and a name
     //
-    pub resource Set {
-        pub let id: UInt64
-        pub let name: String
+    access(all) resource Set {
+        access(all) let id: UInt64
+        access(all) let name: String
         // Store a dictionary of all the Plays which are paired with the Set inside Editions
         // This enforces only one Set/Play unique pair can be used for an Edition
-        pub var setPlaysInEditions: {UInt64: Bool}
+        access(all) var setPlaysInEditions: {UInt64: Bool}
 
         // member function to insert a new Play to the setPlaysInEditions dictionary
-        pub fun insertNewPlay(playID: UInt64) {
+        access(all) fun insertNewPlay(playID: UInt64) {
             self.setPlaysInEditions[playID] = true
         }
 
@@ -278,7 +280,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for a Set
     //
-    pub fun getSetData(id: UInt64): AllDay.SetData {
+    access(all) view fun getSetData(id: UInt64): AllDay.SetData {
         pre {
             AllDay.setByID[id] != nil: "Cannot borrow set, no such id"
         }
@@ -288,7 +290,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for a Set by name
     //
-    pub fun getSetDataByName(name: String): AllDay.SetData {
+    access(all) view fun getSetDataByName(name: String): AllDay.SetData {
         pre {
             AllDay.setIDByName[name] != nil: "Cannot borrow set, no such name"
         }
@@ -300,7 +302,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get all set names (this will be *long*)
     //
-    pub fun getAllSetNames(): [String] {
+    access(all) view fun getAllSetNames(): [String] {
         return AllDay.setIDByName.keys
     }
 
@@ -311,14 +313,14 @@ pub contract AllDay: NonFungibleToken {
 
     // A public struct to access Play data
     //
-    pub struct PlayData {
-        pub let id: UInt64
-        pub let classification: String
-        pub let metadata: {String: String}
+    access(all) struct PlayData {
+        access(all) let id: UInt64
+        access(all) let classification: String
+        access(all) let metadata: &{String: String}
 
         // initializer
         //
-        init (id: UInt64) {
+        view init (id: UInt64) {
             if let play = &AllDay.playByID[id] as &AllDay.Play? {
             self.id = id
             self.classification = play.classification
@@ -331,12 +333,12 @@ pub contract AllDay: NonFungibleToken {
 
     // A top level Play with a unique ID and a classification
     //
-    pub resource Play {
-        pub let id: UInt64
-        pub let classification: String
+    access(all) resource Play {
+        access(all) let id: UInt64
+        access(all) let classification: String
         // Contents writable if borrowed!
         // This is deliberate, as it allows admins to update the data.
-        pub let metadata: {String: String}
+        access(all) let metadata: {String: String}
 
         // initializer
         //
@@ -376,7 +378,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for a Play
     //
-    pub fun getPlayData(id: UInt64): AllDay.PlayData {
+    access(all) view fun getPlayData(id: UInt64): AllDay.PlayData {
         pre {
             AllDay.playByID[id] != nil: "Cannot borrow play, no such id"
         }
@@ -390,23 +392,23 @@ pub contract AllDay: NonFungibleToken {
 
     // A public struct to access Edition data
     //
-    pub struct EditionData {
-        pub let id: UInt64
-        pub let seriesID: UInt64
-        pub let setID: UInt64
-        pub let playID: UInt64
-        pub var maxMintSize: UInt64?
-        pub let tier: String
-        pub var numMinted: UInt64
+    access(all) struct EditionData {
+        access(all) let id: UInt64
+        access(all) let seriesID: UInt64
+        access(all) let setID: UInt64
+        access(all) let playID: UInt64
+        access(all) var maxMintSize: UInt64?
+        access(all) let tier: String
+        access(all) var numMinted: UInt64
 
        // member function to check if max edition size has been reached
-       pub fun maxEditionMintSizeReached(): Bool {
+       access(all) view fun maxEditionMintSizeReached(): Bool {
             return self.numMinted == self.maxMintSize
         }
 
         // initializer
         //
-        init (id: UInt64) {
+        view init (id: UInt64) {
            if let edition = &AllDay.editionByID[id] as &AllDay.Edition? {
             self.id = id
             self.seriesID = edition.seriesID
@@ -423,16 +425,16 @@ pub contract AllDay: NonFungibleToken {
 
     // A top level Edition that contains a Series, Set, and Play
     //
-    pub resource Edition {
-        pub let id: UInt64
-        pub let seriesID: UInt64
-        pub let setID: UInt64
-        pub let playID: UInt64
-        pub let tier: String
+    access(all) resource Edition {
+        access(all) let id: UInt64
+        access(all) let seriesID: UInt64
+        access(all) let setID: UInt64
+        access(all) let playID: UInt64
+        access(all) let tier: String
         // Null value indicates that there is unlimited minting potential for the Edition
-        pub var maxMintSize: UInt64?
+        access(all) var maxMintSize: UInt64?
         // Updates each time we mint a new moment for the Edition to keep a running total
-        pub var numMinted: UInt64
+        access(all) var numMinted: UInt64
 
         // Close this edition so that no more Moment NFTs can be minted in it
         //
@@ -449,7 +451,7 @@ pub contract AllDay: NonFungibleToken {
         // Mint a Moment NFT in this edition, with the given minting mintingDate.
         // Note that this will panic if the max mint size has already been reached.
         //
-        pub fun mint(serialNumber: UInt64?): @AllDay.NFT {
+        access(NFTMinter) fun mint(serialNumber: UInt64?): @AllDay.NFT {
             pre {
                 self.numMinted != self.maxMintSize: "max number of minted moments has been reached"
             }
@@ -522,7 +524,7 @@ pub contract AllDay: NonFungibleToken {
 
     // Get the publicly available data for an Edition
     //
-    pub fun getEditionData(id: UInt64): EditionData {
+    access(all) view fun getEditionData(id: UInt64): EditionData {
         pre {
             AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
         }
@@ -536,29 +538,29 @@ pub contract AllDay: NonFungibleToken {
 
     // Get storage path for SetPlayTierMap
     //
-    priv fun getSetPlayTierMapStorage(): StoragePath {
+    access(contract) view fun getSetPlayTierMapStorage(): StoragePath {
         return /storage/AllDayAdminSetPlayTierMap
     }
 
     // Get composite key used to read/write SetPlayTierMap
     //
-    priv fun getSetPlayTierMapKey(_ setID: UInt64,_ playID: UInt64,_ tier: String): String {
+    access(contract) view fun getSetPlayTierMapKey(_ setID: UInt64,_ playID: UInt64,_ tier: String): String {
         return setID.toString().concat("-").concat(playID.toString()).concat("-").concat(tier)
     }
 
     // Check if the given set, play, tier has already been minted in an Edition
     //
-    priv fun getPlayTierExistsInEdition(_ setID: UInt64, _ playID: UInt64, _ tier: String): Bool {
-        let setPlayTierMap = AllDay.account.borrow<&{String: Bool}>(from: AllDay.getSetPlayTierMapStorage())!
+    access(contract) view fun getPlayTierExistsInEdition(_ setID: UInt64, _ playID: UInt64, _ tier: String): Bool {
+        let setPlayTierMap = AllDay.account.storage.borrow<&{String: Bool}>(from: AllDay.getSetPlayTierMapStorage())!
         return setPlayTierMap.containsKey(AllDay.getSetPlayTierMapKey(setID, playID, tier))
     }
 
     // Insert new entry into SetPlayTierMap
     //
-    priv fun insertSetPlayTierMap(_ setID: UInt64, _ playID: UInt64, _ tier: String) {
-        let setPlayTierMap = AllDay.account.load<{String: Bool}>(from: AllDay.getSetPlayTierMapStorage())!
+    access(contract) fun insertSetPlayTierMap(_ setID: UInt64, _ playID: UInt64, _ tier: String) {
+        let setPlayTierMap = AllDay.account.storage.load<{String: Bool}>(from: AllDay.getSetPlayTierMapStorage())!
         setPlayTierMap.insert(key: AllDay.getSetPlayTierMapKey(setID, playID, tier), true)
-        AllDay.account.save(setPlayTierMap, to: /storage/AllDayAdminSetPlayTierMap)
+        AllDay.account.storage.save(setPlayTierMap, to: /storage/AllDayAdminSetPlayTierMap)
     }
 
     //------------------------------------------------------------
@@ -567,17 +569,18 @@ pub contract AllDay: NonFungibleToken {
 
     // A Moment NFT
     //
-    pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
-        pub let id: UInt64
-        pub let editionID: UInt64
-        pub let serialNumber: UInt64
-        pub let mintingDate: UFix64
+    access(all) resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver {
+        access(all) let id: UInt64
+        access(all) let editionID: UInt64
+        access(all) let serialNumber: UInt64
+        access(all) let mintingDate: UFix64
 
-        // Destructor
-        //
-        destroy() {
-            emit MomentNFTBurned(id: self.id)
-        }
+        access(all) event ResourceDestroyed(
+            id: UInt64 = self.id,
+            editionID: UInt64 = self.editionID,
+            serialNumber: UInt64 = self.serialNumber,
+            mintingDate: UFix64 = self.mintingDate
+        )
 
         // NFT initializer
         //
@@ -601,7 +604,7 @@ pub contract AllDay: NonFungibleToken {
 
         // All supported metadata views for the Moment including the Core NFT Views
         //
-        pub fun getViews(): [Type] {
+        access(all) view fun getViews(): [Type] {
             return [
                 Type<MetadataViews.Display>(),
                 Type<MetadataViews.Editions>(),
@@ -615,7 +618,7 @@ pub contract AllDay: NonFungibleToken {
             ]
         }
 
-        pub fun resolveView(_ view: Type): AnyStruct? {
+        access(all) fun resolveView(_ view: Type): AnyStruct? {
             switch view {
                 case Type<MetadataViews.Display>():
                     return MetadataViews.Display(
@@ -632,7 +635,7 @@ pub contract AllDay: NonFungibleToken {
                     return MetadataViews.ExternalURL("https://nflallday.com/moments/".concat(self.id.toString()))
                 case Type<MetadataViews.Medias>():
                     return MetadataViews.Medias(
-                        items: [
+                        [
                             MetadataViews.Media(
                                 file: MetadataViews.HTTPFile(url: self.getImage(imageType: "image", format: "jpeg", width: 512)),
                                 mediaType: "image/jpeg"
@@ -671,12 +674,10 @@ pub contract AllDay: NonFungibleToken {
                     return MetadataViews.NFTCollectionData(
                         storagePath: /storage/AllDayNFTCollection,
                         publicPath: /public/AllDayNFTCollection,
-                        providerPath: /private/AllDayNFTCollection,
-                        publicCollection: Type<&AllDay.Collection{AllDay.MomentNFTCollectionPublic}>(),
-                        publicLinkedType: Type<&AllDay.Collection{AllDay.MomentNFTCollectionPublic,NonFungibleToken.Receiver,NonFungibleToken.CollectionPublic,MetadataViews.ResolverCollection}>(),
-                        providerLinkedType: Type<&AllDay.Collection{NonFungibleToken.Provider,AllDay.MomentNFTCollectionPublic,NonFungibleToken.Receiver,NonFungibleToken.CollectionPublic,MetadataViews.ResolverCollection}>(),
-                        createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
-                            return <-AllDay.createEmptyCollection()
+                        publicCollection: Type<&AllDay.Collection>(),
+                        publicLinkedType: Type<&AllDay.Collection>(),
+                        createEmptyCollectionFunction: (fun (): @{NonFungibleToken.Collection} {
+                            return <-AllDay.createEmptyCollection(nftType: Type<@AllDay.NFT>())
                         })
                     )
                 case Type<MetadataViews.NFTCollectionDisplay>():
@@ -706,9 +707,9 @@ pub contract AllDay: NonFungibleToken {
                     )
                 case Type<MetadataViews.Royalties>():
                     let royaltyReceiver: Capability<&{FungibleToken.Receiver}> =
-                        getAccount(0xALLDAYROYALTYADDRESS).getCapability<&AnyResource{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
+                        getAccount(0xALLDAYROYALTYADDRESS).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())!
                     return MetadataViews.Royalties(
-                        royalties: [
+                        [
                             MetadataViews.Royalty(
                                 receiver: royaltyReceiver,
                                 cut: 0.05,
@@ -726,7 +727,7 @@ pub contract AllDay: NonFungibleToken {
             return nil
         }
 
-        pub fun getName(): String {
+        access(all) view fun getName(): String {
             let edition: EditionData = AllDay.getEditionData(id: self.editionID)
             let play: PlayData = AllDay.getPlayData(id: edition.playID)
             let firstName: String = play.metadata["playerFirstName"] ?? ""
@@ -735,7 +736,7 @@ pub contract AllDay: NonFungibleToken {
             return firstName.concat(" ").concat(lastName).concat(" ").concat(playType)
         }
 
-        pub fun getDescription(): String {
+        access(all) view fun getDescription(): String {
             let edition: EditionData = AllDay.getEditionData(id: self.editionID)
             let play: PlayData = AllDay.getPlayData(id: edition.playID)
             let description: String = play.metadata["description"] ?? ""
@@ -748,23 +749,23 @@ pub contract AllDay: NonFungibleToken {
             return series.name.concat(" ").concat(set.name).concat(" moment with serial number ").concat(self.serialNumber.toString())
         }
 
-        pub fun assetPath(): String {
+        access(all) view fun assetPath(): String {
             return "https://media.nflallday.com/editions/".concat(self.editionID.toString()).concat("/media/")
         }
 
-        pub fun getImage(imageType: String, format: String, width: Int): String {
+        access(all) view fun getImage(imageType: String, format: String, width: Int): String {
             return self.assetPath().concat(imageType).concat("?format=").concat(format).concat("&width=").concat(width.toString())
         }
 
-        pub fun getVideo(videoType: String): String {
+        access(all) view fun getVideo(videoType: String): String {
             return self.assetPath().concat(videoType)
         }
 
-        pub fun getMomentURL(): String {
+        access(all) view fun getMomentURL(): String {
             return "https://nflallday.com/moments/".concat(self.id.toString())
         }
 
-         pub fun getEditionInfo() : MetadataViews.Edition {
+        access(all) view fun getEditionInfo() : MetadataViews.Edition {
             let edition: EditionData = AllDay.getEditionData(id: self.editionID)
             let set: SetData = AllDay.getSetData(id: edition.setID)
             let name: String = set.name.concat(": #").concat(edition.playID.toString())
@@ -772,7 +773,7 @@ pub contract AllDay: NonFungibleToken {
             return MetadataViews.Edition(name: name, number: UInt64(self.serialNumber), max: edition.maxMintSize ?? nil)
         }
 
-        pub fun getTraits() : {String: AnyStruct} {
+        access(all) fun getTraits() : {String: AnyStruct} {
             let edition: EditionData = AllDay.getEditionData(id: self.editionID)
             let play: PlayData = AllDay.getPlayData(id: edition.playID)
             let series: SeriesData = AllDay.getSeriesData(id: edition.seriesID)
@@ -793,6 +794,10 @@ pub contract AllDay: NonFungibleToken {
             }
             return traitDictionary
         }
+
+        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+            return <- AllDay.createEmptyCollection(nftType: Type<@AllDay.NFT>())
+        }
     }
 
     //------------------------------------------------------------
@@ -801,12 +806,9 @@ pub contract AllDay: NonFungibleToken {
 
     // A public collection interface that allows Moment NFTs to be borrowed
     //
-    pub resource interface MomentNFTCollectionPublic {
-        pub fun deposit(token: @NonFungibleToken.NFT)
-        pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
-        pub fun getIDs(): [UInt64]
-        pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
+    access(all) resource interface MomentNFTCollectionPublic : NonFungibleToken.CollectionPublic {
+        access(all) fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+        access(all) fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
@@ -818,21 +820,47 @@ pub contract AllDay: NonFungibleToken {
 
     // An NFT Collection
     //
-    pub resource Collection:
+    access(all) resource Collection:
         NonFungibleToken.Provider,
         NonFungibleToken.Receiver,
-        NonFungibleToken.CollectionPublic,
+        NonFungibleToken.Collection,
         MomentNFTCollectionPublic,
-        MetadataViews.ResolverCollection
+        ViewResolver.ResolverCollection
     {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an UInt64 ID field
         //
-        pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
+        access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
+
+        // Return a list of NFT types that this receiver accepts
+        view access(all) fun getSupportedNFTTypes(): {Type: Bool} {
+            let supportedTypes: {Type: Bool} = {}
+            supportedTypes[Type<@AllDay.NFT>()] = true
+            return supportedTypes
+        }
+
+        // Return whether or not the given type is accepted by the collection
+        // A collection that can accept any type should just return true by default
+        view access(all) fun isSupportedNFTType(type: Type): Bool {
+            if type == Type<@AllDay.NFT>() {
+                return true
+            }
+            return false
+        }
+
+        // Return the amount of NFTs stored in the collection
+        view access(all) fun getLength(): Int {
+            return self.ownedNFTs.keys.length
+        }
+
+        // Create an empty Collection for AllDay NFTs and return it to the caller
+        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+            return <- AllDay.createEmptyCollection(nftType: Type<@AllDay.NFT>())
+        }
 
         // withdraw removes an NFT from the collection and moves it to the caller
         //
-        pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
+        access(NonFungibleToken.Withdraw | NonFungibleToken.Owner) fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
             let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 
             emit Withdraw(id: token.id, from: self.owner?.address)
@@ -843,7 +871,7 @@ pub contract AllDay: NonFungibleToken {
         // deposit takes a NFT and adds it to the collections dictionary
         // and adds the ID to the id array
         //
-        pub fun deposit(token: @NonFungibleToken.NFT) {
+        access(all) fun deposit(token: @{NonFungibleToken.NFT}) {
             let token <- token as! @AllDay.NFT
             let id: UInt64 = token.id
 
@@ -858,7 +886,7 @@ pub contract AllDay: NonFungibleToken {
         // batchDeposit takes a Collection object as an argument
         // and deposits each contained NFT into this Collection
         //
-        pub fun batchDeposit(tokens: @NonFungibleToken.Collection) {
+        access(all) fun batchDeposit(tokens: @{NonFungibleToken.Collection}) {
             // Get an array of the IDs to be deposited
             let keys = tokens.getIDs()
 
@@ -873,43 +901,27 @@ pub contract AllDay: NonFungibleToken {
 
         // getIDs returns an array of the IDs that are in the collection
         //
-        pub fun getIDs(): [UInt64] {
+        access(all) view fun getIDs(): [UInt64] {
             return self.ownedNFTs.keys
         }
 
         // borrowNFT gets a reference to an NFT in the collection
         //
-        pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            pre {
-                self.ownedNFTs[id] != nil: "Cannot borrow NFT, no such id"
-            }
-
-            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
+        access(all) view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}? {
+            return &self.ownedNFTs[id]
         }
 
         // borrowMomentNFT gets a reference to an NFT in the collection
         //
-        pub fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
-            if self.ownedNFTs[id] != nil {
-                if let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT? {
-                    return ref! as! &AllDay.NFT
-                }
-                return nil
-            } else {
-                return nil
+        access(all) view fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
+            return self.borrowNFT(id) as! &AllDay.NFT?
+        }
+
+        access(all) view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}? {
+            if let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? {
+                return nft as &{ViewResolver.Resolver}
             }
-        }
-
-        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
-            let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
-            let allDayNFT = nft as! &AllDay.NFT
-            return allDayNFT as &AnyResource{MetadataViews.Resolver}
-        }
-
-        // Collection destructor
-        //
-        destroy() {
-            destroy self.ownedNFTs
+            return nil
         }
 
         // Collection initializer
@@ -921,7 +933,10 @@ pub contract AllDay: NonFungibleToken {
 
     // public function that anyone can call to create a new empty collection
     //
-    pub fun createEmptyCollection(): @NonFungibleToken.Collection {
+    access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection} {
+        if nftType != Type<@AllDay.NFT>() {
+            panic("NFT type is not supported")
+        }
         return <- create Collection()
     }
 
@@ -929,21 +944,12 @@ pub contract AllDay: NonFungibleToken {
     // Admin
     //------------------------------------------------------------
 
-    // An interface containing the Admin function that allows minting NFTs
-    //
-    pub resource interface NFTMinter {
-        // Mint a single NFT
-        // The Edition for the given ID must already exist
-        //
-        pub fun mintNFT(editionID: UInt64, serialNumber: UInt64?): @AllDay.NFT
-    }
-
     // A resource that allows managing metadata and minting NFTs
     //
-    pub resource Admin: NFTMinter {
+    access(all) resource Admin {
         // Borrow a Series
         //
-        pub fun borrowSeries(id: UInt64): &AllDay.Series {
+        access(all) view fun borrowSeries(id: UInt64): &AllDay.Series {
             pre {
                 AllDay.seriesByID[id] != nil: "Cannot borrow series, no such id"
             }
@@ -953,7 +959,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Borrow a Set
         //
-        pub fun borrowSet(id: UInt64): &AllDay.Set {
+        access(all) view fun borrowSet(id: UInt64): &AllDay.Set {
             pre {
                 AllDay.setByID[id] != nil: "Cannot borrow Set, no such id"
             }
@@ -963,7 +969,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Borrow a Play
         //
-        pub fun borrowPlay(id: UInt64): &AllDay.Play {
+        access(all) view fun borrowPlay(id: UInt64): &AllDay.Play {
             pre {
                 AllDay.playByID[id] != nil: "Cannot borrow Play, no such id"
             }
@@ -973,17 +979,17 @@ pub contract AllDay: NonFungibleToken {
 
         // Borrow an Edition
         //
-        pub fun borrowEdition(id: UInt64): &AllDay.Edition {
+        access(NFTMinter) fun borrowEdition(id: UInt64): auth(NFTMinter) &AllDay.Edition {
             pre {
                 AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
             }
 
-            return (&AllDay.editionByID[id] as &AllDay.Edition?)!
+            return (&AllDay.editionByID[id] as auth(NFTMinter) &AllDay.Edition?)!
         }
 
         // Create a Series
         //
-        pub fun createSeries(name: String): UInt64 {
+        access(all) fun createSeries(name: String): UInt64 {
             // Create and store the new series
             let series <- create AllDay.Series(
                 name: name,
@@ -997,7 +1003,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Close a Series
         //
-        pub fun closeSeries(id: UInt64): UInt64 {
+        access(all) fun closeSeries(id: UInt64): UInt64 {
             if let series = &AllDay.seriesByID[id] as &AllDay.Series? {
                 series.close()
                 return series.id
@@ -1007,7 +1013,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Create a Set
         //
-        pub fun createSet(name: String): UInt64 {
+        access(all) fun createSet(name: String): UInt64 {
             // Create and store the new set
             let set <- create AllDay.Set(
                 name: name,
@@ -1021,7 +1027,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Create a Play
         //
-        pub fun createPlay(classification: String, metadata: {String: String}): UInt64 {
+        access(all) fun createPlay(classification: String, metadata: {String: String}): UInt64 {
             // Create and store the new play
             let play <- create AllDay.Play(
                 classification: classification,
@@ -1036,7 +1042,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Update a play's description metadata
         //
-        pub fun updatePlayDescription(playID: UInt64, description: String): Bool {
+        access(all) fun updatePlayDescription(playID: UInt64, description: String): Bool {
             if let play = &AllDay.playByID[playID] as &AllDay.Play? {
                 play.updateDescription(description: description)
             } else {
@@ -1047,7 +1053,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Update a dynamic moment/play's metadata
         //
-        pub fun updateDynamicMetadata(playID: UInt64, optTeamName: String?, optPlayerFirstName: String?,
+        access(all) fun updateDynamicMetadata(playID: UInt64, optTeamName: String?, optPlayerFirstName: String?,
             optPlayerLastName: String?, optPlayerNumber: String?, optPlayerPosition: String?): Bool {
             if let play = &AllDay.playByID[playID] as &AllDay.Play? {
                 play.updateDynamicMetadata(optTeamName: optTeamName, optPlayerFirstName: optPlayerFirstName,
@@ -1060,7 +1066,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Create an Edition
         //
-        pub fun createEdition(
+         access(all) fun createEdition(
             seriesID: UInt64,
             setID: UInt64,
             playID: UInt64,
@@ -1081,7 +1087,7 @@ pub contract AllDay: NonFungibleToken {
 
         // Close an Edition
         //
-        pub fun closeEdition(id: UInt64): UInt64 {
+        access(all) fun closeEdition(id: UInt64): UInt64 {
             if let edition = &AllDay.editionByID[id] as &AllDay.Edition? {
                 edition.close()
                 return edition.id
@@ -1092,7 +1098,7 @@ pub contract AllDay: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        pub fun mintNFT(editionID: UInt64, serialNumber: UInt64?): @AllDay.NFT {
+        access(NFTMinter) fun mintNFT(editionID: UInt64, serialNumber: UInt64?): @AllDay.NFT {
             pre {
                 // Make sure the edition we are creating this NFT in exists
                 AllDay.editionByID.containsKey(editionID): "No such EditionID"
@@ -1100,6 +1106,58 @@ pub contract AllDay: NonFungibleToken {
             return <- self.borrowEdition(id: editionID).mint(serialNumber: serialNumber)
         }
     }
+
+        /// Return the metadata view types available for this contract
+        ///
+        view access(all) fun getContractViews(resourceType: Type?): [Type] {
+            return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
+        }
+
+        /// Resolve this contract's metadata views
+        ///
+        view access(all) fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
+            post {
+                result == nil || result!.getType() == viewType: "The returned view must be of the given type or nil"
+            }
+            switch viewType {
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: /storage/AllDayNFTCollection,
+                        publicPath: /public/AllDayNFTCollection,
+                        publicCollection: Type<&AllDay.Collection>(),
+                        publicLinkedType: Type<&AllDay.Collection>(),
+                        createEmptyCollectionFunction: (fun (): @{NonFungibleToken.Collection} {
+                            return <-AllDay.createEmptyCollection(nftType: Type<@AllDay.NFT>())
+                        })
+                    )
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    let bannerImage = MetadataViews.Media(
+                        file: MetadataViews.HTTPFile(
+                            url: "https://assets.nflallday.com/flow/catalogue/NFLAD_BANNER.png"
+                        ),
+                        mediaType: "image/png"
+                    )
+                    let squareImage = MetadataViews.Media(
+                        file: MetadataViews.HTTPFile(
+                            url: "https://assets.nflallday.com/flow/catalogue/NFLAD_SQUARE.png"
+                        ),
+                        mediaType: "image/png"
+                    )
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: "NFL All Day",
+                        description: "Officially Licensed Digital Collectibles Featuring the NFL’s Best Highlights. Buy, Sell and Collect Your Favorite NFL Moments",
+                        externalURL: MetadataViews.ExternalURL("https://nflallday.com/"),
+                        squareImage: squareImage,
+                        bannerImage: bannerImage,
+                        socials: {
+                            "instagram": MetadataViews.ExternalURL("https://www.instagram.com/nflallday/"),
+                            "twitter": MetadataViews.ExternalURL("https://twitter.com/NFLAllDay"),
+                            "discord": MetadataViews.ExternalURL("https://discord.com/invite/5K6qyTzj2k")
+                        }
+                    )
+            }
+            return nil
+        }
 
     //------------------------------------------------------------
     // Contract lifecycle
@@ -1131,17 +1189,11 @@ pub contract AllDay: NonFungibleToken {
 
         // Create an Admin resource and save it to storage
         let admin <- create Admin()
-        self.account.save(<-admin, to: self.AdminStoragePath)
-        // Link capabilites to the admin constrained to the Minter
-        // and Metadata interfaces
-        self.account.link<&AllDay.Admin{AllDay.NFTMinter}>(
-            self.MinterPrivatePath,
-            target: self.AdminStoragePath
-        )
+        self.account.storage.save(<-admin, to: self.AdminStoragePath)
 
         //Initialize map to keep track of set+play+tier(edition) combinations that have been minted
         let setPlayTierMap: {String: Bool} = {}
-        self.account.save(setPlayTierMap, to: AllDay.getSetPlayTierMapStorage())
+        self.account.storage.save(setPlayTierMap, to: AllDay.getSetPlayTierMapStorage())
 
         // Let the world know we are here
         emit ContractInitialized()

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/onflow/cadence"
-	emulator "github.com/onflow/flow-emulator"
+	"github.com/onflow/flow-emulator/emulator"
 	fttemplates "github.com/onflow/flow-ft/lib/go/templates"
 	"github.com/onflow/flow-go-sdk"
 	"github.com/onflow/flow-go-sdk/crypto"
@@ -19,11 +19,10 @@ func fundAccount(
 	b *emulator.Blockchain,
 	receiverAddress flow.Address,
 	amount string,
+	tokenEnv fttemplates.Environment,
 ) {
 	script := fttemplates.GenerateMintTokensScript(
-		ftAddress,
-		flowTokenAddress,
-		flowTokenName,
+		tokenEnv,
 	)
 
 	tx := flow.NewTransaction().

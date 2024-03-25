@@ -9,11 +9,13 @@ import (
 // Handle relative paths by making these regular expressions
 
 const (
-	nftAddressPlaceholder     = "\"[^\"]*NonFungibleToken.cdc\""
-	ftAddressPlaceholder      = "\"[^\"]*FungibleToken.cdc\""
-	mvAddressPlaceholder      = "\"[^\"]*MetadataViews.cdc\""
-	AllDayAddressPlaceholder  = "\"[^\"]*AllDay.cdc\""
-	royaltyAddressPlaceholder = "0xALLDAYROYALTYADDRESS"
+	nftAddressPlaceholder                      = "\"NonFungibleToken\""
+	ftAddressPlaceholder                       = "\"FungibleToken\""
+	mvAddressPlaceholder                       = "\"MetadataViews\""
+	viewResolverAddressPlaceHolder             = "\"ViewResolver\""
+	AllDayAddressPlaceholder                   = "\"AllDay\""
+	FungibleTokenSwitchboardAddressPlaceholder = "\"FungibleTokenSwitchboard\""
+	royaltyAddressPlaceholder                  = "0xALLDAYROYALTYADDRESS"
 )
 
 const (
@@ -22,8 +24,9 @@ const (
 	AllDayScriptsRootPath      = "../../../scripts"
 
 	// Accounts
-	AllDaySetupAccountPath   = AllDayTransactionsRootPath + "/user/setup_AllDay_account.cdc"
-	AllDayAccountIsSetupPath = AllDayScriptsRootPath + "/user/account_is_setup.cdc"
+	AllDaySetupAccountPath     = AllDayTransactionsRootPath + "/user/setup_AllDay_account.cdc"
+	AllDayAccountIsSetupPath   = AllDayScriptsRootPath + "/user/account_is_setup.cdc"
+	AllDaySetupSwitchboardPath = AllDayTransactionsRootPath + "/user/setup_switchboard_account.cdc"
 
 	// Series
 	AllDayCreateSeriesPath       = AllDayTransactionsRootPath + "/admin/series/create_series.cdc"
@@ -80,13 +83,16 @@ func replaceAddresses(code []byte, contracts Contracts) []byte {
 	mvRe := regexp.MustCompile(mvAddressPlaceholder)
 	code = mvRe.ReplaceAll(code, []byte("0x"+contracts.MetadataViewsAddress.String()))
 
+	switchboardRe := regexp.MustCompile(FungibleTokenSwitchboardAddressPlaceholder)
+	code = switchboardRe.ReplaceAll(code, []byte("0x"+contracts.FungibleTokenSwitchboardAddress.String()))
+
 	royaltyRe := regexp.MustCompile(royaltyAddressPlaceholder)
 	code = royaltyRe.ReplaceAll(code, []byte("0x"+contracts.RoyaltyAddress.String()))
 
 	return code
 }
 
-func LoadAllDay(nftAddress flow.Address, metaAddress flow.Address, royaltyAddress flow.Address) []byte {
+func LoadAllDay(nftAddress flow.Address, metaAddress flow.Address, royaltyAddress flow.Address, viewResolverAddress flow.Address) []byte {
 	code := readFile(AllDayPath)
 
 	nftRe := regexp.MustCompile(nftAddressPlaceholder)
@@ -98,9 +104,13 @@ func LoadAllDay(nftAddress flow.Address, metaAddress flow.Address, royaltyAddres
 	mvRe := regexp.MustCompile(mvAddressPlaceholder)
 	code = mvRe.ReplaceAll(code, []byte("0x"+metaAddress.String()))
 
+	viewResolverRe := regexp.MustCompile(viewResolverAddressPlaceHolder)
+	code = viewResolverRe.ReplaceAll(code, []byte("0x"+viewResolverAddress.String()))
+
 	royaltyRe := regexp.MustCompile(royaltyAddressPlaceholder)
 	code = royaltyRe.ReplaceAll(code, []byte("0x"+royaltyAddress.String()))
 
+	//fmt.Println(string(code))
 	return code
 }
 
@@ -114,6 +124,13 @@ func loadAllDaySetupAccountTransaction(contracts Contracts) []byte {
 func loadAllDayAccountIsSetupScript(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayAccountIsSetupPath),
+		contracts,
+	)
+}
+
+func loadSetupSwitchboardAccountTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDaySetupSwitchboardPath),
 		contracts,
 	)
 }

@@ -1,24 +1,22 @@
-import NonFungibleToken from "../../../contracts/NonFungibleToken.cdc"
-import AllDay from "../../../contracts/AllDay.cdc"
+import NonFungibleToken from "NonFungibleToken"
+import AllDay from "AllDay"
 
 transaction(recipientAddress: Address, editionIDs: [UInt64], counts: [UInt64], serialNumbers: [UInt64?]) {
     
     // local variable for storing the minter reference
-    let minter: &{AllDay.NFTMinter}
-    let recipient: &{AllDay.MomentNFTCollectionPublic}
+    let minter: auth(AllDay.NFTMinter) &AllDay.Admin
+    let recipient: &AllDay.Collection
 
-    prepare(signer: AuthAccount) {
+    prepare(signer: auth(BorrowValue) &Account) {
         // borrow a reference to the NFTMinter resource in storage
-        self.minter = signer.getCapability(AllDay.MinterPrivatePath)
-            .borrow<&{AllDay.NFTMinter}>()
+        self.minter = signer.storage.borrow<auth(AllDay.NFTMinter)&AllDay.Admin>(from: AllDay.AdminStoragePath)
             ?? panic("Could not borrow a reference to the NFT minter")
 
         // get the recipients public account object
         let recipientAccount = getAccount(recipientAddress)
 
         // borrow a public reference to the receivers collection
-        self.recipient = recipientAccount.getCapability(AllDay.CollectionPublicPath)
-            .borrow<&{AllDay.MomentNFTCollectionPublic}>()
+        self.recipient = recipientAccount.capabilities.borrow<&AllDay.Collection>(AllDay.CollectionPublicPath)
             ?? panic("Could not borrow a reference to the collection receiver")
 
     }

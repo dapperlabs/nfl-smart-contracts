@@ -1,8 +1,8 @@
-import AllDay from "../../contracts/AllDay.cdc"
+import AllDay from "AllDay"
 
 // This scripts returns the number of AllDay currently in existence.
 
-pub fun main(): UInt64 {    
+access(all) fun main(): UInt64 {
     return AllDay.totalSupply
 }
 

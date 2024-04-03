@@ -4,12 +4,12 @@ import AllDay from "AllDay"
 transaction(recipientAddress: Address, editionIDs: [UInt64], counts: [UInt64], serialNumbers: [UInt64?]) {
     
     // local variable for storing the minter reference
-    let minter: auth(AllDay.NFTMinter) &AllDay.Admin
+    let minter: &AllDay.Admin
     let recipient: &AllDay.Collection
 
     prepare(signer: auth(BorrowValue) &Account) {
         // borrow a reference to the NFTMinter resource in storage
-        self.minter = signer.storage.borrow<auth(AllDay.NFTMinter)&AllDay.Admin>(from: AllDay.AdminStoragePath)
+        self.minter = signer.storage.borrow<&AllDay.Admin>(from: AllDay.AdminStoragePath)
             ?? panic("Could not borrow a reference to the NFT minter")
 
         // get the recipients public account object

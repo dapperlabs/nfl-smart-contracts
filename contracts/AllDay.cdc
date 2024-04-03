@@ -33,7 +33,6 @@ import ViewResolver from "ViewResolver"
 // The AllDay NFTs and metadata contract
 //
 access(all) contract AllDay: NonFungibleToken {
-    access(all) entitlement NFTMinter
     //------------------------------------------------------------
     // Events
     //------------------------------------------------------------
@@ -451,7 +450,7 @@ access(all) contract AllDay: NonFungibleToken {
         // Mint a Moment NFT in this edition, with the given minting mintingDate.
         // Note that this will panic if the max mint size has already been reached.
         //
-        access(NFTMinter) fun mint(serialNumber: UInt64?): @AllDay.NFT {
+        access(all) fun mint(serialNumber: UInt64?): @AllDay.NFT {
             pre {
                 self.numMinted != self.maxMintSize: "max number of minted moments has been reached"
             }
@@ -569,7 +568,7 @@ access(all) contract AllDay: NonFungibleToken {
 
     // A Moment NFT
     //
-    access(all) resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver {
+    access(all) resource NFT: NonFungibleToken.NFT {
         access(all) let id: UInt64
         access(all) let editionID: UInt64
         access(all) let serialNumber: UInt64
@@ -585,6 +584,7 @@ access(all) contract AllDay: NonFungibleToken {
         // NFT initializer
         //
         init(
+
             id: UInt64,
             editionID: UInt64,
             serialNumber: UInt64
@@ -671,52 +671,11 @@ access(all) contract AllDay: NonFungibleToken {
                         ]
                     )
                 case Type<MetadataViews.NFTCollectionData>():
-                    return MetadataViews.NFTCollectionData(
-                        storagePath: /storage/AllDayNFTCollection,
-                        publicPath: /public/AllDayNFTCollection,
-                        publicCollection: Type<&AllDay.Collection>(),
-                        publicLinkedType: Type<&AllDay.Collection>(),
-                        createEmptyCollectionFunction: (fun (): @{NonFungibleToken.Collection} {
-                            return <-AllDay.createEmptyCollection(nftType: Type<@AllDay.NFT>())
-                        })
-                    )
+                    return AllDay.resolveContractView(resourceType: nil, viewType: Type<MetadataViews.NFTCollectionData>())
                 case Type<MetadataViews.NFTCollectionDisplay>():
-                    let bannerImage = MetadataViews.Media(
-                        file: MetadataViews.HTTPFile(
-                            url: "https://assets.nflallday.com/flow/catalogue/NFLAD_BANNER.png"
-                        ),
-                        mediaType: "image/png"
-                    )
-                    let squareImage = MetadataViews.Media(
-                        file: MetadataViews.HTTPFile(
-                            url: "https://assets.nflallday.com/flow/catalogue/NFLAD_SQUARE.png"
-                        ),
-                        mediaType: "image/png"
-                    )
-                    return MetadataViews.NFTCollectionDisplay(
-                        name: "NFL All Day",
-                        description: "Officially Licensed Digital Collectibles Featuring the NFL’s Best Highlights. Buy, Sell and Collect Your Favorite NFL Moments",
-                        externalURL: MetadataViews.ExternalURL("https://nflallday.com/"),
-                        squareImage: squareImage,
-                        bannerImage: bannerImage,
-                        socials: {
-                            "instagram": MetadataViews.ExternalURL("https://www.instagram.com/nflallday/"),
-                            "twitter": MetadataViews.ExternalURL("https://twitter.com/NFLAllDay"),
-                            "discord": MetadataViews.ExternalURL("https://discord.com/invite/5K6qyTzj2k")
-                        }
-                    )
+                    return AllDay.resolveContractView(resourceType: nil, viewType: Type<MetadataViews.NFTCollectionDisplay>())
                 case Type<MetadataViews.Royalties>():
-                    let royaltyReceiver: Capability<&{FungibleToken.Receiver}> =
-                        getAccount(0xALLDAYROYALTYADDRESS).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())!
-                    return MetadataViews.Royalties(
-                        [
-                            MetadataViews.Royalty(
-                                receiver: royaltyReceiver,
-                                cut: 0.05,
-                                description: "NFL All Day marketplace royalty"
-                            )
-                        ]
-                    )
+                    return AllDay.resolveContractView(resourceType: nil, viewType: Type<MetadataViews.Royalties>())
                 case Type<MetadataViews.Serial>():
                     return MetadataViews.Serial(self.serialNumber)
                 case Type<MetadataViews.Traits>():
@@ -821,19 +780,16 @@ access(all) contract AllDay: NonFungibleToken {
     // An NFT Collection
     //
     access(all) resource Collection:
-        NonFungibleToken.Provider,
-        NonFungibleToken.Receiver,
         NonFungibleToken.Collection,
-        MomentNFTCollectionPublic,
-        ViewResolver.ResolverCollection
+        MomentNFTCollectionPublic
     {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an UInt64 ID field
         //
-        access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
+        access(contract) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
 
         // Return a list of NFT types that this receiver accepts
-        view access(all) fun getSupportedNFTTypes(): {Type: Bool} {
+        access(all) view fun getSupportedNFTTypes(): {Type: Bool} {
             let supportedTypes: {Type: Bool} = {}
             supportedTypes[Type<@AllDay.NFT>()] = true
             return supportedTypes
@@ -841,7 +797,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Return whether or not the given type is accepted by the collection
         // A collection that can accept any type should just return true by default
-        view access(all) fun isSupportedNFTType(type: Type): Bool {
+        access(all) view fun isSupportedNFTType(type: Type): Bool {
             if type == Type<@AllDay.NFT>() {
                 return true
             }
@@ -849,7 +805,7 @@ access(all) contract AllDay: NonFungibleToken {
         }
 
         // Return the amount of NFTs stored in the collection
-        view access(all) fun getLength(): Int {
+        access(all) view fun getLength(): Int {
             return self.ownedNFTs.keys.length
         }
 
@@ -979,12 +935,12 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Borrow an Edition
         //
-        access(NFTMinter) fun borrowEdition(id: UInt64): auth(NFTMinter) &AllDay.Edition {
+        access(all) fun borrowEdition(id: UInt64): &AllDay.Edition {
             pre {
                 AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
             }
 
-            return (&AllDay.editionByID[id] as auth(NFTMinter) &AllDay.Edition?)!
+            return (&AllDay.editionByID[id] as &AllDay.Edition?)!
         }
 
         // Create a Series
@@ -1098,7 +1054,7 @@ access(all) contract AllDay: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        access(NFTMinter) fun mintNFT(editionID: UInt64, serialNumber: UInt64?): @AllDay.NFT {
+        access(all) fun mintNFT(editionID: UInt64, serialNumber: UInt64?): @AllDay.NFT {
             pre {
                 // Make sure the edition we are creating this NFT in exists
                 AllDay.editionByID.containsKey(editionID): "No such EditionID"
@@ -1109,13 +1065,13 @@ access(all) contract AllDay: NonFungibleToken {
 
         /// Return the metadata view types available for this contract
         ///
-        view access(all) fun getContractViews(resourceType: Type?): [Type] {
-            return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
+        access(all) view fun getContractViews(resourceType: Type?): [Type] {
+            return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.Royalties>()]
         }
 
         /// Resolve this contract's metadata views
         ///
-        view access(all) fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
+        access(all) view fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
             post {
                 result == nil || result!.getType() == viewType: "The returned view must be of the given type or nil"
             }
@@ -1154,6 +1110,18 @@ access(all) contract AllDay: NonFungibleToken {
                             "twitter": MetadataViews.ExternalURL("https://twitter.com/NFLAllDay"),
                             "discord": MetadataViews.ExternalURL("https://discord.com/invite/5K6qyTzj2k")
                         }
+                    )
+                case Type<MetadataViews.Royalties>():
+                    let royaltyReceiver: Capability<&{FungibleToken.Receiver}> =
+                        getAccount(0xALLDAYROYALTYADDRESS).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())!
+                    return MetadataViews.Royalties(
+                        [
+                            MetadataViews.Royalty(
+                                receiver: royaltyReceiver,
+                                cut: 0.05,
+                                description: "NFL All Day marketplace royalty"
+                            )
+                        ]
                     )
             }
             return nil

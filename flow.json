@@ -1,21 +1,28 @@
 {
-	"emulators": {
-		"default": {
-			"port": 3569,
-			"serviceAccount": "emulator-account"
-		}
+	"contracts": {
+		"AllDay": "contracts/AllDay.cdc"
 	},
-	"contracts": {},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
 		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"previewnet": "access.previewnet.nodes.onflow.org:9000",
 		"testnet": "access.devnet.nodes.onflow.org:9000"
 	},
 	"accounts": {
 		"emulator-account": {
 			"address": "f8d6e0586b0a20c7",
 			"key": "2e246218fd5daa9dfd61aa0bef71afe8b702258efadcd1778e543a47e7bd4f2e"
+		},
+		"previewnet-account": {
+			"address": "27963927c762d188",
+			"key": "$PREVIEWNET_ACCOUNT_PRIVATE_KEY"
 		}
 	},
-	"deployments": {}
+	"deployments": {
+		"previewnet": {
+			"previewnet-account": [
+				"AllDay"
+			]
+		}
+	}
 }

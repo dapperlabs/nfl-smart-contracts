@@ -890,7 +890,7 @@ access(all) contract AllDay: NonFungibleToken {
     // Admin
     //------------------------------------------------------------
 
-    /// Entitlement that grants the ability to mint Golazos NFTs
+    /// Entitlement that grants the ability to mint AllDay NFTs
     access(all) entitlement Mint
 
     /// Entitlement that grants the ability to operate admin functions

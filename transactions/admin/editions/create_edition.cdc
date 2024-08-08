@@ -8,11 +8,11 @@ transaction(
     maxMintSize: UInt64?,
    ) {
     // local variable for the admin reference
-    let admin: &AllDay.Admin
+    let admin: auth(AllDay.Operate) &AllDay.Admin
 
     prepare(signer: auth(BorrowValue) &Account) {
         // borrow a reference to the Admin resource
-        self.admin = signer.storage.borrow<&AllDay.Admin>(from: AllDay.AdminStoragePath)
+        self.admin = signer.storage.borrow<auth(AllDay.Operate) &AllDay.Admin>(from: AllDay.AdminStoragePath)
             ?? panic("Could not borrow a reference to the AllDay Admin capability")
     }
 

@@ -14,7 +14,8 @@ transaction(recipientAddress: Address, withdrawID: UInt64) {
             ?? panic("Could not borrow a reference to the owner's collection")
 
         // borrow a public reference to the receivers collection
-        let depositRef = recipient..capabilities.get<&AllDay.Collection>(AllDay.CollectionPublicPath)!.borrow()!
+        let depositRef = recipient.capabilities.borrow<&AllDay.Collection>(AllDay.CollectionPublicPath)
+            ?? panic("Could not borrow a reference to the recipient's collection")
 
         // withdraw the NFT from the owner's collection
         let nft <- collectionRef.withdraw(withdrawID: withdrawID)

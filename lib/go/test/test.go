@@ -69,7 +69,7 @@ func deployViewResolverContract(t *testing.T, b *emulator.Blockchain) flow.Addre
 func deployNFTContract(t *testing.T, b *emulator.Blockchain, resolverAddress flow.Address) flow.Address {
 	logger := zerolog.Nop()
 	adapter := adapters.NewSDKAdapter(&logger, b)
-	nftCode := nftcontracts.NonFungibleToken(resolverAddress)
+	nftCode := nftcontracts.NonFungibleToken(resolverAddress.String())
 	nftAddress, err := adapter.CreateAccount(context.Background(), nil,
 		[]sdktemplates.Contract{
 			{
@@ -87,7 +87,7 @@ func deployNFTContract(t *testing.T, b *emulator.Blockchain, resolverAddress flo
 }
 
 func deployMetadataViewsContract(t *testing.T, b *emulator.Blockchain, nftAddress flow.Address, resolverAddress flow.Address) flow.Address {
-	metaViewCode := nftcontracts.MetadataViews(ftAddress, nftAddress, resolverAddress)
+	metaViewCode := nftcontracts.MetadataViews(ftAddress.String(), nftAddress.String(), resolverAddress.String())
 	logger := zerolog.Nop()
 	adapter := adapters.NewSDKAdapter(&logger, b)
 	metaViewAddress, err := adapter.CreateAccount(context.Background(), nil,

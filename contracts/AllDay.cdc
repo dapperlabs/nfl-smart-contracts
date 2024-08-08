@@ -91,7 +91,6 @@ access(all) contract AllDay: NonFungibleToken {
     access(all) let CollectionStoragePath:  StoragePath
     access(all) let CollectionPublicPath:   PublicPath
     access(all) let AdminStoragePath:       StoragePath
-    access(all) let MinterPrivatePath:      PrivatePath
 
     //------------------------------------------------------------
     // Publicly readable contract state
@@ -765,17 +764,8 @@ access(all) contract AllDay: NonFungibleToken {
 
     // A public collection interface that allows Moment NFTs to be borrowed
     //
-    access(all) resource interface MomentNFTCollectionPublic : NonFungibleToken.CollectionPublic {
-        access(all) fun batchDeposit(tokens: @{NonFungibleToken.Collection})
-        access(all) fun borrowMomentNFT(id: UInt64): &AllDay.NFT? {
-            // If the result isn't nil, the id of the returned reference
-            // should be the same as the argument to the function
-            post {
-                (result == nil) || (result?.id == id):
-                    "Cannot borrow Moment NFT reference: The ID of the returned reference is incorrect"
-            }
-        }
-    }
+    /// Deprecated: This is no longer used for defining access control anymore.
+    access(all) resource interface MomentNFTCollectionPublic : NonFungibleToken.CollectionPublic {}
 
     // An NFT Collection
     //
@@ -900,12 +890,22 @@ access(all) contract AllDay: NonFungibleToken {
     // Admin
     //------------------------------------------------------------
 
+    /// Entitlement that grants the ability to mint Golazos NFTs
+    access(all) entitlement Mint
+
+    /// Entitlement that grants the ability to operate admin functions
+    access(all) entitlement Operate
+
+    // This is no longer used for defining access control anymore.
+    // Keeping this because removing it is not a valid change for contract update
+    access(all) resource interface NFTMinter {}
+
     // A resource that allows managing metadata and minting NFTs
     //
-    access(all) resource Admin {
+    access(all) resource Admin: NFTMinter {
         // Borrow a Series
         //
-        access(all) view fun borrowSeries(id: UInt64): &AllDay.Series {
+        access(self) view fun borrowSeries(id: UInt64): &AllDay.Series {
             pre {
                 AllDay.seriesByID[id] != nil: "Cannot borrow series, no such id"
             }
@@ -915,7 +915,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Borrow a Set
         //
-        access(all) view fun borrowSet(id: UInt64): &AllDay.Set {
+        access(self) view fun borrowSet(id: UInt64): &AllDay.Set {
             pre {
                 AllDay.setByID[id] != nil: "Cannot borrow Set, no such id"
             }
@@ -925,7 +925,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Borrow a Play
         //
-        access(all) view fun borrowPlay(id: UInt64): &AllDay.Play {
+        access(self) view fun borrowPlay(id: UInt64): &AllDay.Play {
             pre {
                 AllDay.playByID[id] != nil: "Cannot borrow Play, no such id"
             }
@@ -935,7 +935,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Borrow an Edition
         //
-        access(all) fun borrowEdition(id: UInt64): &AllDay.Edition {
+        access(self) fun borrowEdition(id: UInt64): &AllDay.Edition {
             pre {
                 AllDay.editionByID[id] != nil: "Cannot borrow edition, no such id"
             }
@@ -945,7 +945,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Create a Series
         //
-        access(all) fun createSeries(name: String): UInt64 {
+        access(Operate) fun createSeries(name: String): UInt64 {
             // Create and store the new series
             let series <- create AllDay.Series(
                 name: name,
@@ -959,7 +959,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Close a Series
         //
-        access(all) fun closeSeries(id: UInt64): UInt64 {
+        access(Operate) fun closeSeries(id: UInt64): UInt64 {
             if let series = &AllDay.seriesByID[id] as &AllDay.Series? {
                 series.close()
                 return series.id
@@ -969,7 +969,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Create a Set
         //
-        access(all) fun createSet(name: String): UInt64 {
+        access(Operate) fun createSet(name: String): UInt64 {
             // Create and store the new set
             let set <- create AllDay.Set(
                 name: name,
@@ -983,7 +983,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Create a Play
         //
-        access(all) fun createPlay(classification: String, metadata: {String: String}): UInt64 {
+        access(Operate) fun createPlay(classification: String, metadata: {String: String}): UInt64 {
             // Create and store the new play
             let play <- create AllDay.Play(
                 classification: classification,
@@ -998,7 +998,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Update a play's description metadata
         //
-        access(all) fun updatePlayDescription(playID: UInt64, description: String): Bool {
+        access(Operate) fun updatePlayDescription(playID: UInt64, description: String): Bool {
             if let play = &AllDay.playByID[playID] as &AllDay.Play? {
                 play.updateDescription(description: description)
             } else {
@@ -1009,7 +1009,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Update a dynamic moment/play's metadata
         //
-        access(all) fun updateDynamicMetadata(playID: UInt64, optTeamName: String?, optPlayerFirstName: String?,
+        access(Operate) fun updateDynamicMetadata(playID: UInt64, optTeamName: String?, optPlayerFirstName: String?,
             optPlayerLastName: String?, optPlayerNumber: String?, optPlayerPosition: String?): Bool {
             if let play = &AllDay.playByID[playID] as &AllDay.Play? {
                 play.updateDynamicMetadata(optTeamName: optTeamName, optPlayerFirstName: optPlayerFirstName,
@@ -1022,7 +1022,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Create an Edition
         //
-         access(all) fun createEdition(
+         access(Operate) fun createEdition(
             seriesID: UInt64,
             setID: UInt64,
             playID: UInt64,
@@ -1043,7 +1043,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Close an Edition
         //
-        access(all) fun closeEdition(id: UInt64): UInt64 {
+        access(Operate) fun closeEdition(id: UInt64): UInt64 {
             if let edition = &AllDay.editionByID[id] as &AllDay.Edition? {
                 edition.close()
                 return edition.id
@@ -1054,7 +1054,7 @@ access(all) contract AllDay: NonFungibleToken {
         // Mint a single NFT
         // The Edition for the given ID must already exist
         //
-        access(all) fun mintNFT(editionID: UInt64, serialNumber: UInt64?): @AllDay.NFT {
+        access(Mint) fun mintNFT(editionID: UInt64, serialNumber: UInt64?): @AllDay.NFT {
             pre {
                 // Make sure the edition we are creating this NFT in exists
                 AllDay.editionByID.containsKey(editionID): "No such EditionID"
@@ -1138,8 +1138,6 @@ access(all) contract AllDay: NonFungibleToken {
         self.CollectionStoragePath = /storage/AllDayNFTCollection
         self.CollectionPublicPath = /public/AllDayNFTCollection
         self.AdminStoragePath = /storage/AllDayAdmin
-        self.MinterPrivatePath = /private/AllDayMinter
-
         // Initialize the entity counts
         self.totalSupply = 0
         self.nextSeriesID = 1

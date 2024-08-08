@@ -572,26 +572,26 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 		result := getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
 
 		//Validate Display
-		displayView := result[0]
-		assert.Equal(t, "Apple Alpha Interception", displayView.Fields[0].ToGoValue())
-		assert.Equal(t, "Fabulous diving interception by AA", displayView.Fields[1].ToGoValue())
+		displayView := result[0].FieldsMappedByName()
+		assert.Equal(t, "Apple Alpha Interception", string(displayView["name"].(cadence.String)))
+		assert.Equal(t, "Fabulous diving interception by AA", string(displayView["description"].(cadence.String)))
 		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image?format=jpeg&width=256",
-			displayView.Fields[2].(cadence.Struct).Fields[0].ToGoValue())
+			string(displayView["thumbnail"].(cadence.Struct).FieldsMappedByName()["url"].(cadence.String)))
 
 		//Validate Editions
 		editionsView := result[1]
-		edition := editionsView.Fields[0].(cadence.Array).Values[0].(cadence.Struct)
-		assert.Equal(t, "Set One: #1", edition.Fields[0].ToGoValue())
-		assert.Equal(t, uint64(1), edition.Fields[1].ToGoValue())
-		assert.Equal(t, uint64(2), edition.Fields[2].ToGoValue())
+		edition := editionsView.FieldsMappedByName()["infoList"].(cadence.Array).Values[0].(cadence.Struct).FieldsMappedByName()
+		assert.Equal(t, "Set One: #1", string(edition["name"].(cadence.Optional).Value.(cadence.String)))
+		assert.Equal(t, uint64(1), uint64(edition["number"].(cadence.UInt64)))
+		assert.Equal(t, uint64(2), uint64(edition["max"].(cadence.Optional).Value.(cadence.UInt64)))
 
 		// Validate External URL
 		externalURLView := result[2]
-		assert.Equal(t, "https://nflallday.com/moments/1", externalURLView.Fields[0].ToGoValue())
+		assert.Equal(t, "https://nflallday.com/moments/1", string(externalURLView.FieldsMappedByName()["url"].(cadence.String)))
 
 		//Validate Medias
 		mediasView := result[3]
-		medias := mediasView.Fields[0].(cadence.Array)
+		medias := mediasView.FieldsMappedByName()["items"].(cadence.Array)
 		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image?format=jpeg&width=512",
 			getMediaPath(medias.Values[0]))
 		assert.Equal(t, "image/jpeg", getMediaType(medias.Values[0]))
@@ -625,57 +625,57 @@ func TestMomentNFTMetadataViews(t *testing.T) {
 		assert.Equal(t, "video/mp4", getMediaType(medias.Values[7]))
 
 		//Validate NFTCollectionDisplay
-		collectionDisplay := result[4]
-		assert.Equal(t, "NFL All Day", collectionDisplay.Fields[0].ToGoValue())
+		collectionDisplay := result[4].FieldsMappedByName()
+		assert.Equal(t, "NFL All Day", string(collectionDisplay["name"].(cadence.String)))
 		assert.Equal(t, "Officially Licensed Digital Collectibles Featuring the NFL’s Best Highlights. Buy, Sell and Collect Your Favorite NFL Moments",
-			collectionDisplay.Fields[1].ToGoValue())
-		assert.Equal(t, "https://nflallday.com/", collectionDisplay.Fields[2].(cadence.Struct).Fields[0].ToGoValue())
+			string(collectionDisplay["description"].(cadence.String)))
+		assert.Equal(t, "https://nflallday.com/", string(collectionDisplay["externalURL"].(cadence.Struct).FieldsMappedByName()["url"].(cadence.String)))
 		assert.Equal(t, "https://assets.nflallday.com/flow/catalogue/NFLAD_SQUARE.png",
-			getMediaPath(collectionDisplay.Fields[3]))
-		assert.Equal(t, "image/png", getMediaType(collectionDisplay.Fields[3]))
+			getMediaPath(collectionDisplay["squareImage"]))
+		assert.Equal(t, "image/png", getMediaType(collectionDisplay["squareImage"]))
 		assert.Equal(t, "https://assets.nflallday.com/flow/catalogue/NFLAD_BANNER.png",
-			getMediaPath(collectionDisplay.Fields[4]))
-		assert.Equal(t, "image/png", getMediaType(collectionDisplay.Fields[4]))
+			getMediaPath(collectionDisplay["bannerImage"]))
+		assert.Equal(t, "image/png", getMediaType(collectionDisplay["bannerImage"]))
 		socials := map[string]cadence.Struct{}
-		for _, kvPair := range collectionDisplay.Fields[5].(cadence.Dictionary).Pairs {
-			socials[kvPair.Key.ToGoValue().(string)] = kvPair.Value.(cadence.Struct)
+		for _, kvPair := range collectionDisplay["socials"].(cadence.Dictionary).Pairs {
+			socials[string(kvPair.Key.(cadence.String))] = kvPair.Value.(cadence.Struct)
 		}
-		assert.Equal(t, "https://www.instagram.com/nflallday/", socials["instagram"].Fields[0].ToGoValue())
-		assert.Equal(t, "https://twitter.com/NFLAllDay", socials["twitter"].Fields[0].ToGoValue())
-		assert.Equal(t, "https://discord.com/invite/5K6qyTzj2k", socials["discord"].Fields[0].ToGoValue())
+		assert.Equal(t, "https://www.instagram.com/nflallday/", string(socials["instagram"].FieldsMappedByName()["url"].(cadence.String)))
+		assert.Equal(t, "https://twitter.com/NFLAllDay", string(socials["twitter"].FieldsMappedByName()["url"].(cadence.String)))
+		assert.Equal(t, "https://discord.com/invite/5K6qyTzj2k", string(socials["discord"].FieldsMappedByName()["url"].(cadence.String)))
 
 		// Validate Royalties
-		royaltiesView := result[5]
-		royalty := royaltiesView.Fields[0].(cadence.Array).Values[0].(cadence.Struct)
-		assert.Equal(t, contracts.RoyaltyAddress, flow.HexToAddress(royalty.Fields[0].(cadence.Capability).Address.Hex()))
-		assert.Equal(t, uint64(0.05*fixedpoint.Fix64Factor), royalty.Fields[1].ToGoValue())
-		assert.Equal(t, "NFL All Day marketplace royalty", royalty.Fields[2].ToGoValue())
+		royaltiesView := result[5].FieldsMappedByName()
+		royalty := royaltiesView["cutInfos"].(cadence.Array).Values[0].(cadence.Struct).FieldsMappedByName()
+		assert.Equal(t, contracts.RoyaltyAddress, flow.HexToAddress(royalty["receiver"].(cadence.Capability).Address.Hex()))
+		assert.Equal(t, uint64(0.05*fixedpoint.Fix64Factor), uint64(royalty["cut"].(cadence.UFix64)))
+		assert.Equal(t, "NFL All Day marketplace royalty", string(royalty["description"].(cadence.String)))
 
 		// Validate Serial
 		serialView := result[6]
-		assert.Equal(t, uint64(1), serialView.Fields[0].ToGoValue())
+		assert.Equal(t, uint64(1), uint64(serialView.FieldsMappedByName()["number"].(cadence.UInt64)))
 
 		// Validate Traits
 		traitsView := result[7]
-		traits := traitsView.Fields[0].(cadence.Array)
-		traitsMap := map[string]interface{}{}
+		traits := traitsView.FieldsMappedByName()["traits"].(cadence.Array)
+		traitsMap := make(map[string]any)
 		for _, trait := range traits.Values {
-			traitsMap[trait.(cadence.Struct).Fields[0].ToGoValue().(string)] = trait.(cadence.Struct).Fields[1].ToGoValue()
+			traitsMap[string(trait.(cadence.Struct).FieldsMappedByName()["name"].(cadence.String))] = trait.(cadence.Struct).FieldsMappedByName()["value"]
 		}
-		assert.Equal(t, "COMMON", traitsMap["editionTier"])
-		assert.Equal(t, "Series One", traitsMap["seriesName"])
-		assert.Equal(t, "Set One", traitsMap["setName"])
-		assert.Equal(t, uint64(1), traitsMap["serialNumber"])
-		assert.Equal(t, "Interception", traitsMap["playType"])
+		assert.Equal(t, cadence.String("COMMON"), traitsMap["editionTier"])
+		assert.Equal(t, cadence.String("Series One"), traitsMap["seriesName"])
+		assert.Equal(t, cadence.String("Set One"), traitsMap["setName"])
+		assert.Equal(t, cadence.NewUInt64(1), traitsMap["serialNumber"])
+		assert.Equal(t, cadence.String("Interception"), traitsMap["playType"])
 	})
 }
 
 func getMediaPath(media interface{}) interface{} {
-	return media.(cadence.Struct).Fields[0].(cadence.Struct).Fields[0].ToGoValue()
+	return string(media.(cadence.Struct).FieldsMappedByName()["file"].(cadence.Struct).FieldsMappedByName()["url"].(cadence.String))
 }
 
 func getMediaType(media interface{}) interface{} {
-	return media.(cadence.Struct).Fields[1].ToGoValue()
+	return string(media.(cadence.Struct).FieldsMappedByName()["mediaType"].(cadence.String))
 }
 
 func TestUpdatePlayDescription(t *testing.T) {
@@ -690,11 +690,11 @@ func TestUpdatePlayDescription(t *testing.T) {
 		result := getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
 
 		//Validate Display
-		displayView := result[0]
-		assert.Equal(t, "Apple Alpha Interception", displayView.Fields[0].ToGoValue())
-		assert.Equal(t, "Fabulous diving interception by AA", displayView.Fields[1].ToGoValue())
+		displayView := result[0].FieldsMappedByName()
+		assert.Equal(t, "Apple Alpha Interception", string(displayView["name"].(cadence.String)))
+		assert.Equal(t, "Fabulous diving interception by AA", string(displayView["description"].(cadence.String)))
 		assert.Equal(t, "https://media.nflallday.com/editions/1/media/image?format=jpeg&width=256",
-			displayView.Fields[2].(cadence.Struct).Fields[0].ToGoValue())
+			string(displayView["thumbnail"].(cadence.Struct).FieldsMappedByName()["url"].(cadence.String)))
 
 		//Update play description
 		newPlayDescription := "A new play description"
@@ -702,8 +702,8 @@ func TestUpdatePlayDescription(t *testing.T) {
 
 		//Validate Display has been updated
 		result = getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
-		displayView = result[0]
-		assert.Equal(t, newPlayDescription, displayView.Fields[1].ToGoValue())
+		displayView = result[0].FieldsMappedByName()
+		assert.Equal(t, newPlayDescription, string(displayView["description"].(cadence.String)))
 
 	})
 }
@@ -719,8 +719,8 @@ func TestUpdatePlayDynamicMetadata(t *testing.T) {
 	t.Run("Should be able to update play's dynamic metadata", func(t *testing.T) {
 		//Validate initial Display
 		result := getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
-		displayView := result[0]
-		assert.Equal(t, "Apple Alpha Interception", displayView.Fields[0].ToGoValue())
+		displayView := result[0].FieldsMappedByName()
+		assert.Equal(t, "Apple Alpha Interception", string(displayView["name"].(cadence.String)))
 
 		//Update play metadata
 		teamName := "New Team"
@@ -733,22 +733,22 @@ func TestUpdatePlayDynamicMetadata(t *testing.T) {
 
 		//Validate Display has been updated
 		result = getMomentNFTMetadata(t, b, contracts, userAddress, 1, false)
-		displayView = result[0]
-		assert.Equal(t, "Apple Charlie Interception", displayView.Fields[0].ToGoValue())
+		displayView = result[0].FieldsMappedByName()
+		assert.Equal(t, "Apple Charlie Interception", string(displayView["name"].(cadence.String)))
 
 		//Validate Play metadata has been updated
 		traitsView := result[7]
-		traits := traitsView.Fields[0].(cadence.Array).Values
+		traits := traitsView.FieldsMappedByName()["traits"].(cadence.Array).Values
 		for _, trait := range traits {
-			ts := trait.(cadence.Struct)
-			if ts.Fields[0].ToGoValue() == "teamName" {
-				assert.Equal(t, teamName, ts.Fields[1].ToGoValue())
+			ts := trait.(cadence.Struct).FieldsMappedByName()
+			if string(ts["name"].(cadence.String)) == "teamName" {
+				assert.Equal(t, teamName, string(ts["value"].(cadence.String)))
 			}
-			if ts.Fields[0].ToGoValue() == "playerFirstName" {
-				assert.Equal(t, "Apple", ts.Fields[1].ToGoValue())
+			if string(ts["name"].(cadence.String)) == "playerFirstName" {
+				assert.Equal(t, "Apple", string(ts["value"].(cadence.String)))
 			}
-			if ts.Fields[0].ToGoValue() == "playerLastName" {
-				assert.Equal(t, playerLastName, ts.Fields[1].ToGoValue())
+			if string(ts["name"].(cadence.String)) == "playerLastName" {
+				assert.Equal(t, playerLastName, string(ts["value"].(cadence.String)))
 			}
 		}
 	})

@@ -5,7 +5,7 @@ import (
 
 	"github.com/onflow/cadence"
 	jsoncdc "github.com/onflow/cadence/encoding/json"
-	emulator "github.com/onflow/flow-emulator"
+	"github.com/onflow/flow-emulator/emulator"
 	"github.com/onflow/flow-go-sdk"
 )
 
@@ -19,7 +19,7 @@ func accountIsSetup(
 	script := loadAllDayAccountIsSetupScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(cadence.BytesToAddress(address.Bytes()))})
 
-	return result.ToGoValue().(bool)
+	return bool(result.(cadence.Bool))
 }
 
 func getSeriesData(
@@ -78,7 +78,7 @@ func getMomentNFTSupply(
 	script := loadAllDayReadMomentNFTSupplyScript(contracts)
 	result := executeScriptAndCheck(t, b, script, [][]byte{})
 
-	return result.ToGoValue().(uint64)
+	return uint64(result.(cadence.UInt64))
 }
 
 func getMomentNFTProperties(

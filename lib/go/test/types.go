@@ -37,59 +37,59 @@ type OurNFTData struct {
 func cadenceStringDictToGo(cadenceDict cadence.Dictionary) map[string]string {
 	goDict := make(map[string]string)
 	for _, pair := range cadenceDict.Pairs {
-		goDict[pair.Key.ToGoValue().(string)] = pair.Value.ToGoValue().(string)
+		goDict[string(pair.Key.(cadence.String))] = string(pair.Value.(cadence.String))
 	}
 	return goDict
 }
 
 func parseSeriesData(value cadence.Value) SeriesData {
-	fields := value.(cadence.Struct).Fields
+	fields := value.(cadence.Struct).FieldsMappedByName()
 	return SeriesData{
-		fields[0].ToGoValue().(uint64),
-		fields[1].ToGoValue().(string),
-		fields[2].ToGoValue().(bool),
+		uint64(fields["id"].(cadence.UInt64)),
+		string(fields["name"].(cadence.String)),
+		bool(fields["active"].(cadence.Bool)),
 	}
 }
 
 func parseSetData(value cadence.Value) SetData {
-	fields := value.(cadence.Struct).Fields
+	fields := value.(cadence.Struct).FieldsMappedByName()
 	return SetData{
-		fields[0].ToGoValue().(uint64),
-		fields[1].ToGoValue().(string),
+		uint64(fields["id"].(cadence.UInt64)),
+		string(fields["name"].(cadence.String)),
 	}
 }
 
 func parsePlayData(value cadence.Value) PlayData {
-	fields := value.(cadence.Struct).Fields
+	fields := value.(cadence.Struct).FieldsMappedByName()
 	return PlayData{
-		fields[0].ToGoValue().(uint64),
-		fields[1].ToGoValue().(string),
-		cadenceStringDictToGo(fields[2].(cadence.Dictionary)),
+		uint64(fields["id"].(cadence.UInt64)),
+		string(fields["classification"].(cadence.String)),
+		cadenceStringDictToGo(fields["metadata"].(cadence.Dictionary)),
 	}
 }
 
 func parseEditionData(value cadence.Value) EditionData {
-	fields := value.(cadence.Struct).Fields
+	fields := value.(cadence.Struct).FieldsMappedByName()
 	var maxMintSize uint64
-	if fields[4] != nil && fields[4].ToGoValue() != nil {
-		maxMintSize = fields[4].ToGoValue().(uint64)
+	if fields["maxMintSize"].(cadence.Optional).Value != nil {
+		maxMintSize = uint64(fields["maxMintSize"].(cadence.Optional).Value.(cadence.UInt64))
 	}
 	return EditionData{
-		fields[0].ToGoValue().(uint64),
-		fields[1].ToGoValue().(uint64),
-		fields[2].ToGoValue().(uint64),
-		fields[3].ToGoValue().(uint64),
+		uint64(fields["id"].(cadence.UInt64)),
+		uint64(fields["seriesID"].(cadence.UInt64)),
+		uint64(fields["setID"].(cadence.UInt64)),
+		uint64(fields["playID"].(cadence.UInt64)),
 		&maxMintSize,
-		fields[5].ToGoValue().(string),
+		string(fields["tier"].(cadence.String)),
 	}
 }
 
 func parseNFTProperties(value cadence.Value) OurNFTData {
 	array := value.(cadence.Array).Values
 	return OurNFTData{
-		array[0].ToGoValue().(uint64),
-		array[1].ToGoValue().(uint64),
-		array[2].ToGoValue().(uint64),
-		array[3].ToGoValue().(uint64),
+		uint64(array[0].(cadence.UInt64)),
+		uint64(array[1].(cadence.UInt64)),
+		uint64(array[2].(cadence.UInt64)),
+		uint64(array[3].(cadence.UFix64)),
 	}
 }

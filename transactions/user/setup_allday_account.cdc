@@ -1,23 +1,24 @@
-import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
-import AllDay from "../../contracts/AllDay.cdc"
+import NonFungibleToken from "NonFungibleToken"
+import AllDay from "AllDay"
 
 // This transaction configures an account to hold AllDay NFTs.
 
 transaction {
-    prepare(signer: AuthAccount) {
+    prepare(signer: auth(Storage, Capabilities) &Account) {
         // if the account doesn't already have a collection
-        if signer.borrow<&AllDay.Collection>(from: AllDay.CollectionStoragePath) == nil {
+        if signer.storage.borrow<&AllDay.Collection>(from: AllDay.CollectionStoragePath) == nil {
 
             // create a new empty collection
-            let collection <- AllDay.createEmptyCollection()
+            let collection <- AllDay.createEmptyCollection(nftType: Type<@AllDay.NFT>())
             
             // save it to the account
-            signer.save(<-collection, to: AllDay.CollectionStoragePath)
+            signer.storage.save(<-collection, to: AllDay.CollectionStoragePath)
 
             // create a public capability for the collection
-            signer.link<&AllDay.Collection{NonFungibleToken.CollectionPublic, AllDay.MomentNFTCollectionPublic}>(
-                AllDay.CollectionPublicPath,
-                target: AllDay.CollectionStoragePath
+            signer.capabilities.unpublish(AllDay.CollectionPublicPath)
+            signer.capabilities.publish(
+                signer.capabilities.storage.issue<&AllDay.Collection>(AllDay.CollectionStoragePath),
+                at: AllDay.CollectionPublicPath
             )
         }
     }

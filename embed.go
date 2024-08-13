@@ -39,6 +39,8 @@ var (
 	UserSetupAllDayAccount []byte
 	//go:embed transactions/user/transfer_moment_nft.cdc
 	UserTransferMomentNft []byte
+	//go:embed transactions/user/batch_transfer_moment_nfts.cdc
+	UserBatchTransferMomentNfts []byte
 	//go:embed transactions/user/setup_all_collections.cdc
 	UserSetUpAllCollections []byte
 )

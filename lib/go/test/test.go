@@ -1,11 +1,16 @@
 package test
 
 import (
+	"context"
+	"github.com/onflow/flow-emulator/adapters"
+	"github.com/onflow/flow-emulator/convert"
+	"github.com/rs/zerolog"
 	"io/ioutil"
 	"testing"
 
 	"github.com/onflow/cadence"
-	emulator "github.com/onflow/flow-emulator"
+	"github.com/onflow/flow-emulator/emulator"
+	ftcontracts "github.com/onflow/flow-ft/lib/go/contracts"
 	"github.com/onflow/flow-go-sdk"
 	"github.com/onflow/flow-go-sdk/crypto"
 	sdktemplates "github.com/onflow/flow-go-sdk/templates"
@@ -18,10 +23,13 @@ import (
 )
 
 const (
-	flowTokenName         = "FlowToken"
-	nonFungibleTokenName  = "NonFungibleToken"
-	metadataViewsName     = "MetadataViews"
-	defaultAccountFunding = "1000.0"
+	flowTokenName            = "FlowToken"
+	nonFungibleTokenName     = "NonFungibleToken"
+	viewResolverName         = "ViewResolver"
+	metadataViewsName        = "MetadataViews"
+	ftSwitchboardName        = "FungibleTokenSwitchboard"
+	defaultAccountFunding    = "1000.0"
+	defaultfungibleTokenAddr = "ee82856bf20e2aa6"
 )
 
 var (
@@ -30,16 +38,39 @@ var (
 )
 
 type Contracts struct {
-	NFTAddress           flow.Address
-	AllDayAddress        flow.Address
-	MetadataViewsAddress flow.Address
-	RoyaltyAddress       flow.Address
-	AllDaySigner         crypto.Signer
+	NFTAddress                      flow.Address
+	AllDayAddress                   flow.Address
+	MetadataViewsAddress            flow.Address
+	RoyaltyAddress                  flow.Address
+	FungibleTokenSwitchboardAddress flow.Address
+	AllDaySigner                    crypto.Signer
 }
 
-func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
-	nftCode := nftcontracts.NonFungibleToken()
-	nftAddress, err := b.CreateAccount(nil,
+func deployViewResolverContract(t *testing.T, b *emulator.Blockchain) flow.Address {
+	logger := zerolog.Nop()
+	adapter := adapters.NewSDKAdapter(&logger, b)
+	viewResolverCode := nftcontracts.ViewResolver()
+	viewResolverAddress, err := adapter.CreateAccount(context.Background(), nil,
+		[]sdktemplates.Contract{
+			{
+				Name:   viewResolverName,
+				Source: string(viewResolverCode),
+			},
+		},
+	)
+	require.NoError(t, err)
+
+	_, err = b.CommitBlock()
+	require.NoError(t, err)
+
+	return viewResolverAddress
+}
+
+func deployNFTContract(t *testing.T, b *emulator.Blockchain, resolverAddress flow.Address) flow.Address {
+	logger := zerolog.Nop()
+	adapter := adapters.NewSDKAdapter(&logger, b)
+	nftCode := nftcontracts.NonFungibleToken(resolverAddress.String())
+	nftAddress, err := adapter.CreateAccount(context.Background(), nil,
 		[]sdktemplates.Contract{
 			{
 				Name:   nonFungibleTokenName,
@@ -55,9 +86,11 @@ func deployNFTContract(t *testing.T, b *emulator.Blockchain) flow.Address {
 	return nftAddress
 }
 
-func deployMetadataViewsContract(t *testing.T, b *emulator.Blockchain, nftAddress flow.Address) flow.Address {
-	metaViewCode := nftcontracts.MetadataViews(ftAddress, nftAddress)
-	metaViewAddress, err := b.CreateAccount(nil,
+func deployMetadataViewsContract(t *testing.T, b *emulator.Blockchain, nftAddress flow.Address, resolverAddress flow.Address) flow.Address {
+	metaViewCode := nftcontracts.MetadataViews(ftAddress.String(), nftAddress.String(), resolverAddress.String())
+	logger := zerolog.Nop()
+	adapter := adapters.NewSDKAdapter(&logger, b)
+	metaViewAddress, err := adapter.CreateAccount(context.Background(), nil,
 		[]sdktemplates.Contract{
 			{
 				Name:   metadataViewsName,
@@ -73,28 +106,52 @@ func deployMetadataViewsContract(t *testing.T, b *emulator.Blockchain, nftAddres
 	return metaViewAddress
 }
 
+func deployFTSwitchboardContract(t *testing.T, b *emulator.Blockchain, ftAddress flow.Address) flow.Address {
+	ftSwitchboardCode := ftcontracts.FungibleTokenSwitchboard(ftAddress.String())
+	logger := zerolog.Nop()
+	adapter := adapters.NewSDKAdapter(&logger, b)
+	ftSwitchboardAddress, err := adapter.CreateAccount(context.Background(), nil,
+		[]sdktemplates.Contract{
+			{
+				Name:   ftSwitchboardName,
+				Source: string(ftSwitchboardCode),
+			},
+		},
+	)
+	require.NoError(t, err)
+
+	_, err = b.CommitBlock()
+	require.NoError(t, err)
+
+	return ftSwitchboardAddress
+}
+
 func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	accountKeys := test.AccountKeyGenerator()
 
-	nftAddress := deployNFTContract(t, b)
-	mvAddress := deployMetadataViewsContract(t, b, nftAddress)
+	viewResolverAddress := deployViewResolverContract(t, b)
+	nftAddress := deployNFTContract(t, b, viewResolverAddress)
+	mvAddress := deployMetadataViewsContract(t, b, nftAddress, viewResolverAddress)
+	ftSwitchboardAddress := deployFTSwitchboardContract(t, b, ftAddress)
 
 	AllDayAccountKey, AllDaySigner := accountKeys.NewWithSigner()
-	royaltyAddress, err := b.CreateAccount(
+	logger := zerolog.Nop()
+	adapter := adapters.NewSDKAdapter(&logger, b)
+	royaltyAddress, err := adapter.CreateAccount(
+		context.Background(),
 		[]*flow.AccountKey{AllDayAccountKey},
 		nil,
 	)
 	require.NoError(t, err)
 
-	AllDayCode := LoadAllDay(nftAddress, mvAddress, royaltyAddress)
+	AllDayCode := LoadAllDay(nftAddress, mvAddress, royaltyAddress, viewResolverAddress)
 
-	AllDayAddress, err := b.CreateAccount(
+	AllDayAddress, err := adapter.CreateAccount(
+		context.Background(),
 		[]*flow.AccountKey{AllDayAccountKey},
 		nil,
 	)
 	require.NoError(t, err)
-
-	fundAccount(t, b, AllDayAddress, defaultAccountFunding)
 
 	tx1 := sdktemplates.AddAccountContract(
 		AllDayAddress,
@@ -121,18 +178,37 @@ func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	_, err = b.CommitBlock()
 	require.NoError(t, err)
 
-	return Contracts{
-		NFTAddress:           nftAddress,
-		AllDayAddress:        AllDayAddress,
-		MetadataViewsAddress: mvAddress,
-		RoyaltyAddress:       royaltyAddress,
-		AllDaySigner:         AllDaySigner,
+	contracts := Contracts{
+		NFTAddress:                      nftAddress,
+		AllDayAddress:                   AllDayAddress,
+		MetadataViewsAddress:            mvAddress,
+		FungibleTokenSwitchboardAddress: ftSwitchboardAddress,
+		RoyaltyAddress:                  royaltyAddress,
+		AllDaySigner:                    AllDaySigner,
 	}
+
+	royaltySetupTx := flow.NewTransaction().
+		SetScript(loadSetupSwitchboardAccountTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(royaltyAddress)
+
+	signer, err = b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, royaltySetupTx,
+		[]flow.Address{b.ServiceKey().Address, royaltyAddress},
+		[]crypto.Signer{signer, AllDaySigner},
+		false,
+	)
+
+	return contracts
 }
 
 // newEmulator returns a emulator object for testing
 func newEmulator() *emulator.Blockchain {
-	b, err := emulator.NewBlockchain()
+	b, err := emulator.New(emulator.WithStorageLimitEnabled(false))
 	if err != nil {
 		panic(err)
 	}
@@ -178,7 +254,8 @@ func submit(
 	shouldRevert bool,
 ) {
 	// submit the signed transaction
-	err := b.AddTransaction(*tx)
+	flowTx := convert.SDKTransactionToFlow(*tx)
+	err := b.AddTransaction(*flowTx)
 	require.NoError(t, err)
 
 	result, err := b.ExecuteNextTransaction()
@@ -231,7 +308,9 @@ func createAccount(t *testing.T, b *emulator.Blockchain) (sdk.Address, crypto.Si
 	accountKeys := test.AccountKeyGenerator()
 	accountKey, signer := accountKeys.NewWithSigner()
 
-	address, err := b.CreateAccount([]*sdk.AccountKey{accountKey}, nil)
+	logger := zerolog.Nop()
+	adapter := adapters.NewSDKAdapter(&logger, b)
+	address, err := adapter.CreateAccount(context.Background(), []*sdk.AccountKey{accountKey}, nil)
 	require.NoError(t, err)
 
 	return address, signer
@@ -269,7 +348,6 @@ func setupAccount(
 	contracts Contracts,
 ) (sdk.Address, crypto.Signer) {
 	setupAllDay(t, b, address, signer, contracts)
-	fundAccount(t, b, address, defaultAccountFunding)
 
 	return address, signer
 }

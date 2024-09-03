@@ -1,21 +1,96 @@
 {
-	"emulators": {
-		"default": {
-			"port": 3569,
-			"serviceAccount": "emulator-account"
-		}
-	},
-	"contracts": {},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
 		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"previewnet": "access.previewnet.nodes.onflow.org:9000",
+		"testing": "127.0.0.1:3569",
 		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"contracts": {
+		"AllDay": {
+			"source": "./contracts/AllDay.cdc",
+			"aliases": {
+				"emulator": "f8d6e0586b0a20c7",
+				"testnet": "4dfd62c88d1b6462",
+				"mainnet": "e4cf4bdc1751c65d"
+			}
+		},
+		"PackNFT": {
+			"source": "./contracts/PackNFT.cdc",
+			"aliases": {
+				"mainnet": "e4cf4bdc1751c65d",
+				"testnet": "4dfd62c88d1b6462"
+			}
+		},
+		"IPackNFT": {
+			"source": "./contracts/imports/IPackNFT.cdc",
+			"aliases": {
+				"mainnet": "18ddf0823a55a0ee",
+				"testnet": "d8f6346999b983f5"
+			}
+		},
+		"Burner": {
+			"source": "./contracts/imports/Burner.cdc",
+			"aliases": {
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7",
+				"emulator": "ee82856bf20e2aa6"
+			}
+		},
+		"NonFungibleToken": {
+			"source": "./contracts/imports/NonFungibleToken.cdc",
+			"aliases": {
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20",
+				"emulator": "f8d6e0586b0a20c7"
+			}
+		},
+		"FungibleToken": {
+			"source": "./contracts/imports/FungibleToken.cdc",
+			"aliases": {
+				"mainnet": "f233dcee88fe0abe",
+				"testnet": "9a0766d93b6608b7",
+				"emulator": "ee82856bf20e2aa6"
+			}
+		},
+		"MetadataViews": {
+			"source": "./contracts/imports/MetadataViews.cdc",
+			"aliases": {
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20",
+				"emulator": "f8d6e0586b0a20c7"
+			}
+		},
+		"ViewResolver": {
+			"source": "./contracts/imports/ViewResolver.cdc",
+			"aliases": {
+				"mainnet": "1d7e57aa55817448",
+				"testnet": "631e88ae7f1d7c20",
+				"emulator": "f8d6e0586b0a20c7"
+			}
+		}
+	},
+	"deployments": {
+		"testnet": {
+			"nfl-testnet-account": [
+				"AllDay"
+			]
+		}
 	},
 	"accounts": {
 		"emulator-account": {
 			"address": "f8d6e0586b0a20c7",
 			"key": "2e246218fd5daa9dfd61aa0bef71afe8b702258efadcd1778e543a47e7bd4f2e"
+		},
+		"nfl-testnet-account": {
+			"address": "4dfd62c88d1b6462",
+			"key": {
+				"type": "google-kms",
+				"index": 2,
+				"signatureAlgorithm": "ECDSA_P256",
+				"hashAlgorithm": "SHA3_256",
+				"resourceID": "projects/dl-studio-platform-staging/locations/global/keyRings/flow-testnet-cosigners/cryptoKeys/allday-signer/cryptoKeyVersions/1"
+			}
 		}
-	},
-	"deployments": {}
+	}
 }

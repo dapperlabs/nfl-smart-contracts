@@ -455,9 +455,6 @@ access(all) contract AllDay: NonFungibleToken {
             }
 
             var serial = self.numMinted + 1 as UInt64
-            if(self.maxMintSize == nil) {
-                serial = serialNumber!
-            }
 
             // Create the Moment NFT, filled out with our information
             let momentNFT <- create NFT(

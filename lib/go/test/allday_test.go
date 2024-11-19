@@ -459,10 +459,10 @@ func TestMomentNFTs(t *testing.T) {
 			b,
 			contracts,
 			uint64(2),
-			uint64Ptr(2023),
+			nil,
 			userAddress,
 			uint64(3),
-			uint64(2023),
+			uint64(1),
 			false,
 		)
 	})
@@ -473,10 +473,10 @@ func TestMomentNFTs(t *testing.T) {
 			b,
 			contracts,
 			uint64(2),
-			uint64Ptr(2023),
+			nil,
 			userAddress,
 			uint64(4),
-			uint64(2023),
+			uint64(2),
 			false,
 		)
 	})
@@ -762,7 +762,7 @@ func TestMintMomentMulti(t *testing.T) {
 	createTestEditions(t, b, contracts)
 	// edition 1 has a maxSize while edition 2 does not
 	editions := []uint64{1, 2}
-	serialNumbers := []*uint64{nil, uint64Ptr(2023)}
+	serialNumbers := []*uint64{nil, nil}
 
 	mintMomentNFTMulti(t, b, contracts, userAddress /*editionID*/, editions, serialNumbers /*shouldRevert*/, false)
 
@@ -771,10 +771,10 @@ func TestMintMomentMulti(t *testing.T) {
 		assert.Equal(t, uint64(1), nft.EditionID)
 		assert.Equal(t, uint64(1), nft.SerialNumber)
 	})
-	t.Run("Should have a serial number of 2023", func(t *testing.T) {
+	t.Run("Should have a serial number of 1", func(t *testing.T) {
 		nft := getMomentNFTProperties(t, b, contracts, userAddress, 2)
 		assert.Equal(t, uint64(2), nft.EditionID)
-		assert.Equal(t, uint64(2023), nft.SerialNumber)
+		assert.Equal(t, uint64(1), nft.SerialNumber)
 	})
 }
 

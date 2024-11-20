@@ -735,6 +735,7 @@ access(all) contract AllDay: NonFungibleToken {
             let set: SetData = AllDay.getSetData(id: edition.setID)
 
             let traitDictionary: {String: AnyStruct} = {
+                "editionID": self.editionID,
                 "editionTier": edition.tier,
                 "seriesName": series.name,
                 "setName": set.name,

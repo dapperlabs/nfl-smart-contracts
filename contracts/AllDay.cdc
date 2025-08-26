@@ -1052,6 +1052,10 @@ access(all) contract AllDay: NonFungibleToken {
                 "serialNumber": self.serialNumber
             }
 
+            if let badges = self.getBadges(){
+                traitDictionary.insert(key: "badges", badges)
+            }
+
             for name in play.metadata.keys {
                 let value = play.metadata[name] ?? ""
                 if value != "" {

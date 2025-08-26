@@ -34,6 +34,22 @@ var (
 	SeriesCreateSeries []byte
 	//go:embed transactions/admin/sets/create_set.cdc
 	SetsCreateSet []byte
+	//go:embed transactions/admin/badges/create_badge.cdc
+	CreateBadge []byte
+	//go:embed transactions/admin/badges/update_badge.cdc
+	UpdateBadge []byte
+	//go:embed transactions/admin/badges/add_badge_to_play.cdc
+	AddBadgeToPlay []byte
+	//go:embed transactions/admin/badges/add_badge_to_edition.cdc
+	AddBadgeToEdition []byte
+	//go:embed transactions/admin/badges/add_badge_to_moment.cdc
+	AddBadgeToMoment []byte
+	//go:embed transactions/admin/badges/remove_badge_from_play.cdc
+	RemoveBadgeFromPlay []byte
+	//go:embed transactions/admin/badges/remove_badge_from_edition.cdc
+	RemoveBadgeFromEdition []byte
+	//go:embed transactions/admin/badges/remove_badge_from_moment.cdc
+	RemoveBadgeFromMoment []byte
 
 	//go:embed transactions/user/setup_allday_account.cdc
 	UserSetupAllDayAccount []byte

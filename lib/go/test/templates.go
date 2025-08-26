@@ -65,6 +65,19 @@ const (
 	AllDayReadCollectionNFTLengthPath = AllDayScriptsRootPath + "/nfts/read_collection_nft_length.cdc"
 	AllDayReadCollectionNFTIDsPath    = AllDayScriptsRootPath + "/nfts/read_collection_nft_ids.cdc"
 	AllDayReadMomentNFTMetadataPath   = AllDayScriptsRootPath + "/nfts/read_moment_nft_metadata.cdc"
+
+	// Badges
+	AllDayCreateBadgePath            = AllDayTransactionsRootPath + "/admin/badges/create_badge.cdc"
+	AllDayUpdateBadgePath            = AllDayTransactionsRootPath + "/admin/badges/update_badge.cdc"
+	AllDayAddBadgeToPlayPath         = AllDayTransactionsRootPath + "/admin/badges/add_badge_to_play.cdc"
+	AllDayAddBadgeToEditionPath      = AllDayTransactionsRootPath + "/admin/badges/add_badge_to_edition.cdc"
+	AllDayAddBadgeToMomentPath       = AllDayTransactionsRootPath + "/admin/badges/add_badge_to_moment.cdc"
+	AllDayRemoveBadgeFromPlayPath    = AllDayTransactionsRootPath + "/admin/badges/remove_badge_from_play.cdc"
+	AllDayRemoveBadgeFromEditionPath = AllDayTransactionsRootPath + "/admin/badges/remove_badge_from_edition.cdc"
+	AllDayRemoveBadgeFromMomentPath  = AllDayTransactionsRootPath + "/admin/badges/remove_badge_from_moment.cdc"
+	AllDayGetBadgeBySlugPath         = AllDayScriptsRootPath + "/badges/get_badge_by_slug.cdc"
+	AllDayGetNftAllBadgesPath        = AllDayScriptsRootPath + "/badges/get_nft_all_badges.cdc"
+	AllDayBadgeExistsPath            = AllDayScriptsRootPath + "/badges/badge_exists.cdc"
 )
 
 // ------------------------------------------------------------
@@ -342,6 +355,86 @@ func loadAllDayTransferNFTTransaction(contracts Contracts) []byte {
 func loadAllDayReadMomentNFTMetadataScript(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayReadMomentNFTMetadataPath),
+		contracts,
+	)
+}
+
+// ------------------------------------------------------------
+// Badges
+// ------------------------------------------------------------
+func loadAllDayCreateBadgeTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayCreateBadgePath),
+		contracts,
+	)
+}
+
+func loadAllDayUpdateBadgeTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayUpdateBadgePath),
+		contracts,
+	)
+}
+
+func loadAllDayAddBadgeToPlayTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayAddBadgeToPlayPath),
+		contracts,
+	)
+}
+
+func loadAllDayAddBadgeToEditionTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayAddBadgeToEditionPath),
+		contracts,
+	)
+}
+
+func loadAllDayAddBadgeToMomentTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayAddBadgeToMomentPath),
+		contracts,
+	)
+}
+
+func loadAllDayRemoveBadgeFromPlayTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayRemoveBadgeFromPlayPath),
+		contracts,
+	)
+}
+
+func loadAllDayRemoveBadgeFromEditionTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayRemoveBadgeFromEditionPath),
+		contracts,
+	)
+}
+
+func loadAllDayRemoveBadgeFromMomentTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayRemoveBadgeFromMomentPath),
+		contracts,
+	)
+}
+
+func loadAllDayGetBadgeBySlugScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayGetBadgeBySlugPath),
+		contracts,
+	)
+}
+
+func loadAllDayGetNftAllBadgesScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayGetNftAllBadgesPath),
+		contracts,
+	)
+}
+
+func loadAllDayBadgeExistsScript(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayBadgeExistsPath),
 		contracts,
 	)
 }

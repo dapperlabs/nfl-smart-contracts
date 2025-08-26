@@ -1,9 +1,10 @@
 package test
 
 import (
+	"testing"
+
 	"github.com/onflow/cadence"
 	"github.com/onflow/cadence/fixedpoint"
-	"testing"
 
 	"github.com/onflow/flow-emulator/emulator"
 	"github.com/onflow/flow-go-sdk"
@@ -776,6 +777,379 @@ func TestMintMomentMulti(t *testing.T) {
 		assert.Equal(t, uint64(2), nft.EditionID)
 		assert.Equal(t, uint64(1), nft.SerialNumber)
 	})
+}
+
+// ------------------------------------------------------------
+// Badges
+// ------------------------------------------------------------
+func TestBadges(t *testing.T) {
+	b := newEmulator()
+	contracts := AllDayDeployContracts(t, b)
+
+	// Create test entities first
+	createTestEditions(t, b, contracts)
+	userAddress, userSigner := createAccount(t, b)
+	setupAllDay(t, b, userAddress, userSigner, contracts)
+	testMintMomentNFT(
+		t,
+		b,
+		contracts,
+		uint64(1),
+		nil,
+		userAddress,
+		uint64(1),
+		uint64(1),
+		false,
+	)
+
+	createTestBadges(t, b, contracts, userAddress)
+}
+
+func createTestBadges(t *testing.T, b *emulator.Blockchain, contracts Contracts, userAddress flow.Address) {
+	t.Run("Should be able to create a new badge", func(t *testing.T) {
+		testCreateBadge(
+			t,
+			b,
+			contracts,
+			"rookie-year",
+			"Rookie Year",
+			"Badge for rookie year moments",
+			true,
+			"rookie-year-v2",
+			false,
+		)
+	})
+
+	t.Run("Should be able to check if badge exists", func(t *testing.T) {
+		exists := badgeExists(t, b, contracts, "rookie-year")
+		assert.Equal(t, true, exists)
+	})
+
+	t.Run("Should be able to get badge by slug", func(t *testing.T) {
+		badge := getBadgeBySlug(t, b, contracts, "rookie-year")
+		assert.NotNil(t, badge)
+		assert.Equal(t, "rookie-year", badge.Slug)
+		assert.Equal(t, "Rookie Year", badge.Title)
+		assert.Equal(t, "Badge for rookie year moments", badge.Description)
+		assert.Equal(t, true, badge.Visible)
+		assert.Equal(t, "rookie-year-v2", badge.SlugV2)
+	})
+
+	t.Run("Should be able to create another badge", func(t *testing.T) {
+		testCreateBadge(
+			t,
+			b,
+			contracts,
+			"playoff-bound",
+			"Playoff Bound",
+			"Badge for playoff moments",
+			true,
+			"playoff-bound-v2",
+			false,
+		)
+	})
+
+	t.Run("Should be able to update a badge", func(t *testing.T) {
+		newTitle := "Updated Rookie Year"
+		newDescription := "Updated description for rookie year"
+		visible := false
+		metadata := map[string]string{"category": "season"}
+
+		testUpdateBadge(
+			t,
+			b,
+			contracts,
+			"rookie-year",
+			&newTitle,
+			&newDescription,
+			&visible,
+			nil,
+			metadata,
+			false,
+		)
+
+		// Verify the update
+		badge := getBadgeBySlug(t, b, contracts, "rookie-year")
+		assert.NotNil(t, badge)
+		assert.Equal(t, "Updated Rookie Year", badge.Title)
+		assert.Equal(t, "Updated description for rookie year", badge.Description)
+		assert.Equal(t, false, badge.Visible)
+		assert.Equal(t, "season", badge.Metadata["category"])
+	})
+
+	t.Run("Should be able to add badge to play", func(t *testing.T) {
+		metadata := map[string]string{"association": "player-milestone"}
+		testAddBadgeToPlay(
+			t,
+			b,
+			contracts,
+			"rookie-year",
+			1, // playID
+			metadata,
+			false,
+		)
+	})
+
+	t.Run("Should be able to add badge to edition", func(t *testing.T) {
+		metadata := map[string]string{"rarity": "common"}
+		testAddBadgeToEdition(
+			t,
+			b,
+			contracts,
+			"playoff-bound",
+			1, // editionID
+			metadata,
+			false,
+		)
+	})
+
+	t.Run("Should be able to add badge to moment", func(t *testing.T) {
+		metadata := map[string]string{"special": "first-td"}
+		testAddBadgeToMoment(
+			t,
+			b,
+			contracts,
+			"rookie-year",
+			1, // momentID
+			metadata,
+			false,
+		)
+	})
+
+	t.Run("Should be able to get all NFT badges (inherited)", func(t *testing.T) {
+		// Get all badges for the NFT (should include play, edition, and moment badges)
+		badges := getNftAllBadges(t, b, contracts, userAddress, 1)
+		assert.NotNil(t, badges)
+		// Should have badges from play, edition, and moment
+		assert.True(t, len(badges) >= 2) // At least rookie-year from play and moment, playoff-bound from edition
+	})
+
+	t.Run("Should be able to remove badge from play", func(t *testing.T) {
+		testRemoveBadgeFromPlay(
+			t,
+			b,
+			contracts,
+			"rookie-year",
+			1, // playID
+			false,
+		)
+
+	})
+
+	t.Run("Should be able to remove badge from edition", func(t *testing.T) {
+		testRemoveBadgeFromEdition(
+			t,
+			b,
+			contracts,
+			"playoff-bound",
+			1, // editionID
+			false,
+		)
+
+	})
+
+	t.Run("Should be able to remove badge from moment", func(t *testing.T) {
+		testRemoveBadgeFromMoment(
+			t,
+			b,
+			contracts,
+			"rookie-year",
+			1, // momentID
+			false,
+		)
+
+	})
+
+	t.Run("Should not be able to create badge with duplicate slug", func(t *testing.T) {
+		testCreateBadge(
+			t,
+			b,
+			contracts,
+			"rookie-year", // Same slug
+			"Another Rookie Year",
+			"Another badge for rookie year moments",
+			true,
+			"another-rookie-year-v2",
+			true, // Should revert
+		)
+	})
+}
+
+func testCreateBadge(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	slug string,
+	title string,
+	description string,
+	visible bool,
+	slugV2 string,
+	shouldRevert bool,
+) {
+	createBadge(
+		t,
+		b,
+		contracts,
+		slug,
+		title,
+		description,
+		visible,
+		slugV2,
+		shouldRevert,
+	)
+
+	if !shouldRevert {
+		exists := badgeExists(t, b, contracts, slug)
+		assert.Equal(t, true, exists)
+
+		badge := getBadgeBySlug(t, b, contracts, slug)
+		assert.NotNil(t, badge)
+		assert.Equal(t, slug, badge.Slug)
+		assert.Equal(t, title, badge.Title)
+		assert.Equal(t, description, badge.Description)
+		assert.Equal(t, visible, badge.Visible)
+		assert.Equal(t, slugV2, badge.SlugV2)
+	}
+}
+
+func testUpdateBadge(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	slug string,
+	title *string,
+	description *string,
+	visible *bool,
+	slugV2 *string,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	updateBadge(
+		t,
+		b,
+		contracts,
+		slug,
+		title,
+		description,
+		visible,
+		slugV2,
+		metadata,
+		shouldRevert,
+	)
+}
+
+func testAddBadgeToPlay(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	playID uint64,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	addBadgeToPlay(
+		t,
+		b,
+		contracts,
+		badgeSlug,
+		playID,
+		metadata,
+		shouldRevert,
+	)
+}
+
+func testAddBadgeToEdition(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	editionID uint64,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	addBadgeToEdition(
+		t,
+		b,
+		contracts,
+		badgeSlug,
+		editionID,
+		metadata,
+		shouldRevert,
+	)
+}
+
+func testAddBadgeToMoment(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	momentID uint64,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	addBadgeToMoment(
+		t,
+		b,
+		contracts,
+		badgeSlug,
+		momentID,
+		metadata,
+		shouldRevert,
+	)
+}
+
+func testRemoveBadgeFromPlay(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	playID uint64,
+	shouldRevert bool,
+) {
+	removeBadgeFromPlay(
+		t,
+		b,
+		contracts,
+		badgeSlug,
+		playID,
+		shouldRevert,
+	)
+}
+
+func testRemoveBadgeFromEdition(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	editionID uint64,
+	shouldRevert bool,
+) {
+	removeBadgeFromEdition(
+		t,
+		b,
+		contracts,
+		badgeSlug,
+		editionID,
+		shouldRevert,
+	)
+}
+
+func testRemoveBadgeFromMoment(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	momentID uint64,
+	shouldRevert bool,
+) {
+	removeBadgeFromMoment(
+		t,
+		b,
+		contracts,
+		badgeSlug,
+		momentID,
+		shouldRevert,
+	)
 }
 
 func uint64Ptr(i uint64) *uint64 {

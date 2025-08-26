@@ -82,6 +82,17 @@ access(all) contract AllDay: NonFungibleToken {
     access(all) event MomentNFTMinted(id: UInt64, editionID: UInt64, serialNumber: UInt64)
     access(all) event MomentNFTBurned(id: UInt64)
 
+    // Badges Events
+    //
+    access(all) event BadgeCreated(slug: String, title: String, description: String, visible: Bool, slugV2: String, metadata: {String: String})
+    access(all) event BadgeUpdated(slug: String, title: String, description: String, visible: Bool, slugV2: String, metadata: {String: String})
+    access(all) event BadgeAddedToPlay(badgeSlug: String, playID: UInt64, metadata: {String: String})
+    access(all) event BadgeAddedToEdition(badgeSlug: String, editionID: UInt64, metadata: {String: String})
+    access(all) event BadgeAddedToMoment(badgeSlug: String, momentID: UInt64, metadata: {String: String})
+    access(all) event BadgeRemovedFromPlay(badgeSlug: String, playID: UInt64)
+    access(all) event BadgeRemovedFromEdition(badgeSlug: String, editionID: UInt64)
+    access(all) event BadgeRemovedFromMoment(badgeSlug: String, momentID: UInt64)
+
     //------------------------------------------------------------
     // Named values
     //------------------------------------------------------------
@@ -559,6 +570,269 @@ access(all) contract AllDay: NonFungibleToken {
     }
 
     //------------------------------------------------------------
+    // Badges
+    //------------------------------------------------------------  
+
+    access(all) struct Badge{
+        access(all) var slug: String
+        access(all) var title: String
+        access(all) var description: String
+        access(all) var visible: Bool
+        access(all) var slugV2: String
+        access(all) var metadata: {String: String}
+
+        view init(slug: String, title: String, description: String, visible: Bool, slugV2: String){
+            self.slug = slug
+            self.title = title
+            self.description = description
+            self.visible = visible
+            self.slugV2 = slugV2
+            self.metadata = {}
+        }
+
+        access(all) fun update(title: String?, description: String?, visible: Bool?, slugV2: String?, metadata: {String: String}?){
+            if title != nil{
+                self.title = title!
+            }
+            if description != nil{
+                self.description = description!
+            }
+            if visible != nil{
+                self.visible = visible!
+            }
+            if slugV2 != nil{
+                self.slugV2 = slugV2!
+            }
+            if metadata != nil{
+                self.metadata = metadata!
+            }
+        }
+    }
+
+    access(all) entitlement ManageBadges
+
+    access(all) resource Badges {
+        access(all) var slugToBadge: {String: Badge}
+        access(all) var playIdToBadgeSlugs: {UInt64: {String: {String: String}}}
+        access(all) var editionIdToBadgeSlugs: {UInt64: {String: {String: String}}}
+        access(all) var momentIdToBadgeSlugs: {UInt64: {String: {String: String}}}
+        
+
+        // Badges initializer
+        //
+        view init() {
+            self.slugToBadge = {}
+            self.playIdToBadgeSlugs = {}
+            self.editionIdToBadgeSlugs = {}
+            self.momentIdToBadgeSlugs = {}
+        }
+
+        access(all) view fun getBadge(_ slug: String): Badge?{
+            return self.slugToBadge[slug]
+        }
+
+        access(all) fun getPlayBadges(_ playID: UInt64): [Badge]?{
+            if self.playIdToBadgeSlugs[playID] == nil {
+                return nil
+            }
+            let slugs = self.playIdToBadgeSlugs[playID]!
+            var badges: [Badge] = []
+            for slug in slugs.keys{
+                if let badge: Badge = self.slugToBadge[slug]{
+                    badges.append(badge)
+                }
+            }
+            return badges
+        }
+
+        access(all) fun getEditionBadges(_ editionID: UInt64): [Badge]?{
+            if self.editionIdToBadgeSlugs[editionID] == nil {
+                return nil
+            }
+            let slugs = self.editionIdToBadgeSlugs[editionID]!
+            var badges: [Badge] = []
+            for slug in slugs.keys{
+                if let badge: Badge = self.slugToBadge[slug]{
+                    badges.append(badge)
+                }
+            }
+            return badges
+        }
+
+        access(all) fun getMomentBadges(_ momentID: UInt64): [Badge]?{
+            if self.momentIdToBadgeSlugs[momentID] == nil {
+                return nil
+            }
+            let slugs = self.momentIdToBadgeSlugs[momentID]!
+            var badges: [Badge] = []
+            for slug in slugs.keys{
+                if let badge: Badge = self.slugToBadge[slug]{
+                    badges.append(badge)
+                }
+            }
+            return badges
+        }
+
+        access(ManageBadges) fun createBadge(slug: String, title: String, description: String, visible: Bool, slugV2: String){
+            assert(self.slugToBadge[slug] == nil, message: "badge already exists")
+            let badge = Badge(slug: slug, title: title, description: description, visible: visible, slugV2: slugV2)
+            self.slugToBadge[slug] = badge
+            emit BadgeCreated(slug: slug, title: title, description: description, visible: visible, slugV2: slugV2, metadata: badge.metadata)
+        }
+
+        access(ManageBadges) fun updateBadge(slug: String, title: String?, description: String?, visible: Bool?, slugV2: String?, metadata: {String: String}?){
+            assert(self.slugToBadge[slug] != nil, message: "badge doesn't exist")
+            
+            // Get a reference to the badge in the dictionary and update it directly
+            let badgeRef = &self.slugToBadge[slug] as &Badge?
+            if let badgeRef = badgeRef {
+                badgeRef.update(title: title, description: description, visible: visible, slugV2: slugV2, metadata: metadata)
+                emit BadgeUpdated(slug: slug, title: badgeRef.title, description: badgeRef.description, visible: badgeRef.visible, slugV2: badgeRef.slugV2, metadata: *badgeRef.metadata)
+            }
+        }
+
+        access(ManageBadges) fun addBadgeToPlay(badgeSlug: String, playID: UInt64, metadata: {String: String}){
+            assert(self.slugToBadge[badgeSlug] != nil, message: "badge doesn't exist")
+            
+            // Initialize the dictionary for the playID's badge slugs if it doesn't exist
+            if self.playIdToBadgeSlugs[playID] == nil {
+                self.playIdToBadgeSlugs[playID] = {}
+            }
+
+            // Get a reference to the playID's badge slug
+            // using a reference ensures the whole badge slugs are not loaded to memory
+            let playBadgeSlugsRef = &self.playIdToBadgeSlugs[playID] as auth(Insert) &{String: {String: String}}?
+                ?? panic("Could not get a reference to the play's badge slugs")
+
+            assert(playBadgeSlugsRef[badgeSlug] == nil, message: "badge slug already added to play")
+
+            // Insert the slug
+            playBadgeSlugsRef.insert(key: badgeSlug, metadata)
+            
+            emit BadgeAddedToPlay(badgeSlug: badgeSlug, playID: playID, metadata: metadata)
+        }
+
+        access(ManageBadges) fun addBadgeToEdition(badgeSlug: String, editionID: UInt64, metadata: {String: String}){
+            assert(self.slugToBadge[badgeSlug] != nil, message: "badge doesn't exist")
+            
+            // Initialize the dictionary for the editionID's badge slugs if it doesn't exist
+            if self.editionIdToBadgeSlugs[editionID] == nil {
+                self.editionIdToBadgeSlugs[editionID] = {}
+            }
+
+            // Get a reference to the editionID's badge slug
+            // using a reference ensures the whole badge slugs are not loaded to memory
+            let editionBadgeSlugsRef = &self.editionIdToBadgeSlugs[editionID] as auth(Insert) &{String: {String: String}}?
+                ?? panic("Could not get a reference to the edition's badge slugs")
+
+            assert(editionBadgeSlugsRef[badgeSlug] == nil, message: "badge slug already added to edition")
+            
+            // Insert the slug
+            editionBadgeSlugsRef.insert(key: badgeSlug, metadata)
+            
+            emit BadgeAddedToEdition(badgeSlug: badgeSlug, editionID: editionID, metadata: metadata)
+        }
+
+        access(ManageBadges) fun addBadgeToMoment(badgeSlug: String, momentID: UInt64, metadata: {String: String}){
+            assert(self.slugToBadge[badgeSlug] != nil, message: "badge doesn't exist")
+            
+            // Initialize the dictionary for the momentID's badge slugs if it doesn't exist
+            if self.momentIdToBadgeSlugs[momentID] == nil {
+                self.momentIdToBadgeSlugs[momentID] = {}
+            }
+
+            // Get a reference to the momentID's badge slug
+            // using a reference ensures the whole badge slugs are not loaded to memory
+            let momentBadgeSlugsRef = &self.momentIdToBadgeSlugs[momentID] as auth(Insert) &{String: {String: String}}?
+                ?? panic("Could not get a reference to the moment's badge slugs")
+
+            assert(momentBadgeSlugsRef[badgeSlug] == nil, message: "badge slug already added to moment")
+            
+            // Insert the slug
+            momentBadgeSlugsRef.insert(key: badgeSlug, metadata)
+            
+            emit BadgeAddedToMoment(badgeSlug: badgeSlug, momentID: momentID, metadata: metadata)
+        }
+
+        // Remove badge from play
+        access(ManageBadges) fun removeBadgeFromPlay(badgeSlug: String, playID: UInt64){
+            if let playBadges = &self.playIdToBadgeSlugs[playID] as auth(Remove) &{String: {String: String}}? {
+                if playBadges.containsKey(badgeSlug) {
+                    playBadges.remove(key: badgeSlug)
+                    emit BadgeRemovedFromPlay(badgeSlug: badgeSlug, playID: playID)
+                }
+            }
+        }
+
+        // Remove badge from edition
+        access(ManageBadges) fun removeBadgeFromEdition(badgeSlug: String, editionID: UInt64){
+            if let editionBadges = &self.editionIdToBadgeSlugs[editionID] as auth(Remove) &{String: {String: String}}? {
+                if editionBadges.containsKey(badgeSlug) {
+                    editionBadges.remove(key: badgeSlug)
+                    emit BadgeRemovedFromEdition(badgeSlug: badgeSlug, editionID: editionID)
+                }
+            }
+        }
+
+        // Remove badge from moment
+        access(ManageBadges) fun removeBadgeFromMoment(badgeSlug: String, momentID: UInt64){
+            if let momentBadges = &self.momentIdToBadgeSlugs[momentID] as auth(Remove) &{String: {String: String}}? {
+                if momentBadges.containsKey(badgeSlug) {
+                    momentBadges.remove(key: badgeSlug)
+                    emit BadgeRemovedFromMoment(badgeSlug: badgeSlug, momentID: momentID)
+                }
+            }
+        }
+    }  
+
+    access(contract) view fun getBadgesStoragePath(): StoragePath{
+        return /storage/AllDayAdminBadges
+    }
+
+    access(contract) fun initializeBadgesInStorage(){
+        let path = AllDay.getBadgesStoragePath()
+        let badges <- create Badges()
+        self.account.storage.save(<-badges, to: path)
+    }
+
+    access(contract) fun borrowBadges(): &AllDay.Badges?{
+        return AllDay.account.storage.borrow<&AllDay.Badges>(from: AllDay.getBadgesStoragePath())
+    }
+
+    access(all) fun getBadge(_ slug: String): Badge?{
+        let badgesResource = AllDay.borrowBadges()
+        if badgesResource == nil{
+            return nil
+        }
+        return badgesResource!.getBadge(slug)
+    }
+
+    access(contract) fun getPlayBadges(_ playID: UInt64): [Badge]?{
+        let badgesResource = AllDay.borrowBadges()
+        if badgesResource == nil{
+            return nil
+        }
+        return badgesResource!.getPlayBadges(playID)
+    }
+
+    access(contract) fun getEditionBadges(_ editionID: UInt64): [Badge]?{
+        let badgesResource = AllDay.borrowBadges()
+        if badgesResource == nil{
+            return nil
+        }
+        return badgesResource!.getEditionBadges(editionID)
+    }
+
+    access(contract) fun getMomentBadges(_ momentID: UInt64): [Badge]?{
+        let badgesResource = AllDay.borrowBadges()
+        if badgesResource == nil{
+            return nil
+        }
+        return badgesResource!.getMomentBadges(momentID)
+    }
+
+
+    //------------------------------------------------------------
     // NFT
     //------------------------------------------------------------
 
@@ -720,6 +994,42 @@ access(all) contract AllDay: NonFungibleToken {
             return "https://nflallday.com/moments/".concat(self.id.toString())
         }
 
+        access(all) fun getBadges(): [Badge]?{
+            var uniqueBadges: {String: Badge} = {}
+            
+            // Add moment badges
+            if let momentBadges = AllDay.getMomentBadges(self.id){
+                for badge in momentBadges {
+                    uniqueBadges[badge.slug] = badge
+                }
+            }
+            
+            // Add edition badges
+            if let editionBadges = AllDay.getEditionBadges(self.editionID){
+                for badge in editionBadges {
+                    uniqueBadges[badge.slug] = badge
+                }
+            }
+            
+            // Add play badges
+            let edition: EditionData = AllDay.getEditionData(id: self.editionID)
+            if let playBadges = AllDay.getPlayBadges(edition.playID){
+                for badge in playBadges {
+                    uniqueBadges[badge.slug] = badge
+                }
+            }
+            
+            // Convert back to array
+            if uniqueBadges.length > 0 {
+                var badges: [Badge] = []
+                for slug in uniqueBadges.keys {
+                    badges.append(uniqueBadges[slug]!)
+                }
+                return badges
+            }
+            return nil
+        }
+
         access(all) view fun getEditionInfo() : MetadataViews.Edition {
             let edition: EditionData = AllDay.getEditionData(id: self.editionID)
             let set: SetData = AllDay.getSetData(id: edition.setID)
@@ -740,6 +1050,10 @@ access(all) contract AllDay: NonFungibleToken {
                 "seriesName": series.name,
                 "setName": set.name,
                 "serialNumber": self.serialNumber
+            }
+
+            if let badges = self.getBadges(){
+                traitDictionary.insert(key: "badges", badges)
             }
 
             for name in play.metadata.keys {
@@ -1058,6 +1372,49 @@ access(all) contract AllDay: NonFungibleToken {
                 AllDay.editionByID.containsKey(editionID): "No such EditionID"
             }
             return <- self.borrowEdition(id: editionID).mint(serialNumber: serialNumber)
+        }
+
+        // Badge management functions
+        access(Operate) fun createBadge(slug: String, title: String, description: String, visible: Bool, slugV2: String){
+            var badgesResource = self.borrowBadgesWithAuth()
+            if badgesResource == nil{
+                AllDay.initializeBadgesInStorage()
+                badgesResource = self.borrowBadgesWithAuth()
+            }
+            badgesResource!.createBadge(slug: slug, title: title, description: description, visible: visible, slugV2: slugV2)
+        }
+
+        access(Operate) fun updateBadge(slug: String, title: String?, description: String?, visible: Bool?, slugV2: String?, metadata: {String: String}?){
+            self.borrowBadgesWithAuth()?.updateBadge(slug: slug, title: title, description: description, visible: visible, slugV2: slugV2, metadata: metadata)
+        }
+
+        access(Operate) fun addBadgeToPlay(badgeSlug: String, playID: UInt64, metadata: {String: String}){
+            self.borrowBadgesWithAuth()?.addBadgeToPlay(badgeSlug: badgeSlug, playID: playID, metadata: metadata)
+        }
+
+        access(Operate) fun addBadgeToEdition(badgeSlug: String, editionID: UInt64, metadata: {String: String}){
+            self.borrowBadgesWithAuth()?.addBadgeToEdition(badgeSlug: badgeSlug, editionID: editionID, metadata: metadata)
+        }
+
+        access(Operate) fun addBadgeToMoment(badgeSlug: String, momentID: UInt64, metadata: {String: String}){
+            self.borrowBadgesWithAuth()?.addBadgeToMoment(badgeSlug: badgeSlug, momentID: momentID, metadata: metadata)
+        }
+
+        access(Operate) fun removeBadgeFromPlay(badgeSlug: String, playID: UInt64){
+            self.borrowBadgesWithAuth()?.removeBadgeFromPlay(badgeSlug: badgeSlug, playID: playID)
+        }
+
+        access(Operate) fun removeBadgeFromEdition(badgeSlug: String, editionID: UInt64){
+            self.borrowBadgesWithAuth()?.removeBadgeFromEdition(badgeSlug: badgeSlug, editionID: editionID)
+        }
+
+        access(Operate) fun removeBadgeFromMoment(badgeSlug: String, momentID: UInt64){
+            self.borrowBadgesWithAuth()?.removeBadgeFromMoment(badgeSlug: badgeSlug, momentID: momentID)
+        }
+
+        // Helper function to borrow badges with proper authorization
+        access(self) fun borrowBadgesWithAuth(): auth(ManageBadges) &AllDay.Badges?{
+            return AllDay.account.storage.borrow<auth(ManageBadges) &AllDay.Badges>(from: AllDay.getBadgesStoragePath())
         }
     }
 

@@ -2,11 +2,12 @@ package test
 
 import (
 	"context"
+	"io/ioutil"
+	"testing"
+
 	"github.com/onflow/flow-emulator/adapters"
 	"github.com/onflow/flow-emulator/convert"
 	"github.com/rs/zerolog"
-	"io/ioutil"
-	"testing"
 
 	"github.com/onflow/cadence"
 	"github.com/onflow/flow-emulator/emulator"
@@ -356,8 +357,14 @@ func metadataDict(dict map[string]string) cadence.Dictionary {
 	pairs := []cadence.KeyValuePair{}
 
 	for key, value := range dict {
-		k, _ := cadence.NewString(key)
-		v, _ := cadence.NewString(value)
+		k, err := cadence.NewString(key)
+		if err != nil {
+			panic(err)
+		}
+		v, err := cadence.NewString(value)
+		if err != nil {
+			panic(err)
+		}
 		pairs = append(pairs, cadence.KeyValuePair{Key: k, Value: v})
 	}
 

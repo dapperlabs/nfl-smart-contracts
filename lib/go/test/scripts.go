@@ -7,6 +7,7 @@ import (
 	jsoncdc "github.com/onflow/cadence/encoding/json"
 	"github.com/onflow/flow-emulator/emulator"
 	"github.com/onflow/flow-go-sdk"
+	"github.com/stretchr/testify/require"
 )
 
 // Accounts
@@ -115,4 +116,56 @@ func getMomentNFTMetadata(t *testing.T,
 	}
 
 	return resultArray
+}
+
+// Badges
+func getBadgeBySlug(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	slug string,
+) *BadgeData {
+	script := loadAllDayGetBadgeBySlugScript(contracts)
+	slugStr, err := cadence.NewString(slug)
+	require.NoError(t, err)
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(slugStr)})
+
+	if optional, ok := result.(cadence.Optional); ok {
+		if optional.Value == nil {
+			return nil
+		}
+		badge := parseBadgeData(optional.Value)
+		return &badge
+	}
+	return nil
+}
+
+func getNftAllBadges(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	account flow.Address,
+	nftID uint64,
+) []BadgeData {
+	script := loadAllDayGetNftAllBadgesScript(contracts)
+	result := executeScriptAndCheck(t, b, script, [][]byte{
+		jsoncdc.MustEncode(cadence.BytesToAddress(account.Bytes())),
+		jsoncdc.MustEncode(cadence.UInt64(nftID)),
+	})
+
+	return parseBadgeArray(result)
+}
+
+func badgeExists(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	slug string,
+) bool {
+	script := loadAllDayBadgeExistsScript(contracts)
+	slugStr, err := cadence.NewString(slug)
+	require.NoError(t, err)
+	result := executeScriptAndCheck(t, b, script, [][]byte{jsoncdc.MustEncode(slugStr)})
+
+	return bool(result.(cadence.Bool))
 }

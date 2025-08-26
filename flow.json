@@ -86,11 +86,6 @@
 		}
 	},
 	"deployments": {
-		"mainnet": {
-			"nfl-mainnet-account": [
-				"AllDay"
-			]
-		},
 		"testnet": {
 			"nfl-testnet-account": [
 				"AllDay"

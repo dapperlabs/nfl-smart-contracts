@@ -86,9 +86,9 @@ access(all) contract AllDay: NonFungibleToken {
     //
     access(all) event BadgeCreated(slug: String, title: String, description: String, visible: Bool, slugV2: String, metadata: {String: String})
     access(all) event BadgeUpdated(slug: String, title: String, description: String, visible: Bool, slugV2: String, metadata: {String: String})
-    access(all) event BadgeAddedToPlay(badgeSlug: String, playID: UInt64)
-    access(all) event BadgeAddedToEdition(badgeSlug: String, EditionID: UInt64)
-    access(all) event BadgeAddedToMoment(badgeSlug: String, MomentID: UInt64)
+    access(all) event BadgeAddedToPlay(badgeSlug: String, playID: UInt64, metadata: {String: String})
+    access(all) event BadgeAddedToEdition(badgeSlug: String, EditionID: UInt64, metadata: {String: String})
+    access(all) event BadgeAddedToMoment(badgeSlug: String, MomentID: UInt64, metadata: {String: String})
     access(all) event BadgeRemovedFromPlay(badgeSlug: String, playID: UInt64)
     access(all) event BadgeRemovedFromEdition(badgeSlug: String, EditionID: UInt64)
     access(all) event BadgeRemovedFromMoment(badgeSlug: String, MomentID: UInt64)
@@ -709,7 +709,7 @@ access(all) contract AllDay: NonFungibleToken {
             // Insert the slug
             playBadgeSlugsRef.insert(key: badgeSlug, metadata)
             
-            emit BadgeAddedToPlay(badgeSlug: badgeSlug, playID: playID)
+            emit BadgeAddedToPlay(badgeSlug: badgeSlug, playID: playID, metadata: metadata)
         }
 
         access(ManageBadges) fun addBadgeToEdition(badgeSlug: String, editionID: UInt64, metadata: {String: String}){
@@ -730,7 +730,7 @@ access(all) contract AllDay: NonFungibleToken {
             // Insert the slug
             editionBadgeSlugsRef.insert(key: badgeSlug, metadata)
             
-            emit BadgeAddedToEdition(badgeSlug: badgeSlug, EditionID: editionID)
+            emit BadgeAddedToEdition(badgeSlug: badgeSlug, EditionID: editionID, metadata: metadata)
         }
 
         access(ManageBadges) fun addBadgeToMoment(badgeSlug: String, momentID: UInt64, metadata: {String: String}){
@@ -751,7 +751,7 @@ access(all) contract AllDay: NonFungibleToken {
             // Insert the slug
             momentBadgeSlugsRef.insert(key: badgeSlug, metadata)
             
-            emit BadgeAddedToMoment(badgeSlug: badgeSlug, MomentID: momentID)
+            emit BadgeAddedToMoment(badgeSlug: badgeSlug, MomentID: momentID, metadata: metadata)
         }
 
         // Remove badge from play

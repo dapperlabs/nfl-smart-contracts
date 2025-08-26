@@ -87,11 +87,11 @@ access(all) contract AllDay: NonFungibleToken {
     access(all) event BadgeCreated(slug: String, title: String, description: String, visible: Bool, slugV2: String, metadata: {String: String})
     access(all) event BadgeUpdated(slug: String, title: String, description: String, visible: Bool, slugV2: String, metadata: {String: String})
     access(all) event BadgeAddedToPlay(badgeSlug: String, playID: UInt64, metadata: {String: String})
-    access(all) event BadgeAddedToEdition(badgeSlug: String, EditionID: UInt64, metadata: {String: String})
-    access(all) event BadgeAddedToMoment(badgeSlug: String, MomentID: UInt64, metadata: {String: String})
+    access(all) event BadgeAddedToEdition(badgeSlug: String, editionID: UInt64, metadata: {String: String})
+    access(all) event BadgeAddedToMoment(badgeSlug: String, momentID: UInt64, metadata: {String: String})
     access(all) event BadgeRemovedFromPlay(badgeSlug: String, playID: UInt64)
-    access(all) event BadgeRemovedFromEdition(badgeSlug: String, EditionID: UInt64)
-    access(all) event BadgeRemovedFromMoment(badgeSlug: String, MomentID: UInt64)
+    access(all) event BadgeRemovedFromEdition(badgeSlug: String, editionID: UInt64)
+    access(all) event BadgeRemovedFromMoment(badgeSlug: String, momentID: UInt64)
 
     //------------------------------------------------------------
     // Named values
@@ -730,7 +730,7 @@ access(all) contract AllDay: NonFungibleToken {
             // Insert the slug
             editionBadgeSlugsRef.insert(key: badgeSlug, metadata)
             
-            emit BadgeAddedToEdition(badgeSlug: badgeSlug, EditionID: editionID, metadata: metadata)
+            emit BadgeAddedToEdition(badgeSlug: badgeSlug, editionID: editionID, metadata: metadata)
         }
 
         access(ManageBadges) fun addBadgeToMoment(badgeSlug: String, momentID: UInt64, metadata: {String: String}){
@@ -751,7 +751,7 @@ access(all) contract AllDay: NonFungibleToken {
             // Insert the slug
             momentBadgeSlugsRef.insert(key: badgeSlug, metadata)
             
-            emit BadgeAddedToMoment(badgeSlug: badgeSlug, MomentID: momentID, metadata: metadata)
+            emit BadgeAddedToMoment(badgeSlug: badgeSlug, momentID: momentID, metadata: metadata)
         }
 
         // Remove badge from play
@@ -769,7 +769,7 @@ access(all) contract AllDay: NonFungibleToken {
             if let editionBadges = &self.editionIdToBadgeSlugs[editionID] as auth(Remove) &{String: {String: String}}? {
                 if editionBadges.containsKey(badgeSlug) {
                     editionBadges.remove(key: badgeSlug)
-                    emit BadgeRemovedFromEdition(badgeSlug: badgeSlug, EditionID: editionID)
+                    emit BadgeRemovedFromEdition(badgeSlug: badgeSlug, editionID: editionID)
                 }
             }
         }
@@ -779,7 +779,7 @@ access(all) contract AllDay: NonFungibleToken {
             if let momentBadges = &self.momentIdToBadgeSlugs[momentID] as auth(Remove) &{String: {String: String}}? {
                 if momentBadges.containsKey(badgeSlug) {
                     momentBadges.remove(key: badgeSlug)
-                    emit BadgeRemovedFromMoment(badgeSlug: badgeSlug, MomentID: momentID)
+                    emit BadgeRemovedFromMoment(badgeSlug: badgeSlug, momentID: momentID)
                 }
             }
         }

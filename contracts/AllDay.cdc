@@ -683,12 +683,12 @@ access(all) contract AllDay: NonFungibleToken {
         access(ManageBadges) fun updateBadge(slug: String, title: String?, description: String?, visible: Bool?, slugV2: String?, metadata: {String: String}?){
             assert(self.slugToBadge[slug] != nil, message: "badge doesn't exist")
             
-            // Get a copy of the badge, update it, then store it back
-            var badge = self.slugToBadge[slug]!
-            badge.update(title: title, description: description, visible: visible, slugV2: slugV2, metadata: metadata)
-            self.slugToBadge[slug] = badge  // Store the updated badge back in the dictionary
-            
-            emit BadgeUpdated(slug: slug, title: badge.title, description: badge.description, visible: badge.visible, slugV2: badge.slugV2, metadata: badge.metadata)
+            // Get a reference to the badge in the dictionary and update it directly
+            let badgeRef = &self.slugToBadge[slug] as &Badge?
+            if let badgeRef = badgeRef {
+                badgeRef.update(title: title, description: description, visible: visible, slugV2: slugV2, metadata: metadata)
+                emit BadgeUpdated(slug: slug, title: badgeRef.title, description: badgeRef.description, visible: badgeRef.visible, slugV2: badgeRef.slugV2, metadata: *badgeRef.metadata)
+            }
         }
 
         access(ManageBadges) fun addBadgeToPlay(badgeSlug: String, playID: UInt64, metadata: {String: String}){

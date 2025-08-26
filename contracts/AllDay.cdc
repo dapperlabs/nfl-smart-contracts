@@ -581,7 +581,7 @@ access(all) contract AllDay: NonFungibleToken {
         access(all) var slugV2: String
         access(all) var metadata: {String: String}
 
-        init(slug: String, title: String, description: String, visible: Bool, slugV2: String){
+        view init(slug: String, title: String, description: String, visible: Bool, slugV2: String){
             self.slug = slug
             self.title = title
             self.description = description
@@ -620,7 +620,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Badges initializer
         //
-        init() {
+        view init() {
             self.slugToBadge = {}
             self.playIdToBadgeSlugs = {}
             self.editionIdToBadgeSlugs = {}

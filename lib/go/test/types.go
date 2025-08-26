@@ -34,6 +34,15 @@ type OurNFTData struct {
 	MintingDate uint64
 }
 
+type BadgeData struct {
+	Slug        string
+	Title       string
+	Description string
+	Visible     bool
+	SlugV2      string
+	Metadata    map[string]string
+}
+
 func cadenceStringDictToGo(cadenceDict cadence.Dictionary) map[string]string {
 	goDict := make(map[string]string)
 	for _, pair := range cadenceDict.Pairs {
@@ -92,4 +101,38 @@ func parseNFTProperties(value cadence.Value) OurNFTData {
 		uint64(array[2].(cadence.UInt64)),
 		uint64(array[3].(cadence.UFix64)),
 	}
+}
+
+func parseBadgeData(value cadence.Value) BadgeData {
+	fields := value.(cadence.Struct).FieldsMappedByName()
+	return BadgeData{
+		string(fields["slug"].(cadence.String)),
+		string(fields["title"].(cadence.String)),
+		string(fields["description"].(cadence.String)),
+		bool(fields["visible"].(cadence.Bool)),
+		string(fields["slugV2"].(cadence.String)),
+		cadenceStringDictToGo(fields["metadata"].(cadence.Dictionary)),
+	}
+}
+
+func parseBadgeArray(value cadence.Value) []BadgeData {
+	if value == nil {
+		return nil
+	}
+
+	badges := []BadgeData{}
+	if optional, ok := value.(cadence.Optional); ok {
+		if optional.Value == nil {
+			return nil
+		}
+		array := optional.Value.(cadence.Array).Values
+		for _, badgeValue := range array {
+			badges = append(badges, parseBadgeData(badgeValue))
+		}
+	} else if array, ok := value.(cadence.Array); ok {
+		for _, badgeValue := range array.Values {
+			badges = append(badges, parseBadgeData(badgeValue))
+		}
+	}
+	return badges
 }

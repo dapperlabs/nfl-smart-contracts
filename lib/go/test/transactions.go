@@ -1,8 +1,9 @@
 package test
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/onflow/cadence"
 	"github.com/onflow/flow-emulator/emulator"
@@ -55,7 +56,8 @@ func createSeries(
 	name string,
 	shouldRevert bool,
 ) {
-	nameString, _ := cadence.NewString(name)
+	nameString, err := cadence.NewString(name)
+	require.NoError(t, err)
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCreateSeriesTransaction(contracts)).
 		SetGasLimit(100).
@@ -109,7 +111,8 @@ func createSet(
 	name string,
 	shouldRevert bool,
 ) {
-	nameString, _ := cadence.NewString(name)
+	nameString, err := cadence.NewString(name)
+	require.NoError(t, err)
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCreateSetTransaction(contracts)).
 		SetGasLimit(100).
@@ -139,7 +142,8 @@ func createPlay(
 	metadata map[string]string,
 	shouldRevert bool,
 ) {
-	classificationString, _ := cadence.NewString(classification)
+	classificationString, err := cadence.NewString(classification)
+	require.NoError(t, err)
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCreatePlayTransaction(contracts)).
 		SetGasLimit(100).
@@ -173,7 +177,8 @@ func updatePlayDescription(
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
-	descriptionString, _ := cadence.NewString(description)
+	descriptionString, err := cadence.NewString(description)
+	require.NoError(t, err)
 	tx.AddArgument(cadence.NewUInt64(playID))
 	tx.AddArgument(descriptionString)
 
@@ -200,7 +205,8 @@ func updatePlayDynamicMetadata(t *testing.T, b *emulator.Blockchain, contracts C
 
 	toOptionalString := func(val *string) cadence.Optional {
 		if val != nil {
-			cdcString, _ := cadence.NewString(*val)
+			cdcString, err := cadence.NewString(*val)
+			require.NoError(t, err)
 			return cadence.NewOptional(cdcString)
 		} else {
 			return cadence.NewOptional(nil)
@@ -238,7 +244,8 @@ func createEdition(
 	tier string,
 	shouldRevert bool,
 ) {
-	tierString, _ := cadence.NewString(tier)
+	tierString, err := cadence.NewString(tier)
+	require.NoError(t, err)
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCreateEditionTransaction(contracts)).
 		SetGasLimit(100).
@@ -395,6 +402,373 @@ func transferMomentNFT(
 		t, b, tx,
 		[]flow.Address{b.ServiceKey().Address, senderAddress},
 		[]crypto.Signer{signer, senderSigner},
+		shouldRevert,
+	)
+}
+
+// ------------------------------------------------------------
+// Badges
+// ------------------------------------------------------------
+func createBadge(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	slug string,
+	title string,
+	description string,
+	visible bool,
+	slugV2 string,
+	shouldRevert bool,
+) {
+	slugString, err := cadence.NewString(slug)
+	require.NoError(t, err)
+	titleString, err := cadence.NewString(title)
+	require.NoError(t, err)
+	descriptionString, err := cadence.NewString(description)
+	require.NoError(t, err)
+	visibleBool := cadence.NewBool(visible)
+	slugV2String, err := cadence.NewString(slugV2)
+	require.NoError(t, err)
+
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayCreateBadgeTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(slugString)
+	tx.AddArgument(titleString)
+	tx.AddArgument(descriptionString)
+	tx.AddArgument(visibleBool)
+	tx.AddArgument(slugV2String)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func updateBadge(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	slug string,
+	title *string,
+	description *string,
+	visible *bool,
+	slugV2 *string,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	slugString, err := cadence.NewString(slug)
+	require.NoError(t, err)
+
+	var titleOptional cadence.Optional
+	if title != nil {
+		titleStr, err := cadence.NewString(*title)
+		require.NoError(t, err)
+		titleOptional = cadence.NewOptional(titleStr)
+	} else {
+		titleOptional = cadence.NewOptional(nil)
+	}
+
+	var descriptionOptional cadence.Optional
+	if description != nil {
+		descStr, err := cadence.NewString(*description)
+		require.NoError(t, err)
+		descriptionOptional = cadence.NewOptional(descStr)
+	} else {
+		descriptionOptional = cadence.NewOptional(nil)
+	}
+
+	var visibleOptional cadence.Optional
+	if visible != nil {
+		visibleOptional = cadence.NewOptional(cadence.NewBool(*visible))
+	} else {
+		visibleOptional = cadence.NewOptional(nil)
+	}
+
+	var slugV2Optional cadence.Optional
+	if slugV2 != nil {
+		slugV2Str, err := cadence.NewString(*slugV2)
+		require.NoError(t, err)
+		slugV2Optional = cadence.NewOptional(slugV2Str)
+	} else {
+		slugV2Optional = cadence.NewOptional(nil)
+	}
+
+	var metadataOptional cadence.Optional
+	if metadata != nil {
+		pairs := []cadence.KeyValuePair{}
+		for key, value := range metadata {
+			cadenceKey, err := cadence.NewString(key)
+			require.NoError(t, err)
+			cadenceValue, err := cadence.NewString(value)
+			require.NoError(t, err)
+			pairs = append(pairs, cadence.KeyValuePair{
+				Key:   cadenceKey,
+				Value: cadenceValue,
+			})
+		}
+		metadataOptional = cadence.NewOptional(cadence.NewDictionary(pairs))
+	} else {
+		metadataOptional = cadence.NewOptional(nil)
+	}
+
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayUpdateBadgeTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(slugString)
+	tx.AddArgument(titleOptional)
+	tx.AddArgument(descriptionOptional)
+	tx.AddArgument(visibleOptional)
+	tx.AddArgument(slugV2Optional)
+	tx.AddArgument(metadataOptional)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func addBadgeToPlay(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	playID uint64,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	badgeSlugString, err := cadence.NewString(badgeSlug)
+	require.NoError(t, err)
+	playIDUint64 := cadence.NewUInt64(playID)
+
+	pairs := []cadence.KeyValuePair{}
+	for key, value := range metadata {
+		keyStr, err := cadence.NewString(key)
+		require.NoError(t, err)
+		valueStr, err := cadence.NewString(value)
+		require.NoError(t, err)
+		pairs = append(pairs, cadence.KeyValuePair{
+			Key:   keyStr,
+			Value: valueStr,
+		})
+	}
+	metadataDict := cadence.NewDictionary(pairs)
+
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayAddBadgeToPlayTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(badgeSlugString)
+	tx.AddArgument(playIDUint64)
+	tx.AddArgument(metadataDict)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func addBadgeToEdition(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	editionID uint64,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	badgeSlugString, err := cadence.NewString(badgeSlug)
+	require.NoError(t, err)
+	editionIDUint64 := cadence.NewUInt64(editionID)
+
+	pairs := []cadence.KeyValuePair{}
+	for key, value := range metadata {
+		keyStr, err := cadence.NewString(key)
+		require.NoError(t, err)
+		valueStr, err := cadence.NewString(value)
+		require.NoError(t, err)
+		pairs = append(pairs, cadence.KeyValuePair{
+			Key:   keyStr,
+			Value: valueStr,
+		})
+	}
+	metadataDict := cadence.NewDictionary(pairs)
+
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayAddBadgeToEditionTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(badgeSlugString)
+	tx.AddArgument(editionIDUint64)
+	tx.AddArgument(metadataDict)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func addBadgeToMoment(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	momentID uint64,
+	metadata map[string]string,
+	shouldRevert bool,
+) {
+	badgeSlugString, err := cadence.NewString(badgeSlug)
+	require.NoError(t, err)
+	momentIDUint64 := cadence.NewUInt64(momentID)
+
+	pairs := []cadence.KeyValuePair{}
+	for key, value := range metadata {
+		keyStr, err := cadence.NewString(key)
+		require.NoError(t, err)
+		valueStr, err := cadence.NewString(value)
+		require.NoError(t, err)
+		pairs = append(pairs, cadence.KeyValuePair{
+			Key:   keyStr,
+			Value: valueStr,
+		})
+	}
+	metadataDict := cadence.NewDictionary(pairs)
+
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayAddBadgeToMomentTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(badgeSlugString)
+	tx.AddArgument(momentIDUint64)
+	tx.AddArgument(metadataDict)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func removeBadgeFromPlay(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	playID uint64,
+	shouldRevert bool,
+) {
+	badgeSlugString, err := cadence.NewString(badgeSlug)
+	require.NoError(t, err)
+	playIDUint64 := cadence.NewUInt64(playID)
+
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayRemoveBadgeFromPlayTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(badgeSlugString)
+	tx.AddArgument(playIDUint64)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func removeBadgeFromEdition(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	editionID uint64,
+	shouldRevert bool,
+) {
+	badgeSlugString, err := cadence.NewString(badgeSlug)
+	require.NoError(t, err)
+	editionIDUint64 := cadence.NewUInt64(editionID)
+
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayRemoveBadgeFromEditionTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(badgeSlugString)
+	tx.AddArgument(editionIDUint64)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}
+
+func removeBadgeFromMoment(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	momentID uint64,
+	shouldRevert bool,
+) {
+	badgeSlugString, err := cadence.NewString(badgeSlug)
+	require.NoError(t, err)
+	momentIDUint64 := cadence.NewUInt64(momentID)
+
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayRemoveBadgeFromMomentTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(badgeSlugString)
+	tx.AddArgument(momentIDUint64)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
 		shouldRevert,
 	)
 }

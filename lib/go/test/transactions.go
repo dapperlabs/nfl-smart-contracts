@@ -772,3 +772,31 @@ func removeBadgeFromMoment(
 		shouldRevert,
 	)
 }
+
+func deleteBadge(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	shouldRevert bool,
+) {
+	badgeSlugString, err := cadence.NewString(badgeSlug)
+	require.NoError(t, err)
+
+	tx := flow.NewTransaction().
+		SetScript(loadAllDayDeleteBadgeTransaction(contracts)).
+		SetGasLimit(100).
+		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
+		SetPayer(b.ServiceKey().Address).
+		AddAuthorizer(contracts.AllDayAddress)
+	tx.AddArgument(badgeSlugString)
+
+	signer, err := b.ServiceKey().Signer()
+	require.NoError(t, err)
+	signAndSubmit(
+		t, b, tx,
+		[]flow.Address{b.ServiceKey().Address, contracts.AllDayAddress},
+		[]crypto.Signer{signer, contracts.AllDaySigner},
+		shouldRevert,
+	)
+}

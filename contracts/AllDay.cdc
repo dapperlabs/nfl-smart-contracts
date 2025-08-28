@@ -92,6 +92,7 @@ access(all) contract AllDay: NonFungibleToken {
     access(all) event BadgeRemovedFromPlay(badgeSlug: String, playID: UInt64)
     access(all) event BadgeRemovedFromEdition(badgeSlug: String, editionID: UInt64)
     access(all) event BadgeRemovedFromMoment(badgeSlug: String, momentID: UInt64)
+    access(all) event BadgeDeleted(slug: String)
 
     //------------------------------------------------------------
     // Named values
@@ -783,6 +784,15 @@ access(all) contract AllDay: NonFungibleToken {
                 }
             }
         }
+
+        // Delete badge - removes only the badge definition, not associations to avoid computation limits
+        access(ManageBadges) fun deleteBadge(slug: String){
+            assert(self.slugToBadge[slug] != nil, message: "badge doesn't exist")
+            
+            // Remove the badge itself
+            self.slugToBadge.remove(key: slug)
+            emit BadgeDeleted(slug: slug)
+        }
     }  
 
     access(contract) view fun getBadgesStoragePath(): StoragePath{
@@ -1410,6 +1420,10 @@ access(all) contract AllDay: NonFungibleToken {
 
         access(Operate) fun removeBadgeFromMoment(badgeSlug: String, momentID: UInt64){
             self.borrowBadgesWithAuth()?.removeBadgeFromMoment(badgeSlug: badgeSlug, momentID: momentID)
+        }
+
+        access(Operate) fun deleteBadge(slug: String){
+            self.borrowBadgesWithAuth()?.deleteBadge(slug: slug)
         }
 
         // Helper function to borrow badges with proper authorization

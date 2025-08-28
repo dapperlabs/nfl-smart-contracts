@@ -1,7 +1,6 @@
 import AllDay from "AllDay"
 
 /// This transaction deletes a badge completely from the system
-/// This will remove the badge from all associated plays, editions, and moments
 ///
 /// Parameters:
 /// - slug: The unique slug identifier of the badge to delete

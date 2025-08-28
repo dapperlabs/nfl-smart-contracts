@@ -785,41 +785,11 @@ access(all) contract AllDay: NonFungibleToken {
             }
         }
 
-        // Delete badge completely - removes from all associations and the main dictionary
+        // Delete badge - removes only the badge definition, not associations to avoid computation limits
         access(ManageBadges) fun deleteBadge(slug: String){
             assert(self.slugToBadge[slug] != nil, message: "badge doesn't exist")
             
-            // Remove badge from all plays
-            for playID in self.playIdToBadgeSlugs.keys {
-                if let playBadges = &self.playIdToBadgeSlugs[playID] as auth(Remove) &{String: {String: String}}? {
-                    if playBadges.containsKey(slug) {
-                        playBadges.remove(key: slug)
-                        emit BadgeRemovedFromPlay(badgeSlug: slug, playID: playID)
-                    }
-                }
-            }
-            
-            // Remove badge from all editions
-            for editionID in self.editionIdToBadgeSlugs.keys {
-                if let editionBadges = &self.editionIdToBadgeSlugs[editionID] as auth(Remove) &{String: {String: String}}? {
-                    if editionBadges.containsKey(slug) {
-                        editionBadges.remove(key: slug)
-                        emit BadgeRemovedFromEdition(badgeSlug: slug, editionID: editionID)
-                    }
-                }
-            }
-            
-            // Remove badge from all moments
-            for momentID in self.momentIdToBadgeSlugs.keys {
-                if let momentBadges = &self.momentIdToBadgeSlugs[momentID] as auth(Remove) &{String: {String: String}}? {
-                    if momentBadges.containsKey(slug) {
-                        momentBadges.remove(key: slug)
-                        emit BadgeRemovedFromMoment(badgeSlug: slug, momentID: momentID)
-                    }
-                }
-            }
-            
-            // Finally, remove the badge itself
+            // Remove the badge itself
             self.slugToBadge.remove(key: slug)
             emit BadgeDeleted(slug: slug)
         }

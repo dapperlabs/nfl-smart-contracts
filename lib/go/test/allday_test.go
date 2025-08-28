@@ -973,6 +973,41 @@ func createTestBadges(t *testing.T, b *emulator.Blockchain, contracts Contracts,
 			true, // Should revert
 		)
 	})
+
+	t.Run("Should be able to delete a badge", func(t *testing.T) {
+		// First create a badge specifically for deletion testing
+		testCreateBadge(
+			t,
+			b,
+			contracts,
+			"temporary-badge",
+			"Temporary Badge",
+			"Badge for deletion testing",
+			true,
+			"temporary-badge-v2",
+			false,
+		)
+
+		// Add the badge to a play, edition, and moment to test full cleanup
+		testAddBadgeToPlay(t, b, contracts, "temporary-badge", 1, map[string]string{"type": "test"}, false)
+		testAddBadgeToEdition(t, b, contracts, "temporary-badge", 1, map[string]string{"type": "test"}, false)
+		testAddBadgeToMoment(t, b, contracts, "temporary-badge", 1, map[string]string{"type": "test"}, false)
+
+		// Verify badge exists before deletion
+		exists := badgeExists(t, b, contracts, "temporary-badge")
+		assert.Equal(t, true, exists)
+
+		// Delete the badge
+		testDeleteBadge(t, b, contracts, "temporary-badge", false)
+
+		// Verify badge no longer exists
+		exists = badgeExists(t, b, contracts, "temporary-badge")
+		assert.Equal(t, false, exists)
+	})
+
+	t.Run("Should not be able to delete non-existent badge", func(t *testing.T) {
+		testDeleteBadge(t, b, contracts, "non-existent-badge", true) // Should revert
+	})
 }
 
 func testCreateBadge(
@@ -1148,6 +1183,22 @@ func testRemoveBadgeFromMoment(
 		contracts,
 		badgeSlug,
 		momentID,
+		shouldRevert,
+	)
+}
+
+func testDeleteBadge(
+	t *testing.T,
+	b *emulator.Blockchain,
+	contracts Contracts,
+	badgeSlug string,
+	shouldRevert bool,
+) {
+	deleteBadge(
+		t,
+		b,
+		contracts,
+		badgeSlug,
 		shouldRevert,
 	)
 }

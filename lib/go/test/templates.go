@@ -69,6 +69,7 @@ const (
 	// Badges
 	AllDayCreateBadgePath            = AllDayTransactionsRootPath + "/admin/badges/create_badge.cdc"
 	AllDayUpdateBadgePath            = AllDayTransactionsRootPath + "/admin/badges/update_badge.cdc"
+	AllDayDeleteBadgePath            = AllDayTransactionsRootPath + "/admin/badges/delete_badge.cdc"
 	AllDayAddBadgeToPlayPath         = AllDayTransactionsRootPath + "/admin/badges/add_badge_to_play.cdc"
 	AllDayAddBadgeToEditionPath      = AllDayTransactionsRootPath + "/admin/badges/add_badge_to_edition.cdc"
 	AllDayAddBadgeToMomentPath       = AllDayTransactionsRootPath + "/admin/badges/add_badge_to_moment.cdc"
@@ -372,6 +373,13 @@ func loadAllDayCreateBadgeTransaction(contracts Contracts) []byte {
 func loadAllDayUpdateBadgeTransaction(contracts Contracts) []byte {
 	return replaceAddresses(
 		readFile(AllDayUpdateBadgePath),
+		contracts,
+	)
+}
+
+func loadAllDayDeleteBadgeTransaction(contracts Contracts) []byte {
+	return replaceAddresses(
+		readFile(AllDayDeleteBadgePath),
 		contracts,
 	)
 }

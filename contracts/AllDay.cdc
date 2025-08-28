@@ -611,11 +611,11 @@ access(all) contract AllDay: NonFungibleToken {
     }
 
     access(all) resource Badges {
-        access(all) let slugToBadge: {String: Badge}
-        access(all) let playIdToBadgeSlugs: {UInt64: {String: {String: String}}}
-        access(all) let editionIdToBadgeSlugs: {UInt64: {String: {String: String}}}
-        access(all) let momentIdToBadgeSlugs: {UInt64: {String: {String: String}}}
-        access(all) let extension:{String: {String: AnyStruct}}
+        access(self) let slugToBadge: {String: Badge}
+        access(self) let playIdToBadgeSlugs: {UInt64: {String: {String: String}}}
+        access(self) let editionIdToBadgeSlugs: {UInt64: {String: {String: String}}}
+        access(self) let momentIdToBadgeSlugs: {UInt64: {String: {String: String}}}
+        access(self) let extension:{String: {String: AnyStruct}}
         
 
         // Badges initializer

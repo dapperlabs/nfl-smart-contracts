@@ -879,11 +879,12 @@ func createTestBadges(t *testing.T, b *emulator.Blockchain, contracts Contracts,
 
 	t.Run("Should be able to add badge to play", func(t *testing.T) {
 		metadata := map[string]string{"association": "player-milestone"}
-		testAddBadgeToPlay(
+		testAddBadgeToEntity(
 			t,
 			b,
 			contracts,
 			"rookie-year",
+			EntityTypePlay,
 			1, // playID
 			metadata,
 			false,
@@ -892,11 +893,12 @@ func createTestBadges(t *testing.T, b *emulator.Blockchain, contracts Contracts,
 
 	t.Run("Should be able to add badge to edition", func(t *testing.T) {
 		metadata := map[string]string{"rarity": "common"}
-		testAddBadgeToEdition(
+		testAddBadgeToEntity(
 			t,
 			b,
 			contracts,
 			"playoff-bound",
+			EntityTypeEdition,
 			1, // editionID
 			metadata,
 			false,
@@ -905,11 +907,12 @@ func createTestBadges(t *testing.T, b *emulator.Blockchain, contracts Contracts,
 
 	t.Run("Should be able to add badge to moment", func(t *testing.T) {
 		metadata := map[string]string{"special": "first-td"}
-		testAddBadgeToMoment(
+		testAddBadgeToEntity(
 			t,
 			b,
 			contracts,
 			"rookie-year",
+			EntityTypeMoment,
 			1, // momentID
 			metadata,
 			false,
@@ -925,11 +928,12 @@ func createTestBadges(t *testing.T, b *emulator.Blockchain, contracts Contracts,
 	})
 
 	t.Run("Should be able to remove badge from play", func(t *testing.T) {
-		testRemoveBadgeFromPlay(
+		testRemoveBadgeFromEntity(
 			t,
 			b,
 			contracts,
 			"rookie-year",
+			EntityTypePlay,
 			1, // playID
 			false,
 		)
@@ -937,11 +941,12 @@ func createTestBadges(t *testing.T, b *emulator.Blockchain, contracts Contracts,
 	})
 
 	t.Run("Should be able to remove badge from edition", func(t *testing.T) {
-		testRemoveBadgeFromEdition(
+		testRemoveBadgeFromEntity(
 			t,
 			b,
 			contracts,
 			"playoff-bound",
+			EntityTypeEdition,
 			1, // editionID
 			false,
 		)
@@ -949,11 +954,12 @@ func createTestBadges(t *testing.T, b *emulator.Blockchain, contracts Contracts,
 	})
 
 	t.Run("Should be able to remove badge from moment", func(t *testing.T) {
-		testRemoveBadgeFromMoment(
+		testRemoveBadgeFromEntity(
 			t,
 			b,
 			contracts,
 			"rookie-year",
+			EntityTypeMoment,
 			1, // momentID
 			false,
 		)
@@ -989,9 +995,9 @@ func createTestBadges(t *testing.T, b *emulator.Blockchain, contracts Contracts,
 		)
 
 		// Add the badge to a play, edition, and moment to test full cleanup
-		testAddBadgeToPlay(t, b, contracts, "temporary-badge", 1, map[string]string{"type": "test"}, false)
-		testAddBadgeToEdition(t, b, contracts, "temporary-badge", 1, map[string]string{"type": "test"}, false)
-		testAddBadgeToMoment(t, b, contracts, "temporary-badge", 1, map[string]string{"type": "test"}, false)
+		testAddBadgeToEntity(t, b, contracts, "temporary-badge", EntityTypePlay, 1, map[string]string{"type": "test"}, false)
+		testAddBadgeToEntity(t, b, contracts, "temporary-badge", EntityTypeEdition, 1, map[string]string{"type": "test"}, false)
+		testAddBadgeToEntity(t, b, contracts, "temporary-badge", EntityTypeMoment, 1, map[string]string{"type": "test"}, false)
 
 		// Verify badge exists before deletion
 		exists := badgeExists(t, b, contracts, "temporary-badge")
@@ -1073,116 +1079,44 @@ func testUpdateBadge(
 	)
 }
 
-func testAddBadgeToPlay(
+func testAddBadgeToEntity(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
 	badgeSlug string,
-	playID uint64,
+	entityType string,
+	entityID uint64,
 	metadata map[string]string,
 	shouldRevert bool,
 ) {
-	addBadgeToPlay(
+	addBadgeToEntity(
 		t,
 		b,
 		contracts,
 		badgeSlug,
-		playID,
+		entityType,
+		entityID,
 		metadata,
 		shouldRevert,
 	)
 }
 
-func testAddBadgeToEdition(
+func testRemoveBadgeFromEntity(
 	t *testing.T,
 	b *emulator.Blockchain,
 	contracts Contracts,
 	badgeSlug string,
-	editionID uint64,
-	metadata map[string]string,
+	entityType string,
+	entityID uint64,
 	shouldRevert bool,
 ) {
-	addBadgeToEdition(
+	removeBadgeFromEntity(
 		t,
 		b,
 		contracts,
 		badgeSlug,
-		editionID,
-		metadata,
-		shouldRevert,
-	)
-}
-
-func testAddBadgeToMoment(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	badgeSlug string,
-	momentID uint64,
-	metadata map[string]string,
-	shouldRevert bool,
-) {
-	addBadgeToMoment(
-		t,
-		b,
-		contracts,
-		badgeSlug,
-		momentID,
-		metadata,
-		shouldRevert,
-	)
-}
-
-func testRemoveBadgeFromPlay(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	badgeSlug string,
-	playID uint64,
-	shouldRevert bool,
-) {
-	removeBadgeFromPlay(
-		t,
-		b,
-		contracts,
-		badgeSlug,
-		playID,
-		shouldRevert,
-	)
-}
-
-func testRemoveBadgeFromEdition(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	badgeSlug string,
-	editionID uint64,
-	shouldRevert bool,
-) {
-	removeBadgeFromEdition(
-		t,
-		b,
-		contracts,
-		badgeSlug,
-		editionID,
-		shouldRevert,
-	)
-}
-
-func testRemoveBadgeFromMoment(
-	t *testing.T,
-	b *emulator.Blockchain,
-	contracts Contracts,
-	badgeSlug string,
-	momentID uint64,
-	shouldRevert bool,
-) {
-	removeBadgeFromMoment(
-		t,
-		b,
-		contracts,
-		badgeSlug,
-		momentID,
+		entityType,
+		entityID,
 		shouldRevert,
 	)
 }

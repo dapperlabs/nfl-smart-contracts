@@ -4,6 +4,13 @@ import (
 	"github.com/onflow/cadence"
 )
 
+// EntityType constants for badge operations
+const (
+	EntityTypePlay    = "play"
+	EntityTypeEdition = "edition"
+	EntityTypeMoment  = "moment"
+)
+
 type SeriesData struct {
 	ID     uint64
 	Name   string

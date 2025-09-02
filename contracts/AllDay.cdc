@@ -632,7 +632,7 @@ access(all) contract AllDay: NonFungibleToken {
 
     access(all) struct ParallelData {
         access(all) let parallel: String
-        access(all) let extension: {String: {String: AnyStruct}}
+        access(all) let extension: {String: AnyStruct}
 
         view init(parallel: String) {
             self.parallel = parallel

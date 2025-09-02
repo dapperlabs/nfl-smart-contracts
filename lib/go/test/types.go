@@ -32,6 +32,7 @@ type EditionData struct {
 	PlayID      uint64
 	MaxMintSize *uint64
 	Tier        string
+	Parallel    string
 }
 type OurNFTData struct {
 	ID           uint64
@@ -97,6 +98,7 @@ func parseEditionData(value cadence.Value) EditionData {
 		uint64(fields["playID"].(cadence.UInt64)),
 		&maxMintSize,
 		string(fields["tier"].(cadence.String)),
+		string(fields["parallel"].(cadence.String)),
 	}
 }
 

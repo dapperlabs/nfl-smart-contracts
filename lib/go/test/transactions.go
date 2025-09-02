@@ -242,6 +242,7 @@ func createEdition(
 	playID uint64,
 	maxMintSize *uint64,
 	tier string,
+	parallel *string,
 	shouldRevert bool,
 ) {
 	tierString, err := cadence.NewString(tier)
@@ -256,6 +257,13 @@ func createEdition(
 	tx.AddArgument(cadence.NewUInt64(setID))
 	tx.AddArgument(cadence.NewUInt64(playID))
 	tx.AddArgument(tierString)
+	if parallel != nil {
+		parallelString, err := cadence.NewString(*parallel)
+		require.NoError(t, err)
+		tx.AddArgument(parallelString)
+	} else {
+		tx.AddArgument(cadence.Optional{})
+	}
 	if maxMintSize != nil {
 		tx.AddArgument(cadence.NewUInt64(*maxMintSize))
 	} else {

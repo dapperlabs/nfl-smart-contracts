@@ -504,7 +504,7 @@ access(all) contract AllDay: NonFungibleToken {
                 AllDay.playByID.containsKey(playID): "playID does not exist"
                 SeriesData(id: seriesID).active == true: "cannot create an Edition with a closed Series"
                 AllDay.getPlayTierParallelExistsInEdition(setID, playID, tier, parallel) == false: "set play tier combination already exists in an edition"
-                parallel == nil || parallel! != "" || parallel! != "Standard": "parallel can only be nil, non-empty string, or reserved string 'Standard'"
+                parallel == nil || (parallel! != "" && parallel! != "Standard"): "parallel can only be nil or non-empty string that is not the reserved string 'Standard'"
             }
 
             self.id = AllDay.nextEditionID

@@ -626,13 +626,27 @@ access(all) contract AllDay: NonFungibleToken {
         }
     }
 
+    //------------------------------------------------------------
+    // Parallels
+    //------------------------------------------------------------
+
+    access(all) struct ParallelData {
+        access(all) let parallel: String
+        access(all) let extension: {String: AnyStruct}
+
+        view init(parallel: String) {
+            self.parallel = parallel
+            self.extension = {}
+        }
+    }
+
     access(all) resource AddOns {
         access(self) let slugToBadge: {String: Badge}
         access(self) let playIdToBadgeSlugs: {UInt64: {String: {String: String}}}
         access(self) let editionIdToBadgeSlugs: {UInt64: {String: {String: String}}}
         access(self) let momentIdToBadgeSlugs: {UInt64: {String: {String: String}}}
+        access(self) let editionIdToParallelData: {UInt64: ParallelData}
         access(self) let extension:{String: {String: AnyStruct}}
-        
 
         // Badges initializer
         //
@@ -641,6 +655,7 @@ access(all) contract AllDay: NonFungibleToken {
             self.playIdToBadgeSlugs = {}
             self.editionIdToBadgeSlugs = {}
             self.momentIdToBadgeSlugs = {}
+            self.editionIdToParallelData = {}
             self.extension = {}
         }
 

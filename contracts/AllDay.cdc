@@ -414,7 +414,7 @@ access(all) contract AllDay: NonFungibleToken {
         }
 
         access(all) view fun getParallel(): String {
-            return AllDay.getParallelForEdition(self.id) ?? "Standard"
+            return AllDay.getParallelForEdition(self.id)
         }
 
         // initializer
@@ -484,7 +484,7 @@ access(all) contract AllDay: NonFungibleToken {
 
         // Get this edition's parallel
         access(all) view fun getParallel(): String {
-            return AllDay.getParallelForEdition(self.id) ?? "Standard"
+            return AllDay.getParallelForEdition(self.id)
         }
 
         // initializer
@@ -855,11 +855,14 @@ access(all) contract AllDay: NonFungibleToken {
         return AllDay.account.storage.borrow<&AllDay.AddOns>(from: AllDay.getAddOnsStoragePath())
     }
 
-    access(contract) view fun getParallelForEdition(_ editionID: UInt64): String? {
+    // Get the parallel for an edition, returns "Standard" if no parallel is set
+    access(contract) view fun getParallelForEdition(_ editionID: UInt64): String {
         if let ref = AllDay.borrowAddOns() {
-            return ref.getParallelDataForEdition(editionID)?.parallel
+            if let v = ref.getParallelDataForEdition(editionID) {
+                return v.parallel
+            }
         }
-        return nil
+        return "Standard"
     }
 
     access(all) fun getBadge(_ slug: String): Badge?{

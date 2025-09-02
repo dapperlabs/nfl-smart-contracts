@@ -275,6 +275,7 @@ func testCreateEdition(
 	playID uint64,
 	maxMintSize *uint64,
 	tier string,
+	parallel *string,
 	shouldBeID uint64,
 	shouldRevert bool,
 ) {
@@ -287,6 +288,7 @@ func testCreateEdition(
 		playID,
 		maxMintSize,
 		tier,
+		parallel,
 		shouldRevert,
 	)
 
@@ -299,6 +301,11 @@ func testCreateEdition(
 		assert.Equal(t, tier, edition.Tier)
 		if maxMintSize != nil {
 			assert.Equal(t, &maxMintSize, &edition.MaxMintSize)
+		}
+		if parallel != nil {
+			assert.Equal(t, *parallel, edition.Parallel)
+		} else {
+			assert.Equal(t, "Standard", edition.Parallel)
 		}
 	}
 }
@@ -331,7 +338,7 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 	createTestSets(t, b, contracts)
 	createTestPlays(t, b, contracts)
 
-	t.Run("Should be able to create a new edition with series/set/play IDs and a max mint size of 100", func(t *testing.T) {
+	t.Run("Should be able to create a new edition with series/set/play IDs and a max mint size of 100 and no parallel", func(t *testing.T) {
 		testCreateEdition(
 			t,
 			b,
@@ -341,12 +348,13 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			1,
 			&maxMintSize,
 			"COMMON",
+			nil,
 			1,
 			false,
 		)
 	})
 
-	t.Run("Should be able to create another new edition with series/set/play IDs and no max mint size", func(t *testing.T) {
+	t.Run("Should be able to create another new edition with series/set/play IDs and no max mint size and no parallel", func(t *testing.T) {
 		testCreateEdition(
 			t,
 			b,
@@ -356,12 +364,13 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			1,
 			nil,
 			"COMMON",
+			nil,
 			2,
 			false,
 		)
 	})
 
-	t.Run("Should be able to create a new edition with series/set/play IDs and no max mint size", func(t *testing.T) {
+	t.Run("Should be able to create a new edition with series/set/play IDs and no max mint size and no parallel", func(t *testing.T) {
 		testCreateEdition(
 			t,
 			b,
@@ -371,7 +380,24 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			2,
 			nil,
 			"COMMON",
+			nil,
 			3,
+			false,
+		)
+	})
+
+	t.Run("Should be able to create a new edition with series/set/play IDs and no max mint size, same tier but a non-empty parallel", func(t *testing.T) {
+		testCreateEdition(
+			t,
+			b,
+			contracts,
+			1,
+			1,
+			2,
+			nil,
+			"COMMON",
+			stringPtr("validtestparallel"),
+			4,
 			false,
 		)
 	})
@@ -386,7 +412,8 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			1,
 			nil,
 			"COMMON",
-			4,
+			nil,
+			5,
 			true,
 		)
 	})
@@ -394,13 +421,19 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 	t.Run("Should be able to create an Edition with a Set/Play combination that already exists but with a different tier", func(t *testing.T) {
 		//Mint LEGENDARY edition
 		testCreateEdition(t, b, contracts, 1 /*seriesID*/, 1 /*setID*/, 2 /*playID*/, nil,
-			"LEGENDARY" /*tier*/, 4 /*shouldBEID*/, false /*shouldRevert*/)
+			"LEGENDARY" /*tier*/, nil, 5 /*shouldBEID*/, false /*shouldRevert*/)
 	})
 
-	t.Run("Should NOT be able to mint new edition using the same set/play with new tier", func(t *testing.T) {
+	t.Run("Should NOT be able to mint new edition using the same set/play/tier combination", func(t *testing.T) {
 		//Mint COMMON edition again, tx should revert
 		testCreateEdition(t, b, contracts, 1 /*seriesID*/, 1 /*setID*/, 2 /*playID*/, nil,
-			"COMMON" /*tier*/, 5 /*shouldBEID*/, true /*shouldRevert*/)
+			"COMMON" /*tier*/, nil, 6 /*shouldBEID*/, true /*shouldRevert*/)
+	})
+
+	t.Run("Should NOT be able to mint new edition using the same set/play/tier/parallel", func(t *testing.T) {
+		//Mint COMMON edition again, tx should revert
+		testCreateEdition(t, b, contracts, 1 /*seriesID*/, 1 /*setID*/, 2 /*playID*/, nil,
+			"COMMON" /*tier*/, stringPtr("validtestparallel"), 6 /*shouldBEID*/, true /*shouldRevert*/)
 	})
 
 	t.Run("Should be able to close and edition that has no max mint size", func(t *testing.T) {
@@ -1139,4 +1172,8 @@ func testDeleteBadge(
 
 func uint64Ptr(i uint64) *uint64 {
 	return &i
+}
+
+func stringPtr(s string) *string {
+	return &s
 }

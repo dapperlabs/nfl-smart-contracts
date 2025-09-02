@@ -73,6 +73,7 @@ access(all) contract AllDay: NonFungibleToken {
         playID: UInt64,
         maxMintSize: UInt64?,
         tier: String,
+        parallel: String
     )
     // Emitted when an edition is either closed by an admin, or the max amount of moments have been minted
     access(all) event EditionClosed(id: UInt64)
@@ -412,6 +413,10 @@ access(all) contract AllDay: NonFungibleToken {
             return self.numMinted == self.maxMintSize
         }
 
+        access(all) view fun getParallel(): String {
+            return AllDay.getParallelForEdition(self.id) ?? "Standard"
+        }
+
         // initializer
         //
         view init (id: UInt64) {
@@ -477,6 +482,11 @@ access(all) contract AllDay: NonFungibleToken {
             return <- momentNFT
         }
 
+        // Get this edition's parallel
+        access(all) view fun getParallel(): String {
+            return AllDay.getParallelForEdition(self.id) ?? "Standard"
+        }
+
         // initializer
         //
         init (
@@ -485,6 +495,7 @@ access(all) contract AllDay: NonFungibleToken {
             playID: UInt64,
             maxMintSize: UInt64?,
             tier: String,
+            parallel: String?
         ) {
             pre {
                 maxMintSize != 0: "max mint size is zero, must either be null or greater than 0"
@@ -492,7 +503,8 @@ access(all) contract AllDay: NonFungibleToken {
                 AllDay.setByID.containsKey(setID): "setID does not exist"
                 AllDay.playByID.containsKey(playID): "playID does not exist"
                 SeriesData(id: seriesID).active == true: "cannot create an Edition with a closed Series"
-                AllDay.getPlayTierExistsInEdition(setID, playID, tier) == false: "set play tier combination already exists in an edition"
+                AllDay.getPlayTierParallelExistsInEdition(setID, playID, tier, parallel) == false: "set play tier combination already exists in an edition"
+                parallel == nil || parallel! != "": "parallel can only be nil or non-empty string"
             }
 
             self.id = AllDay.nextEditionID
@@ -508,11 +520,22 @@ access(all) contract AllDay: NonFungibleToken {
             }
 
             self.tier = tier
+
+            // Store parallel for the edition if specified
+            if parallel != nil {
+                var addOnsResource = AllDay.borrowAddOns()
+                if addOnsResource == nil {
+                    AllDay.initializeAddOnsInStorage()
+                    addOnsResource = AllDay.borrowAddOns()
+                }
+                addOnsResource!.insertParallelDataForEdition(editionID: self.id, parallel: parallel!)
+            }
+
             self.numMinted = 0 as UInt64
 
             AllDay.nextEditionID = AllDay.nextEditionID + 1 as UInt64
             AllDay.setByID[setID]?.insertNewPlay(playID: playID)
-            AllDay.insertSetPlayTierMap(setID, playID, tier)
+            AllDay.insertSetPlayTierMap(setID, playID, tier, parallel)
 
             emit EditionCreated(
                 id: self.id,
@@ -521,6 +544,7 @@ access(all) contract AllDay: NonFungibleToken {
                 playID: self.playID,
                 maxMintSize: self.maxMintSize,
                 tier: self.tier,
+                parallel: self.getParallel(),
             )
         }
     }
@@ -547,22 +571,26 @@ access(all) contract AllDay: NonFungibleToken {
 
     // Get composite key used to read/write SetPlayTierMap
     //
-    access(contract) view fun getSetPlayTierMapKey(_ setID: UInt64,_ playID: UInt64,_ tier: String): String {
-        return setID.toString().concat("-").concat(playID.toString()).concat("-").concat(tier)
+    access(contract) view fun getSetPlayTierParallelMapKey(_ setID: UInt64,_ playID: UInt64,_ tier: String, _ parallel: String?): String {
+        var s = setID.toString().concat("-").concat(playID.toString()).concat("-").concat(tier)
+        if parallel != nil {
+            s = s.concat("-").concat(parallel!)
+        }
+        return s
     }
 
     // Check if the given set, play, tier has already been minted in an Edition
     //
-    access(contract) view fun getPlayTierExistsInEdition(_ setID: UInt64, _ playID: UInt64, _ tier: String): Bool {
+    access(contract) view fun getPlayTierParallelExistsInEdition(_ setID: UInt64, _ playID: UInt64, _ tier: String, _ parallel: String?): Bool {
         let setPlayTierMap = AllDay.account.storage.borrow<&{String: Bool}>(from: AllDay.getSetPlayTierMapStorage())!
-        return setPlayTierMap.containsKey(AllDay.getSetPlayTierMapKey(setID, playID, tier))
+        return setPlayTierMap.containsKey(AllDay.getSetPlayTierParallelMapKey(setID, playID, tier, parallel))
     }
 
     // Insert new entry into SetPlayTierMap
     //
-    access(contract) fun insertSetPlayTierMap(_ setID: UInt64, _ playID: UInt64, _ tier: String) {
+    access(contract) fun insertSetPlayTierMap(_ setID: UInt64, _ playID: UInt64, _ tier: String, _ parallel: String?) {
         let setPlayTierMap = AllDay.account.storage.load<{String: Bool}>(from: AllDay.getSetPlayTierMapStorage())!
-        setPlayTierMap.insert(key: AllDay.getSetPlayTierMapKey(setID, playID, tier), true)
+        setPlayTierMap.insert(key: AllDay.getSetPlayTierParallelMapKey(setID, playID, tier, parallel), true)
         AllDay.account.storage.save(setPlayTierMap, to: /storage/AllDayAdminSetPlayTierMap)
     }
 
@@ -657,6 +685,17 @@ access(all) contract AllDay: NonFungibleToken {
             self.momentIdToBadgeSlugs = {}
             self.editionIdToParallelData = {}
             self.extension = {}
+        }
+
+        access(contract) view fun getParallelDataForEdition(_ editionID: UInt64): ParallelData? {
+            return self.editionIdToParallelData[editionID]
+        }
+
+        access(contract) fun insertParallelDataForEdition(editionID: UInt64, parallel: String) {
+            pre {
+                !self.editionIdToParallelData.containsKey(editionID): "parallel already exists for this edition"
+            }
+            self.editionIdToParallelData.insert(key: editionID, ParallelData(parallel: parallel))
         }
 
         access(contract) view fun getBadge(_ slug: String): Badge?{
@@ -812,8 +851,15 @@ access(all) contract AllDay: NonFungibleToken {
         self.account.storage.save(<-addons, to: path)
     }
 
-    access(contract) fun borrowAddOns(): &AllDay.AddOns?{
+    access(contract) view fun borrowAddOns(): &AllDay.AddOns?{
         return AllDay.account.storage.borrow<&AllDay.AddOns>(from: AllDay.getAddOnsStoragePath())
+    }
+
+    access(contract) view fun getParallelForEdition(_ editionID: UInt64): String? {
+        if let ref = AllDay.borrowAddOns() {
+            return ref.getParallelDataForEdition(editionID)?.parallel
+        }
+        return nil
     }
 
     access(all) fun getBadge(_ slug: String): Badge?{
@@ -1064,6 +1110,7 @@ access(all) contract AllDay: NonFungibleToken {
             let traitDictionary: {String: AnyStruct} = {
                 "editionID": self.editionID,
                 "editionTier": edition.tier,
+                "parallel": edition.getParallel(),
                 "seriesName": series.name,
                 "setName": set.name,
                 "serialNumber": self.serialNumber
@@ -1356,13 +1403,16 @@ access(all) contract AllDay: NonFungibleToken {
             setID: UInt64,
             playID: UInt64,
             maxMintSize: UInt64?,
-            tier: String): UInt64 {
+            tier: String,
+            parallel: String?
+        ): UInt64 {
             let edition <- create Edition(
                 seriesID: seriesID,
                 setID: setID,
                 playID: playID,
                 maxMintSize: maxMintSize,
                 tier: tier,
+                parallel: parallel,
             )
             let editionID = edition.id
             AllDay.editionByID[edition.id] <-! edition

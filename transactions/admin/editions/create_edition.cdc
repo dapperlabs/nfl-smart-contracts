@@ -5,6 +5,7 @@ transaction(
     setID: UInt64,
     playID: UInt64,
     tier: String,
+    parallel: String?,
     maxMintSize: UInt64?,
    ) {
     // local variable for the admin reference
@@ -23,6 +24,7 @@ transaction(
             playID: playID,
             maxMintSize: maxMintSize,
             tier: tier,
+            parallel: parallel,
         )
 
         log("====================================")

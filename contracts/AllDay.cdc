@@ -504,7 +504,8 @@ access(all) contract AllDay: NonFungibleToken {
                 AllDay.playByID.containsKey(playID): "playID does not exist"
                 SeriesData(id: seriesID).active == true: "cannot create an Edition with a closed Series"
                 AllDay.getPlayTierParallelExistsInEdition(setID, playID, tier, parallel) == false: "set play tier combination already exists in an edition"
-                parallel == nil || (parallel! != "" && parallel! != "Standard"): "parallel can only be nil or non-empty string that is not the reserved string 'Standard'"
+                AllDay.isValidTier(tier): "tier is not a valid tier"
+                AllDay.isValidParallel(parallel): "parallel is not a valid parallel"
             }
 
             self.id = AllDay.nextEditionID
@@ -547,6 +548,18 @@ access(all) contract AllDay: NonFungibleToken {
                 parallel: self.getParallel(),
             )
         }
+    }
+
+    // Check if parallel is valid
+    //
+    access(all) view fun isValidParallel(_ parallel: String?): Bool {
+        return parallel == nil || {"Ruby": true, "Emerald": true, "Sapphire": true}.containsKey(parallel!)
+    }
+
+    // Check if tier is valid
+    //
+    access(all) view fun isValidTier(_ tier: String): Bool {
+        return {"COMMON": true, "UNCOMMON": true, "LEGENDARY": true, "RARE": true, "ULTIMATE": true}.containsKey(tier)
     }
 
     // Get the publicly available data for an Edition

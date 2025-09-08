@@ -370,6 +370,22 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 		)
 	})
 
+	t.Run("Should NOT be able to create a new edition with series/set/play IDs and no max mint size and no parallel", func(t *testing.T) {
+		testCreateEdition(
+			t,
+			b,
+			contracts,
+			1,
+			1,
+			2,
+			nil,
+			"invalidtesttier",
+			nil,
+			3,
+			true,
+		)
+	})
+
 	t.Run("Should be able to create a new edition with series/set/play IDs and no max mint size and no parallel", func(t *testing.T) {
 		testCreateEdition(
 			t,
@@ -386,6 +402,22 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 		)
 	})
 
+	t.Run("Should NOT be able to create a new edition with series/set/play IDs and no max mint size, same tier but a non-empty parallel", func(t *testing.T) {
+		testCreateEdition(
+			t,
+			b,
+			contracts,
+			1,
+			1,
+			2,
+			nil,
+			"COMMON",
+			stringPtr("invalidtestparallel"),
+			4,
+			true,
+		)
+	})
+
 	t.Run("Should be able to create a new edition with series/set/play IDs and no max mint size, same tier but a non-empty parallel", func(t *testing.T) {
 		testCreateEdition(
 			t,
@@ -396,7 +428,7 @@ func createTestEditions(t *testing.T, b *emulator.Blockchain, contracts Contract
 			2,
 			nil,
 			"COMMON",
-			stringPtr("validtestparallel"),
+			stringPtr("Ruby"),
 			4,
 			false,
 		)

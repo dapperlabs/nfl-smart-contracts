@@ -553,7 +553,7 @@ access(all) contract AllDay: NonFungibleToken {
     // Check if parallel is valid
     //
     access(all) view fun isValidParallel(_ parallel: String?): Bool {
-        return parallel == nil || {"Ruby": true, "Emerald": true, "Sapphire": true}.containsKey(parallel!)
+        return parallel == nil || {"Ruby": true, "Emerald": true, "Sapphire": true, "Opal": true, "Diamond": true, "Obsidian": true}.containsKey(parallel!)
     }
 
     // Check if tier is valid

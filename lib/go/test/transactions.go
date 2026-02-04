@@ -28,7 +28,7 @@ func fundAccount(
 
 	tx := flow.NewTransaction().
 		SetScript(script).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(b.ServiceKey().Address)
@@ -60,7 +60,7 @@ func createSeries(
 	require.NoError(t, err)
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCreateSeriesTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -85,7 +85,7 @@ func closeSeries(
 ) {
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCloseSeriesTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -115,7 +115,7 @@ func createSet(
 	require.NoError(t, err)
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCreateSetTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -146,7 +146,7 @@ func createPlay(
 	require.NoError(t, err)
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCreatePlayTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -173,7 +173,7 @@ func updatePlayDescription(
 ) {
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayUpdatePlayDescriptionTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -198,7 +198,7 @@ func updatePlayDynamicMetadata(t *testing.T, b *emulator.Blockchain, contracts C
 ) {
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayUpdateDayUpdatePlayDynamicMetadataTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -249,7 +249,7 @@ func createEdition(
 	require.NoError(t, err)
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCreateEditionTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -289,7 +289,7 @@ func closeEdition(
 ) {
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayCloseEditionTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -319,7 +319,7 @@ func mintMomentNFT(
 ) {
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayMintMomentNFTTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -352,7 +352,7 @@ func mintMomentNFTMulti(
 ) {
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayMintMomentNFTMultiTransaction(contracts)).
-		SetGasLimit(900).
+		SetComputeLimit(900).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(contracts.AllDayAddress)
@@ -397,7 +397,7 @@ func transferMomentNFT(
 ) {
 	tx := flow.NewTransaction().
 		SetScript(loadAllDayTransferNFTTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(senderAddress)

@@ -163,7 +163,7 @@ func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 	)
 
 	tx1.
-		SetGasLimit(100).
+		SetComputeLimit(400).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address)
 
@@ -190,7 +190,7 @@ func AllDayDeployContracts(t *testing.T, b *emulator.Blockchain) Contracts {
 
 	royaltySetupTx := flow.NewTransaction().
 		SetScript(loadSetupSwitchboardAccountTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(royaltyAddress)
@@ -326,7 +326,7 @@ func setupAllDay(
 ) {
 	tx := flow.NewTransaction().
 		SetScript(loadAllDaySetupAccountTransaction(contracts)).
-		SetGasLimit(100).
+		SetComputeLimit(100).
 		SetProposalKey(b.ServiceKey().Address, b.ServiceKey().Index, b.ServiceKey().SequenceNumber).
 		SetPayer(b.ServiceKey().Address).
 		AddAuthorizer(userAddress)
